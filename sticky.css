@@ -1,0 +1,118 @@
+
+body {
+  background: #fff;
+  color: #333;
+  font-family: 'Lato', sans-serif;
+}
+input {
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: 2px solid silver;
+}
+#add{
+  border-radius: 40px;
+  border: 2px solid silver;
+  color: silver;
+  font-weight: 700;
+}
+h1 {
+  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 3px;
+}
+ul {
+  margin-top: 0px;
+  list-style-type: none; /* Remove bullets */
+  font-size: 11pt;
+}
+li {
+  margin-left: -35px;
+  margin-bottom: 8px;
+}
+#container {
+  text-align: center;
+  line-height: 16pt;
+  width: 30%;
+  margin:auto;
+  letter-spacing: 1px;
+}
+#intro {
+  display: inline-block;
+}
+#addNote{
+  border-radius: 40px;
+  border: 2px solid silver;
+  font-weight: bold;
+  color: #424242;
+  padding-left,padding-right: 5px;
+}
+.remove {
+  text-align: center;
+  color: silver;
+  font-weight: 700;
+  margin-top: 0px;
+  margin-left: 10px;
+  margin-right: 5px;
+  width: 20px;
+  height:20px;
+  line-height: 0px; /*or you could use 4em*/
+  vertical-align: middle;
+  padding-left: 5px;
+  border-color: silver;
+  border-width: thin;
+  border-radius: 10px;
+}
+.close {
+  text-align: center;
+  float:right;
+  color: silver;
+  font-weight: 700;
+  margin-top: 5px;
+  margin-right: 5px;
+  width: 20px;
+  height:20px;
+  line-height: 0px; /*or you could use 4em*/
+  vertical-align: middle;
+  padding-left: 5px;
+  border-color: silver;
+  border-width: thin;
+  border-radius: 10px;
+}
+.close:hover, #add:hover, .remove:hover, #addNote:hover {
+  background-color: #dbd9d9;
+}
+
+#mydiv, .drag {
+  position: absolute;
+  width: 280px;
+  z-index: 9;
+  background-color: #fcfacf;
+  /*background-color: #f1f1f1;*/
+  border: 1px solid #d3d3d3;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+#del {
+  float:right;
+  width: 10px;
+  height:15px;
+}
+
+#mydivheader, .dragHeader {
+  padding-left,padding-right: 10px;
+  padding-top, padding-bottom: 5px;
+  margin-bottom: 10px;
+  height: 30px;
+  width: 280px;
+  cursor: move;
+  z-index: 10;
+  background-color: #f1f1f1;
+  color: #61615c;
+  font-weight: 700;
+  vertical-align: middle;
+  line-height: 30px;
+  text-align: center;
+  p {
+    padding-left: 5px;
+  }
+}
