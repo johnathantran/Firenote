@@ -10,12 +10,15 @@ input {
   margin-bottom: 10px;
   border-radius: 10px;
   border: 2px solid silver;
+  width: 65%;
 }
 #add{
   border-radius: 40px;
   border: 2px solid silver;
   color: silver;
   font-weight: 700;
+  margin-left: 5px;
+  margin-bottom: 5px;
 }
 h1 {
   font-family: 'Montserrat', sans-serif;
@@ -37,16 +40,64 @@ li {
   margin:auto;
   letter-spacing: 1px;
 }
+#hideTip {
+  font-size: 8pt;
+  font-weight: lighter;
+  line-height: 10pt;
+  font-style: italic;
+}
 #intro {
   display: inline-block;
 }
-#addNote{
+#myNotes {
+  text-align: center;
+  border: 10px solid silver;
+  padding: 10px;
+  display: inline-block;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+.headerList {
+  font-size: 10pt;
+  font-weight: normal;
+}
+span {
+  word-wrap:break-word;
+}
+#pending {
+  visibility: hidden;
+  color: red;
+}
+#addNote {
   border-radius: 40px;
   border: 2px solid silver;
   font-weight: bold;
   color: #424242;
   padding-left,padding-right: 5px;
 }
+.save {
+  border-radius: 40px;
+  font-size: 8pt;
+  border: 2px solid silver;
+  color: #424242;
+  margin-right: 9px;
+  vertical-align: middle;
+  display: none;
+  line-height: 0px;
+  height: 18px;
+}
+.crossoff, .check {
+  width: 10px;
+  height:10px;
+  line-height: 0px; /*or you could use 4em*/
+  vertical-align: middle;
+  padding-left: 3px;
+  padding-right: 5px;
+}
+.check {
+  display: none;
+}
+
 .remove {
   text-align: center;
   color: silver;
@@ -63,23 +114,35 @@ li {
   border-width: thin;
   border-radius: 10px;
 }
-.close {
+.close{
   text-align: center;
   float:right;
   color: silver;
   font-weight: 700;
-  margin-top: 5px;
+  margin-top: -15px;
   margin-right: 5px;
   width: 20px;
   height:20px;
   line-height: 0px; /*or you could use 4em*/
   vertical-align: middle;
-  padding-left: 5px;
   border-color: silver;
   border-width: thin;
   border-radius: 10px;
+  margin-bottom: -100px;
 }
-.close:hover, #add:hover, .remove:hover, #addNote:hover {
+.editHeader {
+    width:10px;
+    height:10px;
+    margin-top: 5px;
+    margin-right: 5px;
+    margin-left: 5px;
+    padding-left: 5px;
+    padding-top: 5px;
+    vertical-align: middle;
+    display: block;
+}
+
+.close:hover, #add:hover, .remove:hover, #addNote:hover, .save:hover {
   background-color: #dbd9d9;
 }
 
@@ -91,6 +154,10 @@ li {
   /*background-color: #f1f1f1;*/
   border: 1px solid #d3d3d3;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  resize: both;
+  overflow: auto;
+  visibility: visible;
+  display: block;
 }
 #del {
   float:right;
@@ -103,7 +170,7 @@ li {
   padding-top, padding-bottom: 5px;
   margin-bottom: 10px;
   height: 30px;
-  width: 280px;
+  width: 80%;
   cursor: move;
   z-index: 10;
   background-color: #f1f1f1;
@@ -111,7 +178,9 @@ li {
   font-weight: 700;
   vertical-align: middle;
   line-height: 30px;
-  text-align: center;
+
+  float: left;
+  overflow: hidden;
   p {
     padding-left: 5px;
   }
