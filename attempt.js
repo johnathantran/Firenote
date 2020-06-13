@@ -1,3 +1,76 @@
+$(document).ready(function() {
+  $(".task").on('keyup', function (e) {
+      if (e.keyCode === 13) {
+          elmnt = getElm();
+          console.log(elmnt);
+          // click the Add button for that note when enter key is pressed
+          elmnt.parentNode.childNodes[4].click();
+      }
+  });
+
+  // enable edits to note header
+  $(".dragHeader").on('keyup', function (e) {
+      if (e.keyCode === 13) {
+          elmnt = getElm();
+          var new_header = elmnt.textContent;
+          elmnt.setAttribute("contentEditable",false);
+          elmnt.parentNode.childNodes[1].src = "images/edit.svg";
+          elmnt.textContent = new_header;
+
+          current_idx = elmnt.parentNode.id.slice(-1);
+          localStorage.setItem('headerText' + current_idx, elmnt.textContent);
+
+      }
+  });
+});
+
+var toggled = false;
+function toggleDarkMode() {
+  if (toggled == false) {
+    toggled = true;
+  }
+  else {
+    toggled = false;
+  };
+
+  function fadeout() {
+    if (toggled == true) {
+      document.getElementById('fadeout').textContent = "Dark Mode ON";
+      document.getElementById('fadeout').style.opacity = '1';
+    }
+    else {
+      document.getElementById('fadeout').textContent = "Dark Mode OFF";
+      document.getElementById('fadeout').style.opacity = '0';
+    };
+  }
+  document.body.classList.toggle("dark-mode");
+  window.setTimeout(fadeout(toggled), 4000);
+
+  var sheet = (function() {
+     // Create the <style> tag
+     var style = document.createElement("style");
+
+     // WebKit hack
+     style.appendChild(document.createTextNode(""));
+
+     // Add the <style> element to the page
+     document.head.appendChild(style);
+
+     return style.sheet;
+ })();
+
+ //console.log(document.body.style.color);
+ sheet.insertRule("\
+     .drag {\
+         \
+         color: #565657;\
+     }\
+     .headerList:hover {\
+       background-color: #2196F3;\
+       color: white;\
+     }\
+ ", 0);
+}
 // gets an element
 function getElm(e) {
    e = e || window.event;
@@ -90,15 +163,20 @@ function addNote() {
   console.log(idx);
 
   //idx++;
+
   //console.log("index: " + idx.toString());
   var note = document.createElement('div');
-  // spawn note in center of screen
-  note.style.top = ($(window).scrollTop() + $(window).height() / 2) + "px";
-  note.style.left = ($(window).scrollTop() + $(window).width() / 2) + "px";
 
   note.id = "mydiv" + idx.toString();
   document.body.appendChild(note);
   note.classList.add('drag');
+  console.log(note.offsetWidth);
+
+  // spawn note in center of screen
+  note.style.top = ($(window).scrollTop() + $(window).height() / 2) + "px";
+  console.log(note.offsetWidth);
+  note.style.left = ($(window).scrollTop() + $(window).width() / 2) - (note.offsetWidth / 2) + "px";
+
   note.innerHTML += '<div id="mydiv' + idx.toString() + 'header" class="dragHeader" onmousedown="dragElement()"> New Note ';
   note.innerHTML += '<img class="editHeader" src="images/edit.svg" onclick="editHeader()">';
   note.innerHTML += '<button class="close" onclick="deleteNote()">x</button></div>';
@@ -360,7 +438,7 @@ function editNote() {
   for (j = 0; j < spanList.length; j++) {
     save_button = spanList[j].parentNode.childNodes[2];
 
-    if (save_button.style.display == 'block') {
+    if (save_button.style.opacity == '1') {
       displayed = save_button;
       shown_save_count++;
     };
@@ -369,7 +447,7 @@ function editNote() {
   console.log(shown_save_count);
   if (shown_save_count < 1) {
     elmnt.parentNode.childNodes[2].style.float = "right";
-    elmnt.parentNode.childNodes[2].style.display = "block"; //show the save button
+    elmnt.parentNode.childNodes[2].style.opacity = "1"; //show the save button
     elmnt.setAttribute("contentEditable", true);
     elmnt.focus();
     shown_save_count++;
@@ -377,7 +455,7 @@ function editNote() {
   else if ((shown_save_count == 1) && (displayed == elmnt.parentNode.childNodes[3])) {
     console.log(og_note);
     elmnt.parentNode.childNodes[2].style.float = "right";
-    elmnt.parentNode.childNodes[2].style.display = "block"; //show the save button
+    elmnt.parentNode.childNodes[2].style.opacity = "1"; //show the save button
     elmnt.setAttribute("contentEditable", true);
     elmnt.focus();
   }
@@ -418,7 +496,7 @@ function saveEdit(og_note) {
     og_note = []; // reset og_note variable
     localStorage.setItem('todo' + current_idx, JSON.stringify(todos)); // save
 
-    elmnt.parentNode.childNodes[2].style.display = "none";
+    elmnt.parentNode.childNodes[2].style.opacity = "0";
     document.querySelector("#pending").style.visibility = "hidden";
 }
 /*
@@ -452,29 +530,7 @@ $(".lists").on('keyup', function (e) {
   }
 });
 */
-$(".task").on('keyup', function (e) {
-    if (e.keyCode === 13) {
-        elmnt = getElm();
-        console.log(elmnt);
-        // click the Add button for that note when enter key is pressed
-        elmnt.parentNode.childNodes[4].click();
-    }
-});
 
-// enable edits to note header
-$(".dragHeader").on('keyup', function (e) {
-    if (e.keyCode === 13) {
-        elmnt = getElm();
-        var new_header = elmnt.textContent;
-        elmnt.setAttribute("contentEditable",false);
-        elmnt.parentNode.childNodes[1].src = "images/edit.svg";
-        elmnt.textContent = new_header;
-
-        current_idx = elmnt.parentNode.id.slice(-1);
-        localStorage.setItem('headerText' + current_idx, elmnt.textContent);
-
-    }
-});
 
 //Namespace management idea from http://enterprisejquery.com/2010/10/how-good-c-habits-can-encourage-bad-javascript-habits-part-1/
 (function( cursorManager ) {

@@ -16,14 +16,22 @@
 <body>
 
 <div id="container">
+  <label class="switch" >
+    <div id="fadeout"> Dark Mode OFF </div>
+    <input type="checkbox" onclick="toggleDarkMode()">
+    <span class="slider round" ></span>
+  </label>
+  <div id="myNotes">Notes Dock <p id="hideTip"> click to hide or show a note. </p><hr></div><br>
   <div id="intro">
-    <h1> sticky </h1>
+    <h1> stickee </h1>
     <p> welcome to your customizable workspace for virtual sticky notes. jot down your thoughts. write to-do lists. stay organized while saving paper. </p>
     <hr><br>
-    <div id="myNotes">My Notes <p id="hideTip"> click to hide or show a note. </p><hr></div><br>
+
     <button id="addNote" onclick="addNote()">+ Add New Note</button>
     <p id="pending"> you have unsaved pending edits. save before adding new edit. </p>
+    <!--<img id="logo" src="images/icon.png">-->
   </div>
+  <div id="ref">Created by: Johnathan Tran 2020 </div>
 </div>
 <!--
 <div id="container">
