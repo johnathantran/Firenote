@@ -1,3 +1,8 @@
+// A brief guide:
+// N: any integer
+// 'todoN': represents a LIST of todo items for any note of index N
+// 
+
 $(document).ready(function() {
   $(".task").on('keyup', function (e) {
       if (e.keyCode === 13) {
@@ -130,30 +135,37 @@ function dragElement(elmnt) {
   }
 }
 
+// adds a note to the screen when "Add Note" is clicked
 function addNote() {
 
   var existing_notes = [];
-  var first_empty_slot;
+  var first_empty_slot = 1;
+
+  // detect which notes are currently on the screen
   var header_list = document.querySelectorAll(".dragHeader");
   var notes_on_screen = [];
-
   console.log(header_list);
   for (j = 0; j < header_list.length; j++) {
     notes_on_screen.push(header_list[j].id.slice(5)[0]);
   }
-
   console.log(notes_on_screen);
 
-
+  // check local storage for existing notes
   for (j = 1; j <= 10; j++) {
     note_check = localStorage.getItem('todo' + j);
-    if ((note_check !== null) && (note_check !== "[]")) {
+
+    // if the note exists on the screen
+    if (notes_on_screen.includes(j.toString()) == true) {
       existing_notes.push(j);
     }
-    else if ((note_check == "[]") && (notes_on_screen.includes(j.toString()) == false)) {
-      if (first_empty_slot == undefined) {
-        first_empty_slot = j;
-      };
+    // if the note exists at that index (may not be on screen)
+    else if ((note_check !== null) && (note_check !== "[]")) {
+      existing_notes.push(j);
+    }
+    // break on first instance that an available slot is found
+    else if ((note_check == undefined) || (note_check == null)) {
+      first_empty_slot = j;
+      break;
     };
     console.log(j + note_check);
   };
@@ -170,11 +182,9 @@ function addNote() {
   note.id = "mydiv" + idx.toString();
   document.body.appendChild(note);
   note.classList.add('drag');
-  console.log(note.offsetWidth);
 
   // spawn note in center of screen
   note.style.top = ($(window).scrollTop() + $(window).height() / 2) + "px";
-  console.log(note.offsetWidth);
   note.style.left = ($(window).scrollTop() + $(window).width() / 2) - (note.offsetWidth / 2) + "px";
 
   note.innerHTML += '<div id="mydiv' + idx.toString() + 'header" class="dragHeader" onmousedown="dragElement()"> New Note ';
@@ -185,15 +195,19 @@ function addNote() {
 
   console.log(note.innerHTML);
 
-  // add new notes to header list
+  // create new note in local storage as empty list
+  var todos = new Array;
+  localStorage.setItem('todo' + idx.toString(), JSON.stringify(todos))
+
+  // add new notes to notes dock
   note_list = document.querySelector('#myNotes');
   var note_log = document.createElement('div');
   console.log(note_log);
   document.querySelector('#myNotes').appendChild(note_log);
   note_log.innerHTML += '<p class="headerList" id="headerItem' + idx.toString() + '" onclick="hideNote()">' + 'New Note</p>';
-
 }
 
+// deletes a note from existence
 function deleteNote() {
 
   var r = confirm("Are you sure you want to delete this note?");
@@ -203,48 +217,19 @@ function deleteNote() {
     // get the parent div element (the note)
     elmnt = elmnt.parentNode;
     console.log(elmnt);
-    current_idx = elmnt.id.slice(-1);
-    console.log(current_idx);
-    var todo = get_todos(current_idx);
+    idx = elmnt.id.slice(-1);
 
     // remove all list items
-    todos = [];
-    localStorage.setItem('todo' + current_idx, JSON.stringify(todos));
-    localStorage.setItem('headerText' + current_idx, "New Note");
-    show(current_idx);
+    var todos;
+    localStorage.removeItem('todo' + idx);
+    console.log(todos);
+    localStorage.removeItem('headerText' + idx);
+    show(idx);
 
     // remove the div
     elmnt.remove();
     document.querySelector("#headerItem" + idx.toString()).remove();
-    idx--;
   }
-}
-
-function get_todos(idx) {
-    // make a new array of arrays containing todos of each note
-    var allTodos = new Array;
-
-    // for each note, get the array of todos, where idx= total # of notes
-    for (i = 1; i <= idx; i++) {
-      var todos = new Array;
-      var todos_str = localStorage.getItem('todo' + i);
-      console.log(todos_str);
-      todos = JSON.parse(todos_str);
-      console.log(todos);
-      allTodos.push(todos);
-      /*
-      if ((todos_str !== "undefined") && (todos !== null) && (todos_str != "[]")){
-          todos = JSON.parse(todos_str);
-          console.log(todos);
-          allTodos.push(todos);
-      }
-      */
-    }
-    console.log("Index is " + idx );
-    console.log(allTodos);
-    console.log(allTodos[idx-1]);
-    // return the todo list for the requested note
-    return allTodos[idx-1];
 }
 
 function add() {
@@ -304,25 +289,69 @@ function remove() {
 
     var todos_str = localStorage.getItem('todo' + current_idx);
     var todos = JSON.parse(todos_str);
-    //console.log("Currently in todos: " + todos);
+    console.log("Currently in todos: " + todos);
+
+    // remove the targeted item from the list of todos
     todos.splice(id, 1);
+    
     localStorage.setItem('todo' + current_idx, JSON.stringify(todos));
     show(current_idx);
     return false;
 }
 
+// returns a requested list of todo items
+function get_todos(idx) {
+  /*
+  // make a new array of arrays containing todos of each note
+  var allTodos = new Array;
+
+  // for each note, get the array of todos, where idx= total # of notes
+  for (i = 1; i <= idx; i++) {
+    var todos = new Array;
+    var todos_str = localStorage.getItem('todo' + i);
+    console.log(todos_str);
+
+    if (todos_str !== undefined) {
+      todos = JSON.parse(todos_str);
+    }
+
+    console.log(todos);
+    allTodos.push(todos);
+  }
+  console.log("Index is " + idx );
+  console.log(allTodos);
+  console.log(allTodos[idx-1]);
+  // return the todo list for the requested note
+  return allTodos[idx-1];
+
+  */
+  console.log("runs");
+  var requested_list = localStorage.getItem('todo' + idx);
+  console.log(requested_list);
+
+  if ((requested_list !== "undefined")) {
+    console.log("2" + requested_list);
+    requested_list = JSON.parse(requested_list);
+  }
+
+  return requested_list
+}
+
+// idx is the targeted note index
 function show(idx) {
 
-    var todos = get_todos(idx);
+    var todos_list = get_todos(idx);
 
-    console.log("Currently in todos: " + todos);
-    if (todos !== undefined) {
+    console.log("Currently in this todo list: " + todos_list);
+
+    // if the list of todos is found, shown on screen
+    if ((todos_list !== 'undefined') && (todos_list !== null)) {
       var html = '<ul>';
-      for(var i=0; i<todos.length; i++) {
+      for(var i=0; i<todos_list.length; i++) {
           html += '<li class="lists">';
           html += '<img class="crossoff" src="images/crossoff.png" onclick="remove()" id="' + i  + '">';
           //html += '<img class="edit" onclick="editNote()" src="images/edit.svg">';
-          html += '<span class="span" onclick="editNote()">' + todos[i] + '</span>';
+          html += '<span class="span" onclick="editNote()">' + todos_list[i] + '</span>';
           html += '<button class="save" onclick="saveEdit(og_note)"> save </button></li>';
           //html += '<hr>';
       };
@@ -350,13 +379,12 @@ function show(idx) {
 
 // page load
 for (j = 1; j <= 10; j++) {
-  if (( localStorage.getItem('todo' + j) !== null) && (localStorage.getItem('todo' + j) !== '[]') && (localStorage.getItem('todo' + j) !== undefined)) {
+
+  // load existing notes
+  if (( localStorage.getItem('todo' + j) !== null) && (localStorage.getItem('todo' + j) !== 'undefined')) {
 
     idx = j;
-    if (idx == 2) {
-      addNote(idx);
-      continue;
-    }
+
     var note = document.createElement('div');
     console.log(note);
     note.id = "mydiv" + idx.toString();
@@ -373,7 +401,7 @@ for (j = 1; j <= 10; j++) {
     note_header = localStorage.getItem('headerText' + idx.toString())
     note.childNodes[0].textContent = note_header;
 
-    // adds the new note header to "My Notes"
+    // adds the new note header to Notes Dock
     note_list = document.querySelector('#myNotes');
     var note_log = document.createElement('div');
     console.log(note_log);
