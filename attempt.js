@@ -13,7 +13,6 @@ $(document).ready(function() {
           elmnt.parentNode.childNodes[4].click();
       }
   });
-
   // enable edits to note header
   $(".dragHeader").on('keyup', function (e) {
       if (e.keyCode === 13) {
@@ -25,10 +24,50 @@ $(document).ready(function() {
 
           current_idx = elmnt.parentNode.id.slice(-1);
           localStorage.setItem('headerText' + current_idx, elmnt.textContent);
-
       }
   });
 });
+
+// creates notes when the page is loaded (note exists), or when the Add Note button is clicked (note does not exist yet)
+function createNote(exists,idx) {
+
+  var note = document.createElement('div');
+  note.id = "mydiv" + idx;
+  document.body.appendChild(note);
+  note.classList.add('drag');
+  note.innerHTML += '<div id="mydiv' + idx + 'header" class="dragHeader" onmousedown="dragElement()">Note ' + idx;
+  note.innerHTML += '<img class="editHeader" src="images/edit.svg" onclick="editHeader()">';
+  note.innerHTML += '<button class="close" onclick="deleteNote()">x</button></div>';
+  note.innerHTML += '<input class="task" id="task' + idx + '"><button id="add" onclick="add()">+ Add</button>';
+  note.innerHTML += '<div id="todos' + idx + '"></div>';
+
+  // if the page is loading
+  if (exists == true) {   
+      note.style.top = localStorage.getItem('posTop' + idx);
+      note.style.left = localStorage.getItem('posLeft' + idx);
+      note_header = localStorage.getItem('headerText' + idx);
+      note.childNodes[0].textContent = note_header;
+  }
+  // if adding a new note
+  else {
+    // spawn note in center of screen
+    note.style.top = ($(window).scrollTop() + $(window).height() / 2) + "px";
+    note.style.left = ($(window).scrollTop() + $(window).width() / 2) - (note.offsetWidth / 2) + "px";
+
+    // create new note in local storage as empty list
+    var todos = new Array;
+    localStorage.setItem('todo' + idx, JSON.stringify(todos));
+    note_header = 'Note ' + idx;
+    localStorage.setItem('headerText' + idx,'Note' + idx);
+  };
+
+  // adds the new note header to Notes Dock
+  note_list = document.querySelector('#myNotes');
+  var note_log = document.createElement('div');
+  console.log(note_log);
+  document.querySelector('#myNotes').appendChild(note_log);
+  note_log.innerHTML += '<p class="headerList" id="headerItem' + idx + '" onclick="hideNote()">' + note_header + '</p>';
+};
 
 // page load
 function loadPage() {
@@ -36,39 +75,17 @@ function loadPage() {
 
     // load existing notes
     if (localStorage.getItem('todo' + idx) !== null) {
-
       idx = idx.toString();
-
-      var note = document.createElement('div');
-      console.log(note);
-      note.id = "mydiv" + idx;
-      document.body.appendChild(note);
-      note.classList.add('drag');
-      note.innerHTML += '<div id="mydiv' + idx + 'header" class="dragHeader" onmousedown="dragElement()">Note ' + idx;
-      note.innerHTML += '<img class="editHeader" src="images/edit.svg" onclick="editHeader()">';
-      note.innerHTML += '<button class="close" onclick="deleteNote()">x</button></div>';
-      note.innerHTML += '<input class="task" id="task' + idx + '"><button id="add" onclick="add()">+ Add</button>';
-      note.innerHTML += '<div id="todos' + idx + '"></div>';
-      note.style.top = localStorage.getItem('posTop' + idx);
-      note.style.left = localStorage.getItem('posLeft' + idx);
-      console.log(note);
-      note_header = localStorage.getItem('headerText' + idx);
-      note.childNodes[0].textContent = note_header;
-
-      // adds the new note header to Notes Dock
-      note_list = document.querySelector('#myNotes');
-      var note_log = document.createElement('div');
-      console.log(note_log);
-      document.querySelector('#myNotes').appendChild(note_log);
-      note_log.innerHTML += '<p class="headerList" id="headerItem' + idx + '" onclick="hideNote()">' + note_header + '</p>';
+      createNote(exists=true,idx);
       show(idx);
     }
     console.log(localStorage.getItem('todo' + idx));
   }
 };
-
 loadPage();
 var toggled = false;
+
+// enable dark mode CSS changes
 function toggleDarkMode() {
   if (toggled == false) {
     toggled = true;
@@ -76,7 +93,7 @@ function toggleDarkMode() {
   else {
     toggled = false;
   };
-
+  // subfunction to fade in Dark Mode Text
   function fadeout() {
     if (toggled == true) {
       document.getElementById('fadeout').textContent = "Dark Mode ON";
@@ -102,13 +119,8 @@ function toggleDarkMode() {
 
      return style.sheet;
  })();
-
- //console.log(document.body.style.color);
+ // insert new CSS rules for dark mode
  sheet.insertRule("\
-     .drag {\
-         \
-         color: #565657;\
-     }\
      .headerList:hover {\
        background-color: #2196F3;\
        color: white;\
@@ -122,7 +134,7 @@ function getElm(e) {
    e = e.target || e.srcElement;
    console.log(e);
    return e;
-}
+};
 
 // allows an element to be dragged
 function dragElement(elmnt) {
@@ -217,37 +229,7 @@ function addNote() {
   console.log(first_empty_slot);
   console.log(existing_notes);
   idx = first_empty_slot.toString();
-  console.log(idx);
-
-  var note = document.createElement('div');
-
-  note.id = "mydiv" + idx;
-  document.body.appendChild(note);
-  note.classList.add('drag');
-
-  // spawn note in center of screen
-  note.style.top = ($(window).scrollTop() + $(window).height() / 2) + "px";
-  note.style.left = ($(window).scrollTop() + $(window).width() / 2) - (note.offsetWidth / 2) + "px";
-
-  note.innerHTML += '<div id="mydiv' + idx + 'header" class="dragHeader" onmousedown="dragElement()">Note ' + idx;
-  note.innerHTML += '<img class="editHeader" src="images/edit.svg" onclick="editHeader()">';
-  note.innerHTML += '<button class="close" onclick="deleteNote()">x</button></div>';
-  note.innerHTML += '<input class="task" id="task' + idx + '"><button id="add" onclick="add()">+ Add</button>';
-  note.innerHTML += '<div id="todos' + idx + '"></div>';
-
-  console.log(note.innerHTML);
-
-  // create new note in local storage as empty list
-  var todos = new Array;
-  localStorage.setItem('todo' + idx, JSON.stringify(todos))
-  localStorage.setItem('headerText' + idx,'Note' + idx);
-
-  // add new notes to notes dock
-  note_list = document.querySelector('#myNotes');
-  var note_log = document.createElement('div');
-  console.log(note_log);
-  document.querySelector('#myNotes').appendChild(note_log);
-  note_log.innerHTML += '<p class="headerList" id="headerItem' + idx + '" onclick="hideNote()">' + 'Note ' + idx + '</p>';
+  createNote(exists=false,idx);
 }
 
 // deletes a note from existence
@@ -265,7 +247,6 @@ function deleteNote() {
   var header = elmnt.childNodes[0].textContent;
   var r = confirm("Are you sure you want to delete " + header + "?");
   if (r == true) {
-
     // remove all list items
     var todos;
     localStorage.removeItem('todo' + idx);
@@ -364,7 +345,6 @@ function get_todos(idx) {
 function show(idx) {
 
     var todos_list = get_todos(idx);
-
     console.log("Currently in this todo list: " + todos_list);
 
     // if the list of todos is found, shown on screen
@@ -378,7 +358,6 @@ function show(idx) {
           html += '<button class="save" onclick="saveEdit(og_note)"> save </button></li>';
           //html += '<hr>';
       };
-
       html += '</ul>';
       document.getElementById('todos' + idx).innerHTML = html;
 
@@ -388,16 +367,11 @@ function show(idx) {
       };
     }
     // if there is only one item in the list left, remove the list
-
     else {
       elmnt = getElm();
       console.log(elmnt);
       elmnt.parentNode.remove();
     };
-
-    console.log(document.getElementById("mydiv2"));
-    //document.getElementById("mydiv2").style.display = "block";
-
 }
 
 // Execute a function when the user releases a key on the keyboard
@@ -480,8 +454,6 @@ function editNote() {
     og_note = [og_note[0]];
     console.log(shown_save_count);
     document.querySelector("#pending").style.visibility = "visible";
-    //save_button.value = "pe"
-    //alert("You have unsaved pending edits. Save before editing a new note.");
   };
 }
 
