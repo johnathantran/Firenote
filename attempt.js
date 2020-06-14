@@ -1,7 +1,8 @@
-// A brief guide:
+// A brief guide to defined variables:
 // N: any integer
 // 'todoN': represents a LIST of todo items for any note of index N
-// 
+// 'headerTextN': the text element of the header of note N
+// 'headerItemN': the text element of the header of note N in the Notes Dock
 
 $(document).ready(function() {
   $(".task").on('keyup', function (e) {
@@ -29,6 +30,44 @@ $(document).ready(function() {
   });
 });
 
+// page load
+function loadPage() {
+  for (idx = 1; idx <= 10; idx++) {
+
+    // load existing notes
+    if (localStorage.getItem('todo' + idx) !== null) {
+
+      idx = idx.toString();
+
+      var note = document.createElement('div');
+      console.log(note);
+      note.id = "mydiv" + idx;
+      document.body.appendChild(note);
+      note.classList.add('drag');
+      note.innerHTML += '<div id="mydiv' + idx + 'header" class="dragHeader" onmousedown="dragElement()">Note ' + idx;
+      note.innerHTML += '<img class="editHeader" src="images/edit.svg" onclick="editHeader()">';
+      note.innerHTML += '<button class="close" onclick="deleteNote()">x</button></div>';
+      note.innerHTML += '<input class="task" id="task' + idx + '"><button id="add" onclick="add()">+ Add</button>';
+      note.innerHTML += '<div id="todos' + idx + '"></div>';
+      note.style.top = localStorage.getItem('posTop' + idx);
+      note.style.left = localStorage.getItem('posLeft' + idx);
+      console.log(note);
+      note_header = localStorage.getItem('headerText' + idx);
+      note.childNodes[0].textContent = note_header;
+
+      // adds the new note header to Notes Dock
+      note_list = document.querySelector('#myNotes');
+      var note_log = document.createElement('div');
+      console.log(note_log);
+      document.querySelector('#myNotes').appendChild(note_log);
+      note_log.innerHTML += '<p class="headerList" id="headerItem' + idx + '" onclick="hideNote()">' + note_header + '</p>';
+      show(idx);
+    }
+    console.log(localStorage.getItem('todo' + idx));
+  }
+};
+
+loadPage();
 var toggled = false;
 function toggleDarkMode() {
   if (toggled == false) {
@@ -76,6 +115,7 @@ function toggleDarkMode() {
      }\
  ", 0);
 }
+
 // gets an element
 function getElm(e) {
    e = e || window.event;
@@ -83,15 +123,20 @@ function getElm(e) {
    console.log(e);
    return e;
 }
-// localStorage.setItem('todo2', JSON.stringify([]));
+
+// allows an element to be dragged
 function dragElement(elmnt) {
   // get the div header element
   elmnt = getElm();
   // get the parent div element
   elmnt = elmnt.parentNode;
+  console.log(elmnt);
   // get the index of div element
+  // if there are more than 10 notes, get last 2 chars
   idx = elmnt.id.slice(-1);
-
+  if (idx == 0) {
+    idx = elmnt.id.slice(-2);
+  }
   elmnt = document.getElementById("mydiv" + idx);
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 
@@ -171,15 +216,12 @@ function addNote() {
   };
   console.log(first_empty_slot);
   console.log(existing_notes);
-  idx = first_empty_slot;
+  idx = first_empty_slot.toString();
   console.log(idx);
 
-  //idx++;
-
-  //console.log("index: " + idx.toString());
   var note = document.createElement('div');
 
-  note.id = "mydiv" + idx.toString();
+  note.id = "mydiv" + idx;
   document.body.appendChild(note);
   note.classList.add('drag');
 
@@ -187,24 +229,25 @@ function addNote() {
   note.style.top = ($(window).scrollTop() + $(window).height() / 2) + "px";
   note.style.left = ($(window).scrollTop() + $(window).width() / 2) - (note.offsetWidth / 2) + "px";
 
-  note.innerHTML += '<div id="mydiv' + idx.toString() + 'header" class="dragHeader" onmousedown="dragElement()"> New Note ';
+  note.innerHTML += '<div id="mydiv' + idx + 'header" class="dragHeader" onmousedown="dragElement()">Note ' + idx;
   note.innerHTML += '<img class="editHeader" src="images/edit.svg" onclick="editHeader()">';
   note.innerHTML += '<button class="close" onclick="deleteNote()">x</button></div>';
-  note.innerHTML += '<input class="task" id="task' + idx.toString() + '"><button id="add" onclick="add()">+ Add</button>';
-  note.innerHTML += '<div id="todos' + idx.toString() + '"></div>';
+  note.innerHTML += '<input class="task" id="task' + idx + '"><button id="add" onclick="add()">+ Add</button>';
+  note.innerHTML += '<div id="todos' + idx + '"></div>';
 
   console.log(note.innerHTML);
 
   // create new note in local storage as empty list
   var todos = new Array;
-  localStorage.setItem('todo' + idx.toString(), JSON.stringify(todos))
+  localStorage.setItem('todo' + idx, JSON.stringify(todos))
+  localStorage.setItem('headerText' + idx,'Note' + idx);
 
   // add new notes to notes dock
   note_list = document.querySelector('#myNotes');
   var note_log = document.createElement('div');
   console.log(note_log);
   document.querySelector('#myNotes').appendChild(note_log);
-  note_log.innerHTML += '<p class="headerList" id="headerItem' + idx.toString() + '" onclick="hideNote()">' + 'New Note</p>';
+  note_log.innerHTML += '<p class="headerList" id="headerItem' + idx + '" onclick="hideNote()">' + 'Note ' + idx + '</p>';
 }
 
 // deletes a note from existence
@@ -217,7 +260,11 @@ function deleteNote() {
     // get the parent div element (the note)
     elmnt = elmnt.parentNode;
     console.log(elmnt);
+    // if there are more than 10 notes, get last 2 chars
     idx = elmnt.id.slice(-1);
+    if (idx == 0) {
+      idx = elmnt.id.slice(-2);
+    }
 
     // remove all list items
     var todos;
@@ -232,24 +279,31 @@ function deleteNote() {
   }
 }
 
+// add a new todo list item to an existing list
 function add() {
-
-    var elmnt = getElm();
     // get the parent div element
+    var elmnt = getElm();
     elmnt = elmnt.parentNode;
     console.log(elmnt);
+
     // get the index of div element
-    current_idx = elmnt.id.slice(-1);
-    console.log(current_idx);
+    idx = elmnt.id.slice(-1);
+    console.log(idx);
+
     // add a task for that note
     var todos = new Array;
+    if (elmnt.childNodes[3].value == "") {
+      return;
+    }
     var task = elmnt.childNodes[3].value;
     console.log(task);
+
     // get the current list of todos for that note
-    var todos_str = localStorage.getItem('todo' + current_idx);
+    var todos_str = localStorage.getItem('todo' + idx);
+    console.log(todos_str);
 
     // if there is an actual list
-    if (todos_str !== "undefined") {
+    if (todos_str !== null) {
 
       // add the new task to the list of todos for that note
       var todos = JSON.parse(todos_str);
@@ -262,20 +316,18 @@ function add() {
       }
       // if there is no note yet
       else {
+        console.log("No note yet");
         var todos = new Array;
         todos.push(task);
       }
     }
-    console.log(todos);
-    localStorage.setItem('todo' + current_idx, JSON.stringify(todos));
-    show(current_idx);
-    console.log(task);
-    console.log(current_idx);
-    console.log(elmnt.childNodes[3]);
+    localStorage.setItem('todo' + idx, JSON.stringify(todos));
+    show(idx);
+
     elmnt.childNodes[3].value = "";
-    return false;
 }
 
+// removes an item from a todo list
 function remove() {
 
     var elmnt = getElm();
@@ -301,39 +353,10 @@ function remove() {
 
 // returns a requested list of todo items
 function get_todos(idx) {
-  /*
-  // make a new array of arrays containing todos of each note
-  var allTodos = new Array;
 
-  // for each note, get the array of todos, where idx= total # of notes
-  for (i = 1; i <= idx; i++) {
-    var todos = new Array;
-    var todos_str = localStorage.getItem('todo' + i);
-    console.log(todos_str);
-
-    if (todos_str !== undefined) {
-      todos = JSON.parse(todos_str);
-    }
-
-    console.log(todos);
-    allTodos.push(todos);
-  }
-  console.log("Index is " + idx );
-  console.log(allTodos);
-  console.log(allTodos[idx-1]);
-  // return the todo list for the requested note
-  return allTodos[idx-1];
-
-  */
-  console.log("runs");
   var requested_list = localStorage.getItem('todo' + idx);
   console.log(requested_list);
-
-  if ((requested_list !== "undefined")) {
-    console.log("2" + requested_list);
-    requested_list = JSON.parse(requested_list);
-  }
-
+  requested_list = JSON.parse(requested_list);
   return requested_list
 }
 
@@ -345,7 +368,7 @@ function show(idx) {
     console.log("Currently in this todo list: " + todos_list);
 
     // if the list of todos is found, shown on screen
-    if ((todos_list !== 'undefined') && (todos_list !== null)) {
+    if (todos_list !== null) {
       var html = '<ul>';
       for(var i=0; i<todos_list.length; i++) {
           html += '<li class="lists">';
@@ -377,47 +400,11 @@ function show(idx) {
 
 }
 
-// page load
-for (j = 1; j <= 10; j++) {
-
-  // load existing notes
-  if (( localStorage.getItem('todo' + j) !== null) && (localStorage.getItem('todo' + j) !== 'undefined')) {
-
-    idx = j;
-
-    var note = document.createElement('div');
-    console.log(note);
-    note.id = "mydiv" + idx.toString();
-    document.body.appendChild(note);
-    note.classList.add('drag');
-    note.innerHTML += '<div id="mydiv' + idx.toString() + 'header" class="dragHeader" onmousedown="dragElement()"> New Note ';
-    note.innerHTML += '<img class="editHeader" src="images/edit.svg" onclick="editHeader()">';
-    note.innerHTML += '<button class="close" onclick="deleteNote()">x</button></div>';
-    note.innerHTML += '<input class="task" id="task' + idx.toString() + '"><button id="add" onclick="add()">+ Add</button>';
-    note.innerHTML += '<div id="todos' + idx.toString() + '"></div>';
-    note.style.top = localStorage.getItem('posTop' + idx.toString());
-    note.style.left = localStorage.getItem('posLeft' + idx.toString());
-    console.log(note);
-    note_header = localStorage.getItem('headerText' + idx.toString())
-    note.childNodes[0].textContent = note_header;
-
-    // adds the new note header to Notes Dock
-    note_list = document.querySelector('#myNotes');
-    var note_log = document.createElement('div');
-    console.log(note_log);
-    document.querySelector('#myNotes').appendChild(note_log);
-    note_log.innerHTML += '<p class="headerList" id="headerItem' + idx.toString() + '" onclick="hideNote()">' + note_header + '</p>';
-    show(j);
-  }
-  console.log(localStorage.getItem('todo' + j));
-}
-
 // Execute a function when the user releases a key on the keyboard
 document.getElementById('add').addEventListener('click', add);
 console.log(document.getElementsByClassName(".headerList"))
 
-show(idx);
-
+// hides a note from view by clicking on it in the Notes Dock
 function hideNote() {
   elmnt = getElm();
   document.querySelector('#mydiv' + elmnt.id.slice(-1));
@@ -432,6 +419,8 @@ function hideNote() {
     elmnt.style.color = "silver";
   }
 }
+
+// allows edit of the header of a note
 function editHeader() {
   elmnt = getElm();
   header = elmnt.parentNode.childNodes[0];
@@ -450,6 +439,7 @@ function editHeader() {
   header.focus();
 }
 
+// allows a list item to be edited
 var og_note = [];
 function editNote() {
   elmnt = getElm();
@@ -457,7 +447,6 @@ function editNote() {
   og_note.push(elmnt.textContent); // original note content
   console.log(og_note);
   console.log(elmnt.parentNode.childNodes);
-
 
   shown_save_count = 0;
   var displayed;
@@ -496,6 +485,7 @@ function editNote() {
   };
 }
 
+// saves an edit on a todo list item
 function saveEdit(og_note) {
     spanList = document.querySelectorAll(".span");
     shown_save_count = 0;
