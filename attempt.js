@@ -10,7 +10,7 @@ $(document).ready(function() {
           elmnt = getElm();
           console.log(elmnt);
           // click the Add button for that note when enter key is pressed
-          elmnt.parentNode.childNodes[4].click();
+          elmnt.parentNode.childNodes[5].click();
       }
   });
   // enable edits to note header
@@ -19,7 +19,7 @@ $(document).ready(function() {
           elmnt = getElm();
           var new_header = elmnt.textContent;
           elmnt.setAttribute("contentEditable",false);
-          elmnt.parentNode.childNodes[1].src = "images/edit.svg";
+          //elmnt.parentNode.childNodes[1].src = "images/edit.svg";
           elmnt.textContent = new_header;
 
           current_idx = elmnt.parentNode.id.slice(-1);
@@ -36,8 +36,9 @@ function createNote(exists,idx) {
   document.body.appendChild(note);
   note.classList.add('drag');
   note.innerHTML += '<div id="mydiv' + idx + 'header" class="dragHeader" onmousedown="dragElement()">Note ' + idx;
-  note.innerHTML += '<img class="editHeader" src="images/edit.svg" onclick="editHeader()">';
-  note.innerHTML += '<button class="close" onclick="deleteNote()">x</button></div>';
+  note.innerHTML += '<img src="images/edit.png" class="dot" id="edit" onclick="editHeader()">';
+  note.innerHTML += '<img src="images/minimize.png" class="dot" id="minimize" onclick="hideNote(false)">';
+  note.innerHTML += '<img src="images/exit.png" class="dot" id="exit" onclick="deleteNote()"></img>';
   note.innerHTML += '<input class="task" id="task' + idx + '"><button id="add" onclick="add()">+ Add</button>';
   note.innerHTML += '<div id="todos' + idx + '"></div>';
 
@@ -66,7 +67,7 @@ function createNote(exists,idx) {
   var note_log = document.createElement('div');
   console.log(note_log);
   document.querySelector('#myNotes').appendChild(note_log);
-  note_log.innerHTML += '<p class="headerList" id="headerItem' + idx + '" onclick="hideNote()">' + note_header + '</p>';
+  note_log.innerHTML += '<p class="headerList" id="headerItem' + idx + '" onclick="hideNote(true)">' + note_header + '</p>';
 };
 
 // page load
@@ -273,10 +274,11 @@ function add() {
 
     // add a task for that note
     var todos = new Array;
-    if (elmnt.childNodes[3].value == "") {
+    console.log(elmnt.childNodes);
+    if (elmnt.childNodes[4].value == "") {
       return;
     }
-    var task = elmnt.childNodes[3].value;
+    var task = elmnt.childNodes[4].value;
     console.log(task);
 
     // get the current list of todos for that note
@@ -305,7 +307,7 @@ function add() {
     localStorage.setItem('todo' + idx, JSON.stringify(todos));
     show(idx);
 
-    elmnt.childNodes[3].value = "";
+    elmnt.childNodes[4].value = "";
 }
 
 // removes an item from a todo list
@@ -379,10 +381,17 @@ document.getElementById('add').addEventListener('click', add);
 console.log(document.getElementsByClassName(".headerList"))
 
 // hides a note from view by clicking on it in the Notes Dock
-function hideNote() {
+function hideNote(fromDock) {
   elmnt = getElm();
-  document.querySelector('#mydiv' + elmnt.id.slice(-1));
-  div_to_hide = document.querySelector('#mydiv' + elmnt.id.slice(-1));
+  // from the Notes Dock
+  if (fromDock == true) {
+    document.querySelector('#mydiv' + elmnt.id.slice(-1));
+    div_to_hide = document.querySelector('#mydiv' + elmnt.id.slice(-1));
+  }
+  // from the minimize button
+  else {
+    div_to_hide = elmnt.parentNode;
+  }
 
   if (div_to_hide.style.display == "none") {
     div_to_hide.style.display = "block";
@@ -402,11 +411,11 @@ function editHeader() {
   if (header.isContentEditable == false) {
     header.setAttribute("contentEditable", true);
     cursorManager.setEndOfContenteditable(header);
-    elmnt.parentNode.childNodes[1].src = "images/edit_toggle.svg";
+    //elmnt.parentNode.childNodes[1].src = "images/edit_toggle.svg";
   }
   else {
     header.setAttribute("contentEditable", false);
-    elmnt.parentNode.childNodes[1].src = "images/edit.svg";
+    //elmnt.parentNode.childNodes[1].src = "images/edit.svg";
     current_idx = elmnt.parentNode.id.slice(-1);
     localStorage.setItem('headerText' + current_idx, header.textContent);
   }
