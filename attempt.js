@@ -4,6 +4,7 @@
 // 'headerTextN': the text element of the header of note N
 // 'headerItemN': the text element of the header of note N in the Notes Dock
 
+//localStorage.removeItem(1);
 $(document).ready(function() {
   $(".task").on('keyup', function (e) {
       if (e.keyCode === 13) {
@@ -22,8 +23,10 @@ $(document).ready(function() {
           //elmnt.parentNode.childNodes[1].src = "images/edit.svg";
           elmnt.textContent = new_header;
 
-          current_idx = elmnt.parentNode.id.slice(-1);
-          localStorage.setItem('headerText' + current_idx, elmnt.textContent);
+          idx = elmnt.parentNode.id.slice(-1);
+          dict = JSON.parse(localStorage.getItem(idx,dict));
+          dict['headerText'] = header.textContent;
+          localStorage.setItem(idx, JSON.stringify(dict));
       }
   });
 });
@@ -42,16 +45,19 @@ function createNote(exists,idx) {
   note.innerHTML += '<input class="task" id="task' + idx + '"><button id="add" onclick="add()">+ Add</button>';
   note.innerHTML += '<div class="todoLists" id="todos' + idx + '"></div>';
 
+  var note_header = 'Note' + idx;
   // if the page is loading
-  if (exists == true) { 
-      note.style.top = localStorage.getItem('posTop' + idx); // get note position
-      note.style.left = localStorage.getItem('posLeft' + idx);
-      note_header = localStorage.getItem('headerText' + idx); // get note header
+  if (exists == true) {
+
+      dict = JSON.parse(localStorage.getItem(idx,dict));
+      note.style.top = dict['posTop'];
+      note.style.left = dict['posLeft'];
+      note_header = dict['headerText'];
       note.childNodes[0].textContent = note_header;
 
-      // check if the note is minimzied
-      console.log(localStorage.getItem('minimized' + idx));
-      if (localStorage.getItem('minimized' + idx) == 'true') {
+      // check if the note is minimized
+      console.log(dict);
+      if (dict['minimized'] == true) {
         note.childNodes[4].style.display = 'none';
         note.childNodes[5].style.display = 'none';
         note.childNodes[6].style.display = 'none';
@@ -64,10 +70,16 @@ function createNote(exists,idx) {
     note.style.left = ($(window).scrollTop() + $(window).width() / 2) - (note.offsetWidth / 2) + "px";
 
     // create new note in local storage as empty list
-    var todos = new Array;
-    localStorage.setItem('todo' + idx, JSON.stringify(todos));
-    note_header = 'Note ' + idx;
-    localStorage.setItem('headerText' + idx,'Note' + idx);
+    var dict = {
+      'todo': null, // list of todo items
+      'headerText': note_header, 
+      'minimized': false, 
+      'posTop': note.style.top, 
+      'posLeft': note.style.left,
+      'hidden': false,
+    };
+    localStorage.setItem(idx, JSON.stringify(dict));
+    console.log(dict);
   };
 
   // adds the new note header to Notes Dock
@@ -76,25 +88,29 @@ function createNote(exists,idx) {
   console.log(note_log);
   document.querySelector('#myNotes').appendChild(note_log);
   note_log.innerHTML += '<p class="headerList" id="headerItem' + idx + '" onclick="hideNote()">' + note_header + '</p>';
+  
+  // check if the note is hidden
+  if (dict['hidden'] == true) {
+    note.style.display = 'none';
+    document.querySelector('#headerItem' + idx).style.color = 'silver';
+  }
 };
 
 // page load
 function loadPage() {
+  
   for (idx = 1; idx <= 10; idx++) {
 
-    // load existing notes
-    if (localStorage.getItem('todo' + idx) !== null) {
-      idx = idx.toString();
+    dict = JSON.parse(localStorage.getItem(idx));
+    if (dict !== null) {
+      console.log(dict);
       createNote(exists=true,idx);
       show(idx);
-    }
-    console.log(localStorage.getItem('todo' + idx));
+    }   
   }
 };
 loadPage();
 var toggled = false;
-
-
 
 // enable dark mode CSS changes
 function toggleDarkMode() {
@@ -196,10 +212,12 @@ function dragElement(elmnt) {
     document.onmouseup = null;
     document.onmousemove = null;
     var elmnt = getElm().parentNode;
-    current_idx = elmnt.id.slice(-1);
-    console.log(current_idx);
-    localStorage.setItem('posTop' + current_idx, elmnt.style.top);
-    localStorage.setItem('posLeft' + current_idx, elmnt.style.left);
+    idx = elmnt.id.slice(-1);
+
+    dict = JSON.parse(localStorage.getItem(idx));
+    dict['posTop'] = elmnt.style.top;
+    dict['posLeft'] = elmnt.style.left;
+    localStorage.setItem(idx, JSON.stringify(dict));
   }
 }
 
@@ -220,7 +238,7 @@ function addNote() {
 
   // check local storage for existing notes
   for (j = 1; j <= 10; j++) {
-    note_check = localStorage.getItem('todo' + j);
+    note_check = localStorage.getItem(j);
 
     // if the note exists on the screen
     if (notes_on_screen.includes(j.toString()) == true) {
@@ -259,12 +277,7 @@ function deleteNote() {
   var r = confirm("Are you sure you want to delete " + header + "?");
   if (r == true) {
     // remove all list items
-    var todos;
-    localStorage.removeItem('todo' + idx);
-    console.log(todos);
-    localStorage.removeItem('headerText' + idx);
-    show(idx);
-
+    localStorage.removeItem(idx);
     // remove the div
     elmnt.remove();
     document.querySelector("#headerItem" + idx.toString()).remove();
@@ -292,7 +305,9 @@ function add() {
     console.log(task);
 
     // get the current list of todos for that note
-    var todos_str = localStorage.getItem('todo' + idx);
+    dict = JSON.parse(localStorage.getItem(idx));
+    console.log(dict);
+    var todos_str = dict['todo'];
     console.log(todos_str);
 
     // if there is an actual list
@@ -301,20 +316,18 @@ function add() {
       // add the new task to the list of todos for that note
       var todos = JSON.parse(todos_str);
       console.log(todos);
-      if (todos !== null) {
-        //var todos = JSON.parse(todos_str);
-        if (todos[todos.length - 1] != task) {
+      if (todos[todos.length - 1] != task) {
           todos.push(task);
-        }
-      }
-      // if there is no note yet
-      else {
-        console.log("No note yet");
-        var todos = new Array;
-        todos.push(task);
       }
     }
-    localStorage.setItem('todo' + idx, JSON.stringify(todos));
+    else {
+      todos = [task];
+      console.log(todos);
+    }
+    dict['todo'] = JSON.stringify(todos);
+    console.log(dict['todos']);
+    localStorage.setItem(idx, JSON.stringify(dict));
+    console.log(dict);
     show(idx);
 
     elmnt.childNodes[4].value = "";
@@ -328,28 +341,36 @@ function remove() {
     // get the parent div element
     parent = elmnt.parentNode.parentNode.parentNode;
     // get the index of div element
-    current_idx = parent.id.slice(-1);
-    console.log("Index: " + current_idx);
+    idx = parent.id.slice(-1);
+    console.log("Index: " + idx);
     var id = elmnt.getAttribute('id');
 
-    var todos_str = localStorage.getItem('todo' + current_idx);
-    var todos = JSON.parse(todos_str);
-    console.log("Currently in todos: " + todos);
+    var todos = get_todos(idx);
 
-    // remove the targeted item from the list of todos
+    console.log(todos);
     todos.splice(id, 1);
-    
-    localStorage.setItem('todo' + current_idx, JSON.stringify(todos));
-    show(current_idx);
+
+    console.log("Currently in todos: " + todos);
+    dict['todo'] = JSON.stringify(todos);
+    localStorage.setItem(idx, JSON.stringify(dict));
+    console.log(localStorage.getItem(idx));
+
+    show(idx);
     return false;
 }
 
 // returns a requested list of todo items
 function get_todos(idx) {
 
-  var requested_list = localStorage.getItem('todo' + idx);
+  var requested_list;
+  dict = JSON.parse(localStorage.getItem(idx));
+  todos_list = dict['todo'];
+  console.log(todos_list);
+  if ((todos_list !== null) && (todos_list !== undefined)) {
+    requested_list = JSON.parse(dict['todo']);
+  }
+  console.log(dict);
   console.log(requested_list);
-  requested_list = JSON.parse(requested_list);
   return requested_list
 }
 
@@ -357,10 +378,11 @@ function get_todos(idx) {
 function show(idx) {
 
     var todos_list = get_todos(idx);
+    console.log(idx);
     console.log("Currently in this todo list: " + todos_list);
 
     // if the list of todos is found, shown on screen
-    if (todos_list !== null) {
+    if ((todos_list !== null) && (todos_list !== undefined)) {
       var html = '<ul>';
       for(var i=0; i<todos_list.length; i++) {
           html += '<li class="lists">';
@@ -378,31 +400,39 @@ function show(idx) {
           buttons[i].addEventListener('click', remove);
       };
     }
+    /*
     // if there is only one item in the list left, remove the list
     else {
       elmnt = getElm();
       console.log(elmnt);
       elmnt.parentNode.remove();
     };
+    */
 }
 
 // Execute a function when the user releases a key on the keyboard
-document.getElementById('add').addEventListener('click', add);
-console.log(document.getElementsByClassName(".headerList"))
+//document.getElementById('add').addEventListener('click', add);
+// console.log(document.getElementsByClassName(".headerList"))
 
 // hides a note from view by clicking on it in the Notes Dock
 function hideNote() {
+  
+  // save hidden feature to local storage
   elmnt = getElm();
-  // from the Notes Dock
+  dict = JSON.parse(localStorage.getItem(elmnt.id.slice(-1)));
+
   div_to_hide = document.querySelector('#mydiv' + elmnt.id.slice(-1));
   if (div_to_hide.style.display == "none") {
     div_to_hide.style.display = "block";
     elmnt.style.color = "black";
+    dict['hidden'] = false;
   }
   else {
     div_to_hide.style.display = "none";
     elmnt.style.color = "silver";
+    dict['hidden'] = true;
   }
+  localStorage.setItem(elmnt.id.slice(-1),JSON.stringify(dict));
 }
 
 // minimize a note leaving only the header
@@ -416,20 +446,22 @@ function minimize() {
   var hide_todo = elmnt.parentNode.childNodes[6];
  
   // if visible
+  dict = JSON.parse(localStorage.getItem(idx,dict));
   if (hide_input.style.display == 'inline-block') {
     console.log("hiding");
     hide_input.style.display = 'none';
     hide_add.style.display = 'none';
     hide_todo.style.display= 'none';
-    localStorage.setItem('minimized' + idx,true);
+    dict['minimized'] = true;
   }
   else {
     console.log("showing");
     hide_input.style.display = 'inline-block';
     hide_add.style.display = 'inline-block';
     hide_todo.style.display = 'inline-block';
-    localStorage.removeItem('minimized' + idx);
+    dict['minimized'] = false;
   }
+  localStorage.setItem(idx, JSON.stringify(dict));
 }
 
 // allows edit of the header of a note
@@ -445,8 +477,11 @@ function editHeader() {
   else {
     header.setAttribute("contentEditable", false);
     //elmnt.parentNode.childNodes[1].src = "images/edit.svg";
-    current_idx = elmnt.parentNode.id.slice(-1);
-    localStorage.setItem('headerText' + current_idx, header.textContent);
+    idx = elmnt.parentNode.id.slice(-1);
+    
+    dict = JSON.parse(localStorage.getItem(idx,dict));
+    dict['headerText'] = header.textContent;
+    localStorage.setItem(idx, JSON.stringify(dict));
   }
   header.focus();
 }
@@ -504,17 +539,20 @@ function saveEdit(og_note) {
       og_note = og_note[og_note.length-1];
     }
     elmnt = getElm(); // get the save button
-    var task = elmnt.parentNode.childNodes[  2].textContent; // get the text of the edited note
+    console.log(elmnt.parentNode.childNodes);
+    var task = elmnt.parentNode.childNodes[1].textContent; // get the text of the edited note
     console.log(task);
     var parent = elmnt.parentNode.parentNode.parentNode; // get the index of div element
-    current_idx = parent.id.slice(-1);
+    idx = parent.id.slice(-1);
 
     // get the current list of todos for that note
-    var todos_str = localStorage.getItem('todo' + current_idx);
-    var todos = JSON.parse(todos_str);
+    todos = get_todos(idx);
+    //var todos_str = localStorage.getItem('todo' + current_idx);
+    //var todos = JSON.parse(todos_str);
     console.log(todos);
     console.log(og_note);
-    note_idx = todos.indexOf(og_note);
+    console.log(og_note[0])
+    note_idx = todos.indexOf(og_note[0]);
     console.log(note_idx); // fix error in case that there are 2 of the exact same notes
     console.log("Edit: " + task);
     console.log(og_note);
@@ -522,7 +560,13 @@ function saveEdit(og_note) {
     todos[note_idx] = task; // set the old note to the edited note
     console.log("New edits: " + todos);
     og_note = []; // reset og_note variable
-    localStorage.setItem('todo' + current_idx, JSON.stringify(todos)); // save
+
+
+    dict['todo'] = JSON.stringify(todos);
+    console.log(todos);
+    console.log(dict);
+    localStorage.setItem(idx, JSON.stringify(dict));
+    console.log(localStorage.getItem(idx));
 
     elmnt.parentNode.childNodes[2].style.opacity = "0";
     document.querySelector("#pending").style.visibility = "hidden";
@@ -542,8 +586,6 @@ $(".span").on('keyup', function (e) {
         //elmnt.parentNode.childNodes[3].click();
         elmnt.blur();
         elmnt.setAttribute("contentEditable", false);
-
-
     }
 });
 */
@@ -558,7 +600,6 @@ $(".lists").on('keyup', function (e) {
   }
 });
 */
-
 
 //Namespace management idea from http://enterprisejquery.com/2010/10/how-good-c-habits-can-encourage-bad-javascript-habits-part-1/
 (function( cursorManager ) {
