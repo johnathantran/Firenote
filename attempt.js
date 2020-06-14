@@ -29,8 +29,32 @@ $(document).ready(function() {
           localStorage.setItem(idx, JSON.stringify(dict));
       }
   });
+
+  var coll = document.getElementsByClassName("collapsible");
+  var i;
+  
+  for (i = 0; i < coll.length; i++) {
+    coll[i].addEventListener("click", function() {
+      this.classList.toggle("active");
+      var content = this.nextElementSibling;
+      if (content.style.maxHeight){
+        content.style.maxHeight = null;
+      } else {
+        content.style.maxHeight = content.scrollHeight + "px";
+      } 
+    });
+  }
+
 });
 
+function hideMenu() {
+  if (document.querySelector('#menu').style.display == "none") {
+    document.querySelector('#menu').style.display = "block";
+  }
+  else {
+    document.querySelector('#menu').style.display = "none";
+  }
+}
 // creates notes when the page is loaded (note exists), or when the Add Note button is clicked (note does not exist yet)
 function createNote(exists,idx) {
 
@@ -99,6 +123,26 @@ function createNote(exists,idx) {
 // page load
 function loadPage() {
   
+  // check if user has enabled dark mode
+  if (localStorage.getItem('stickee_dark') == 'true') {
+    
+    var sheet = (function() {
+      // Create the <style> tag
+      var style = document.createElement("style");
+      // WebKit hack
+      style.appendChild(document.createTextNode(""));
+      // Add the <style> element to the page
+      document.head.appendChild(style);
+      return style.sheet;
+    })();
+    document.body.classList.toggle("dark-mode");
+    sheet.insertRule("\
+    .collapsible {\
+     background-color: #363640;\
+     color: white;\
+    }",0);
+  }
+  // recreate saved notes on page load
   for (idx = 1; idx <= 10; idx++) {
 
     dict = JSON.parse(localStorage.getItem(idx));
@@ -110,51 +154,53 @@ function loadPage() {
   }
 };
 loadPage();
-var toggled = false;
+
 
 // enable dark mode CSS changes
 function toggleDarkMode() {
-  if (toggled == false) {
-    toggled = true;
-  }
-  else {
-    toggled = false;
-  };
-  // subfunction to fade in Dark Mode Text
-  function fadeout() {
-    if (toggled == true) {
-      document.getElementById('fadeout').textContent = "Dark Mode ON";
-      document.getElementById('fadeout').style.opacity = '1';
-    }
-    else {
-      document.getElementById('fadeout').textContent = "Dark Mode OFF";
-      document.getElementById('fadeout').style.opacity = '0';
-    };
-  }
-  document.body.classList.toggle("dark-mode");
-  window.setTimeout(fadeout(toggled), 4000);
 
   var sheet = (function() {
-     // Create the <style> tag
-     var style = document.createElement("style");
+    // Create the <style> tag
+    var style = document.createElement("style");
+    // WebKit hack
+    style.appendChild(document.createTextNode(""));
+    // Add the <style> element to the page
+    document.head.appendChild(style);
+    return style.sheet;
+  })();
 
-     // WebKit hack
-     style.appendChild(document.createTextNode(""));
+  document.body.classList.toggle("dark-mode");
+  if (localStorage.getItem('stickee_dark') == 'true') {
+    console.log("dark to light");
 
-     // Add the <style> element to the page
-     document.head.appendChild(style);
+    sheet.insertRule("\
+    .collapsible {\
+     background-color: white;\
+     color: black;\
+    }",0);
+    sheet.insertRule("\
+    #bar {\
+     background-color: gray;\
+    }",0);
 
-     return style.sheet;
- })();
- // insert new CSS rules for dark mode
- sheet.insertRule("\
-     .headerList:hover {\
-       background-color: #2196F3;\
-       color: white;\
-     }\
- ", 0);
+    localStorage.setItem('stickee_dark',false);
+  }
+  else {
+    console.log("light to dark");
+    
+    sheet.insertRule("\
+    .collapsible {\
+     background-color: #363640;\
+     color: white;\
+    }",0);
+    sheet.insertRule("\
+    #bar {\
+     background-color: white;\
+    }",0);
+    
+    localStorage.setItem('stickee_dark',true);
+  }
 }
-
 // gets an element
 function getElm(e) {
    e = e || window.event;

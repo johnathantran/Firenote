@@ -16,11 +16,32 @@
 <body>
 
 <div id="container">
-  <label class="switch" >
-    <div id="fadeout"> Dark Mode OFF </div>
-    <input type="checkbox" onclick="toggleDarkMode()">
-    <span class="slider round" ></span>
-  </label>
+
+  <div id="menu">
+    <div><button class="collapsible" onclick="toggleDarkMode()">dark mode</button></div>
+    <div>
+      <button class="collapsible">help +</button>
+      <div class="content">Get started by clicking the "Add New Note" button. 
+        Your notes will stay saved even if you close the browser because your data is saved until
+        you clear your cache. You can edit your sticky notes, minimize, dock, and reposition them 
+        according to your needs.
+      </div>
+    </div>
+    <div>
+      <button class="collapsible">contact +</button>
+      <div class="content"> As a first time developer, your support
+        is incredibly important to me to improve and build upon this app.
+      Please contact me at: jtran304@gmail.com for your ideas and feedback!</div>
+    </div>
+  </div>
+
+
+  <div class="menuIcon" onclick="hideMenu(this)">
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+  </div>
+
   <div id="myNotes">Notes Dock <p id="hideTip"> click to hide or show a note. </p><hr></div><br>
   <div id="intro">
     <h1> stickee </h1>

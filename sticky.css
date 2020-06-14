@@ -1,4 +1,68 @@
 /* Three dots */
+/* Style the button that is used to open and close the collapsible content */
+#menu {
+  position: absolute;
+  top: 60px;
+  right: 15px;
+  width: 200px;
+  text-align: right;
+  display: block;
+}
+.collapsible {
+  float: right;
+  display: block;
+  letter-spacing: 1px;
+  color: black;
+  background-color: white;
+  cursor: pointer;
+  padding: 10px;
+  width: 60%;
+  border: none;
+  text-align: right;
+  outline: none;
+  font-size: 14px;
+  margin: 0 auto;
+}
+.content {
+  padding: 0 18px;
+  text-align: right;
+  width: 90%;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  word-wrap: break-word;
+  letter-spacing: normal;
+  font-size: smaller;
+}
+
+
+.menuIcon {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  cursor: pointer;
+  float: right;
+}
+.bar {
+  width: 25px;
+  height: 4px;
+  background-color: #333;
+  margin: 4px 0;
+  transition: 0.4s;
+}
+.change .bar1 {
+  -webkit-transform: rotate(-45deg) translate(-9px, 6px);
+  transform: rotate(-45deg) translate(-9px, 6px);
+}
+.change .bar2 {opacity: 0;}
+.change .bar3 {
+  -webkit-transform: rotate(45deg) translate(-8px, -8px);
+  transform: rotate(45deg) translate(-8px, -8px);
+}
+
+
+
+
 .dot {
   margin-top: 4px;
   height: 12px;
@@ -91,9 +155,10 @@ li {
   font-size: 10pt;
   font-weight: normal;
 }
-.headerList:hover {
-  background-color: #62b8fc;
+.active, .collapsible:hover, .headerList:hover {
+  background-color: #73befa;
   color: white;
+  cursor: pointer;
 }
 span {
   word-wrap:break-word;
@@ -149,22 +214,7 @@ span {
   border-width: thin;
   border-radius: 10px;
 }
-.close{
-  text-align: center;
-  float:right;
-  color: silver;
-  font-weight: 700;
-  margin-top: -15px;
-  margin-right: 5px;
-  width: 20px;
-  height:20px;
-  line-height: 0px; /*or you could use 4em*/
-  vertical-align: middle;
-  border-color: silver;
-  border-width: thin;
-  border-radius: 10px;
-  margin-bottom: -100px;
-}
+
 .editHeader {
     width:10px;
     height:10px;
@@ -177,8 +227,9 @@ span {
     display: block;
 }
 
-.close:hover, #add:hover, .remove:hover, #addNote:hover, .save:hover {
+#add:hover, .remove:hover, #addNote:hover, .save:hover, .dot {
   background-color: #dbd9d9;
+  cursor: pointer;
 }
 
 #mydiv, .drag {
