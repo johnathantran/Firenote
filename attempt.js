@@ -137,9 +137,13 @@ function loadPage() {
     })();
     document.body.classList.toggle("dark-mode");
     sheet.insertRule("\
-    .collapsible {\
+    .collapsible, .clear {\
      background-color: #363640;\
-     color: white;\
+     color: #fcd488;\
+    }",0);
+    sheet.insertRule("\
+    .bar {\
+     background-color: white;\
     }",0);
   }
   // recreate saved notes on page load
@@ -174,7 +178,7 @@ function toggleDarkMode() {
     console.log("dark to light");
 
     sheet.insertRule("\
-    .collapsible,.clear {\
+    .collapsible, .clear {\
      background-color: white;\
      color: black;\
     }",0);
@@ -189,9 +193,9 @@ function toggleDarkMode() {
     console.log("light to dark");
     
     sheet.insertRule("\
-    .collapsible,.clear {\
+    .collapsible, .clear {\
      background-color: #363640;\
-     color: white;\
+     color: #fcd488;\
     }",0);
     sheet.insertRule("\
     .bar {\
@@ -585,7 +589,8 @@ function editNote() {
     elmnt.focus();
     shown_save_count++;
   }
-  else if ((shown_save_count == 1) && (displayed == elmnt.parentNode.childNodes[3])) {
+  // if you click on the same pending edit, will not prompt the pending message
+  else if ((shown_save_count == 1) && (displayed == elmnt.parentNode.childNodes[2])) {
     console.log(og_note);
     elmnt.parentNode.childNodes[2].style.float = "right";
     elmnt.parentNode.childNodes[2].style.opacity = "1"; //show the save button

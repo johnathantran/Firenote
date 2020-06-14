@@ -1,3 +1,28 @@
+/* Normal white Button as seen on Google.com*/
+.blue {
+  color: #444444;
+  background: #F3F3F3;
+  border: 1px #DADADA solid;
+  padding: 5px 10px;
+  border-radius: 2px;
+  font-family: 'Montserrat','sans-serif';
+  font-size: 9pt;
+  outline: none;
+  color: white;
+  background: #4C8FFB;
+  border: 1px #3079ED solid;
+  box-shadow: inset 0 1px 0 #80B0FB;
+}
+.blue:hover {
+  cursor: pointer;
+  border: 1px #2F5BB7 solid;
+  box-shadow: 0 1px 1px #EAEAEA, inset 0 1px 0 #5A94F1;
+  background: #3F83F1;
+}
+.blue:active {
+  box-shadow: inset 0 2px 5px #2370FE;  
+}
+
 
 /* Three dots */
 /* Style the button that is used to open and close the collapsible content */
@@ -88,14 +113,27 @@ input {
   border: 2px solid silver;
   width: 65%;
 }
-#add{
-  border-radius: 40px;
-  border: 2px solid silver;
-  color: silver;
-  font-weight: 700;
+
+#add,.save{
   margin-left: 5px;
   margin-bottom: 5px;
+  color: #444444;
+  background: #F3F3F3;
+  border: 1px #DADADA solid;
+  padding: 5px 10px;
+  border-radius: 40px;
+  font-weight: bold;
+  font-size: 9pt;
+  outline: none;
 }
+#add:hover,.save:hover {
+  border: 1px #C6C6C6 solid;
+  box-shadow: 1px 1px 1px #EAEAEA;
+  color: #333333;
+  background: #F7F7F7;
+  cursor: pointer;
+}
+
 h1 {
   font-family: 'Montserrat', sans-serif;
   letter-spacing: 3px;
@@ -156,23 +194,21 @@ span {
   visibility: hidden;
   color: red;
 }
+/*
 #addNote {
   border-radius: 40px;
   border: 2px solid silver;
   font-weight: bold;
   color: #424242;
   padding-left,padding-right: 5px;
-}
+}*/
 .save {
   border-radius: 40px;
-  font-size: 8pt;
-  border: 2px solid silver;
-  color: #424242;
-  margin-right: 9px;
+  height: 18px;
   vertical-align: middle;
   opacity: 0;
   line-height: 0px;
-  height: 18px;
+  margin-right: 9px;
   display: inline-block;
 }
 .crossoff, .check {
@@ -216,7 +252,7 @@ span {
     display: block;
 }
 
-#add:hover, .remove:hover, #addNote:hover, .save:hover, .dot {
+.remove:hover, .dot {
   background-color: #dbd9d9;
   cursor: pointer;
 }
