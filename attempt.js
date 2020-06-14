@@ -27,6 +27,7 @@ $(document).ready(function() {
           dict = JSON.parse(localStorage.getItem(idx,dict));
           dict['headerText'] = header.textContent;
           localStorage.setItem(idx, JSON.stringify(dict));
+          document.querySelector('#headerItem' + idx).textContent = header.textContent; // update note dock
       }
   });
 
@@ -498,8 +499,12 @@ function hideNote() {
 
   div_to_hide = document.querySelector('#mydiv' + elm.id.slice(-1));
   if (div_to_hide.style.display == "none") {
+
     div_to_hide.style.display = "block";
     elm.style.color = "black";
+    if (localStorage.getItem('stickee_dark') == 'true') {
+      elm.style.color = "white";
+    }
     dict['hidden'] = false;
   }
   else {
@@ -557,6 +562,7 @@ function editHeader() {
     dict = JSON.parse(localStorage.getItem(idx,dict));
     dict['headerText'] = header.textContent;
     localStorage.setItem(idx, JSON.stringify(dict));
+    document.querySelector('#headerItem' + idx).textContent = header.textContent; // update note dock
   }
   header.focus();
 }
