@@ -8,12 +8,11 @@
   text-align: right;
   display: block;
 }
-
 .collapsible,.clear {
   float: right;
   display: block;
   letter-spacing: 1px;
-  color: black;
+  color: rgb(68, 68, 68);
   background-color: white;
   cursor: pointer;
   padding: 10px;
@@ -21,7 +20,9 @@
   border: none;
   text-align: right;
   outline: none;
-  font-size: 14px;
+  font-size: 13px;
+  font-family: 'Montserrat';
+  font-weight: 700;
   margin: 0 auto;
 }
 .content {
@@ -35,8 +36,6 @@
   letter-spacing: normal;
   font-size: smaller;
 }
-
-
 .menuIcon {
   position: absolute;
   top: 15px;
@@ -51,18 +50,6 @@
   margin: 4px 0;
   transition: 0.4s;
 }
-.change .bar1 {
-  -webkit-transform: rotate(-45deg) translate(-9px, 6px);
-  transform: rotate(-45deg) translate(-9px, 6px);
-}
-.change .bar2 {opacity: 0;}
-.change .bar3 {
-  -webkit-transform: rotate(45deg) translate(-8px, -8px);
-  transform: rotate(45deg) translate(-8px, -8px);
-}
-
-
-
 
 .dot {
   margin-top: 4px;
