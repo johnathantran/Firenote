@@ -8,6 +8,9 @@
   display: inline-block;
   margin-right: 5px;
 }
+.todoLists,.task,#add {
+  display: inline-block;
+}
 body {
   background-color: #fff;
   color: #333;

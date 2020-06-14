@@ -37,10 +37,10 @@ function createNote(exists,idx) {
   note.classList.add('drag');
   note.innerHTML += '<div id="mydiv' + idx + 'header" class="dragHeader" onmousedown="dragElement()">Note ' + idx;
   note.innerHTML += '<img src="images/edit.png" class="dot" id="edit" onclick="editHeader()">';
-  note.innerHTML += '<img src="images/minimize.png" class="dot" id="minimize" onclick="hideNote(false)">';
+  note.innerHTML += '<img src="images/minimize.png" class="dot" id="minimize" onclick="minHeader()">';
   note.innerHTML += '<img src="images/exit.png" class="dot" id="exit" onclick="deleteNote()"></img>';
   note.innerHTML += '<input class="task" id="task' + idx + '"><button id="add" onclick="add()">+ Add</button>';
-  note.innerHTML += '<div id="todos' + idx + '"></div>';
+  note.innerHTML += '<div class="todoLists" id="todos' + idx + '"></div>';
 
   // if the page is loading
   if (exists == true) {   
@@ -67,7 +67,7 @@ function createNote(exists,idx) {
   var note_log = document.createElement('div');
   console.log(note_log);
   document.querySelector('#myNotes').appendChild(note_log);
-  note_log.innerHTML += '<p class="headerList" id="headerItem' + idx + '" onclick="hideNote(true)">' + note_header + '</p>';
+  note_log.innerHTML += '<p class="headerList" id="headerItem' + idx + '" onclick="hideNote()">' + note_header + '</p>';
 };
 
 // page load
@@ -85,6 +85,8 @@ function loadPage() {
 };
 loadPage();
 var toggled = false;
+
+
 
 // enable dark mode CSS changes
 function toggleDarkMode() {
@@ -381,18 +383,10 @@ document.getElementById('add').addEventListener('click', add);
 console.log(document.getElementsByClassName(".headerList"))
 
 // hides a note from view by clicking on it in the Notes Dock
-function hideNote(fromDock) {
+function hideNote() {
   elmnt = getElm();
   // from the Notes Dock
-  if (fromDock == true) {
-    document.querySelector('#mydiv' + elmnt.id.slice(-1));
-    div_to_hide = document.querySelector('#mydiv' + elmnt.id.slice(-1));
-  }
-  // from the minimize button
-  else {
-    div_to_hide = elmnt.parentNode;
-  }
-
+  div_to_hide = document.querySelector('#mydiv' + elmnt.id.slice(-1));
   if (div_to_hide.style.display == "none") {
     div_to_hide.style.display = "block";
     elmnt.style.color = "black";
@@ -400,6 +394,28 @@ function hideNote(fromDock) {
   else {
     div_to_hide.style.display = "none";
     elmnt.style.color = "silver";
+  }
+}
+
+function minHeader() {
+  elmnt = getElm();
+  console.log(elmnt.parentNode.childNodes);
+  var hide_input = elmnt.parentNode.childNodes[4];
+  var hide_add = elmnt.parentNode.childNodes[5];
+  var hide_todo = elmnt.parentNode.childNodes[6];
+ 
+  // if visible
+  if (hide_input.style.display == 'inline-block') {
+    console.log("hiding");
+    hide_input.style.display = 'none';
+    hide_add.style.display = 'none';
+    hide_todo.style.display= 'none';
+  }
+  else {
+    console.log("showing");
+    hide_input.style.display = 'inline-block';
+    hide_add.style.display = 'inline-block';
+    hide_todo.style.display = 'inline-block';
   }
 }
 
