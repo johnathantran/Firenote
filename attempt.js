@@ -174,12 +174,12 @@ function toggleDarkMode() {
     console.log("dark to light");
 
     sheet.insertRule("\
-    .collapsible {\
+    .collapsible,.clear {\
      background-color: white;\
      color: black;\
     }",0);
     sheet.insertRule("\
-    #bar {\
+    .bar {\
      background-color: gray;\
     }",0);
 
@@ -189,12 +189,12 @@ function toggleDarkMode() {
     console.log("light to dark");
     
     sheet.insertRule("\
-    .collapsible {\
+    .collapsible,.clear {\
      background-color: #363640;\
      color: white;\
     }",0);
     sheet.insertRule("\
-    #bar {\
+    .bar {\
      background-color: white;\
     }",0);
     
@@ -277,6 +277,12 @@ function addNote() {
   var header_list = document.querySelectorAll(".dragHeader");
   var notes_on_screen = [];
   console.log(header_list);
+
+  // 10 note limit
+  if (header_list.length >= 10) {
+    alert ("You have reached the 10 note limit. Please delete a note to add more.");
+    return;
+  }
   for (j = 0; j < header_list.length; j++) {
     notes_on_screen.push(header_list[j].id.slice(5)[0]);
   }
@@ -327,6 +333,23 @@ function deleteNote() {
     // remove the div
     elmnt.remove();
     document.querySelector("#headerItem" + idx.toString()).remove();
+  }
+}
+
+// remove all notes
+function clearAll() {
+
+  r = confirm("This will remove all of your notes and delete them from your cache. Are you sure you want to proceed?");
+  if (r == true) {
+    var header_list = document.querySelectorAll(".dragHeader");
+    console.log(header_list);
+    for (j = 1; j <= header_list.length; j++) {
+      console.log("runs");
+      console.log(document.querySelector('#mydiv' + j));
+      localStorage.removeItem(j);
+      document.querySelector('#mydiv' + j).remove();
+      document.querySelector("#headerItem" + j.toString()).remove();
+    }
   }
 }
 

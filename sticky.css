@@ -8,7 +8,8 @@
   text-align: right;
   display: block;
 }
-.collapsible {
+
+.collapsible,.clear {
   float: right;
   display: block;
   letter-spacing: 1px;
@@ -155,7 +156,7 @@ li {
   font-size: 10pt;
   font-weight: normal;
 }
-.active, .collapsible:hover, .headerList:hover {
+.active, .collapsible:hover, .headerList:hover, .clear:hover{
   background-color: #73befa;
   color: white;
   cursor: pointer;
