@@ -8,22 +8,22 @@
 $(document).ready(function() {
   $(".task").on('keyup', function (e) {
       if (e.keyCode === 13) {
-          elmnt = getElm();
-          console.log(elmnt);
+          elm = getElm();
+          console.log(elm);
           // click the Add button for that note when enter key is pressed
-          elmnt.parentNode.childNodes[5].click();
+          elm.parentNode.childNodes[5].click();
       }
   });
   // enable edits to note header
   $(".dragHeader").on('keyup', function (e) {
       if (e.keyCode === 13) {
-          elmnt = getElm();
-          var new_header = elmnt.textContent;
-          elmnt.setAttribute("contentEditable",false);
-          //elmnt.parentNode.childNodes[1].src = "images/edit.svg";
-          elmnt.textContent = new_header;
+          elm = getElm();
+          var new_header = elm.textContent;
+          elm.setAttribute("contentEditable",false);
+          //elm.parentNode.childNodes[1].src = "images/edit.svg";
+          elm.textContent = new_header;
 
-          idx = elmnt.parentNode.id.slice(-1);
+          idx = elm.parentNode.id.slice(-1);
           dict = JSON.parse(localStorage.getItem(idx,dict));
           dict['headerText'] = header.textContent;
           localStorage.setItem(idx, JSON.stringify(dict));
@@ -44,9 +44,9 @@ $(document).ready(function() {
       } 
     });
   }
-
 });
 
+// hides the menu when the 3 bar icon is clicked
 function hideMenu() {
   if (document.querySelector('#menu').style.display == "none") {
     document.querySelector('#menu').style.display = "block";
@@ -55,6 +55,7 @@ function hideMenu() {
     document.querySelector('#menu').style.display = "none";
   }
 }
+
 // creates notes when the page is loaded (note exists), or when the Add Note button is clicked (note does not exist yet)
 function createNote(exists,idx) {
 
@@ -205,6 +206,7 @@ function toggleDarkMode() {
     localStorage.setItem('stickee_dark',true);
   }
 }
+
 // gets an element
 function getElm(e) {
    e = e || window.event;
@@ -214,24 +216,24 @@ function getElm(e) {
 };
 
 // allows an element to be dragged
-function dragElement(elmnt) {
+function dragElement(elm) {
   // get the div header element
-  elmnt = getElm();
+  elm = getElm();
   // get the parent div element
-  elmnt = elmnt.parentNode;
-  console.log(elmnt);
+  elm = elm.parentNode;
+  console.log(elm);
   // get the index of div element
   // if there are more than 10 notes, get last 2 chars
-  idx = elmnt.id.slice(-1);
+  idx = elm.id.slice(-1);
   if (idx == 0) {
-    idx = elmnt.id.slice(-2);
+    idx = elm.id.slice(-2);
   }
-  elmnt = document.getElementById("mydiv" + idx);
+  elm = document.getElementById("mydiv" + idx);
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 
-  if (document.getElementById(elmnt.id + "header")) {
+  if (document.getElementById(elm.id + "header")) {
     // if present, the header is where you move the DIV from:
-    document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+    document.getElementById(elm.id + "header").onmousedown = dragMouseDown;
   }
   function dragMouseDown(e) {
     e = e || window.event;
@@ -253,20 +255,20 @@ function dragElement(elmnt) {
     pos3 = e.clientX;
     pos4 = e.clientY;
     // set the element's new position:
-    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    elm.style.top = (elm.offsetTop - pos2) + "px";
+    elm.style.left = (elm.offsetLeft - pos1) + "px";
 
   }
   function closeDragElement() {
     // stop moving when mouse button is released:
     document.onmouseup = null;
     document.onmousemove = null;
-    var elmnt = getElm().parentNode;
-    idx = elmnt.id.slice(-1);
+    var elm = getElm().parentNode;
+    idx = elm.id.slice(-1);
 
     dict = JSON.parse(localStorage.getItem(idx));
-    dict['posTop'] = elmnt.style.top;
-    dict['posLeft'] = elmnt.style.left;
+    dict['posTop'] = elm.style.top;
+    dict['posLeft'] = elm.style.left;
     localStorage.setItem(idx, JSON.stringify(dict));
   }
 }
@@ -320,22 +322,22 @@ function addNote() {
 // deletes a note from existence
 function deleteNote() {
 
-  var elmnt = getElm();
+  var elm = getElm();
   // get the parent div element (the note)
-  elmnt = elmnt.parentNode;
+  elm = elm.parentNode;
   // if there are more than 10 notes, get last 2 chars
-  idx = elmnt.id.slice(-1);
+  idx = elm.id.slice(-1);
   if (idx == 0) {
-    idx = elmnt.id.slice(-2);
+    idx = elm.id.slice(-2);
   }
   
-  var header = elmnt.childNodes[0].textContent;
+  var header = elm.childNodes[0].textContent;
   var r = confirm("Are you sure you want to delete " + header + "?");
   if (r == true) {
     // remove all list items
     localStorage.removeItem(idx);
     // remove the div
-    elmnt.remove();
+    elm.remove();
     document.querySelector("#headerItem" + idx.toString()).remove();
   }
 }
@@ -360,21 +362,21 @@ function clearAll() {
 // add a new todo list item to an existing list
 function add() {
     // get the parent div element
-    var elmnt = getElm();
-    elmnt = elmnt.parentNode;
-    console.log(elmnt);
+    var elm = getElm();
+    elm = elm.parentNode;
+    console.log(elm);
 
     // get the index of div element
-    idx = elmnt.id.slice(-1);
+    idx = elm.id.slice(-1);
     console.log(idx);
 
     // add a task for that note
     var todos = new Array;
-    console.log(elmnt.childNodes);
-    if (elmnt.childNodes[4].value == "") {
+    console.log(elm.childNodes);
+    if (elm.childNodes[4].value == "") {
       return;
     }
-    var task = elmnt.childNodes[4].value;
+    var task = elm.childNodes[4].value;
     console.log(task);
 
     // get the current list of todos for that note
@@ -403,20 +405,20 @@ function add() {
     console.log(dict);
     show(idx);
 
-    elmnt.childNodes[4].value = "";
+    elm.childNodes[4].value = "";
 }
 
 // removes an item from a todo list
 function remove() {
 
-    var elmnt = getElm();
-    console.log(elmnt);
+    var elm = getElm();
+    console.log(elm);
     // get the parent div element
-    parent = elmnt.parentNode.parentNode.parentNode;
+    parent = elm.parentNode.parentNode.parentNode;
     // get the index of div element
     idx = parent.id.slice(-1);
     console.log("Index: " + idx);
-    var id = elmnt.getAttribute('id');
+    var id = elm.getAttribute('id');
 
     var todos = get_todos(idx);
 
@@ -476,9 +478,9 @@ function show(idx) {
     /*
     // if there is only one item in the list left, remove the list
     else {
-      elmnt = getElm();
-      console.log(elmnt);
-      elmnt.parentNode.remove();
+      elm = getElm();
+      console.log(elm);
+      elm.parentNode.remove();
     };
     */
 }
@@ -491,32 +493,32 @@ function show(idx) {
 function hideNote() {
   
   // save hidden feature to local storage
-  elmnt = getElm();
-  dict = JSON.parse(localStorage.getItem(elmnt.id.slice(-1)));
+  elm = getElm();
+  dict = JSON.parse(localStorage.getItem(elm.id.slice(-1)));
 
-  div_to_hide = document.querySelector('#mydiv' + elmnt.id.slice(-1));
+  div_to_hide = document.querySelector('#mydiv' + elm.id.slice(-1));
   if (div_to_hide.style.display == "none") {
     div_to_hide.style.display = "block";
-    elmnt.style.color = "black";
+    elm.style.color = "black";
     dict['hidden'] = false;
   }
   else {
     div_to_hide.style.display = "none";
-    elmnt.style.color = "silver";
+    elm.style.color = "silver";
     dict['hidden'] = true;
   }
-  localStorage.setItem(elmnt.id.slice(-1),JSON.stringify(dict));
+  localStorage.setItem(elm.id.slice(-1),JSON.stringify(dict));
 }
 
 // minimize a note leaving only the header
 function minimize() {
-  elmnt = getElm();
-  console.log(elmnt.parentNode.childNodes);
-  var idx = elmnt.parentNode.id.slice(-1);
+  elm = getElm();
+  console.log(elm.parentNode.childNodes);
+  var idx = elm.parentNode.id.slice(-1);
   console.log(idx);
-  var hide_input = elmnt.parentNode.childNodes[4];
-  var hide_add = elmnt.parentNode.childNodes[5];
-  var hide_todo = elmnt.parentNode.childNodes[6];
+  var hide_input = elm.parentNode.childNodes[4];
+  var hide_add = elm.parentNode.childNodes[5];
+  var hide_todo = elm.parentNode.childNodes[6];
  
   // if visible
   dict = JSON.parse(localStorage.getItem(idx,dict));
@@ -539,18 +541,18 @@ function minimize() {
 
 // allows edit of the header of a note
 function editHeader() {
-  elmnt = getElm();
-  header = elmnt.parentNode.childNodes[0];
-  console.log(elmnt.parentNode.childNodes[0].textContent);
+  elm = getElm();
+  header = elm.parentNode.childNodes[0];
+  console.log(elm.parentNode.childNodes[0].textContent);
   if (header.isContentEditable == false) {
     header.setAttribute("contentEditable", true);
     cursorManager.setEndOfContenteditable(header);
-    //elmnt.parentNode.childNodes[1].src = "images/edit_toggle.svg";
+    //elm.parentNode.childNodes[1].src = "images/edit_toggle.svg";
   }
   else {
     header.setAttribute("contentEditable", false);
-    //elmnt.parentNode.childNodes[1].src = "images/edit.svg";
-    idx = elmnt.parentNode.id.slice(-1);
+    //elm.parentNode.childNodes[1].src = "images/edit.svg";
+    idx = elm.parentNode.id.slice(-1);
     
     dict = JSON.parse(localStorage.getItem(idx,dict));
     dict['headerText'] = header.textContent;
@@ -562,11 +564,11 @@ function editHeader() {
 // allows a list item to be edited
 var og_note = [];
 function editNote() {
-  elmnt = getElm();
+  elm = getElm();
 
-  og_note.push(elmnt.textContent); // original note content
+  og_note.push(elm.textContent); // original note content
   console.log(og_note);
-  console.log(elmnt.parentNode.childNodes);
+  console.log(elm.parentNode.childNodes);
 
   shown_save_count = 0;
   var displayed;
@@ -583,19 +585,19 @@ function editNote() {
   // if there are no pending edits, show the save button
   console.log(shown_save_count);
   if (shown_save_count < 1) {
-    elmnt.parentNode.childNodes[2].style.float = "right";
-    elmnt.parentNode.childNodes[2].style.opacity = "1"; //show the save button
-    elmnt.setAttribute("contentEditable", true);
-    elmnt.focus();
+    elm.parentNode.childNodes[2].style.float = "right";
+    elm.parentNode.childNodes[2].style.opacity = "1"; //show the save button
+    elm.setAttribute("contentEditable", true);
+    elm.focus();
     shown_save_count++;
   }
   // if you click on the same pending edit, will not prompt the pending message
-  else if ((shown_save_count == 1) && (displayed == elmnt.parentNode.childNodes[2])) {
+  else if ((shown_save_count == 1) && (displayed == elm.parentNode.childNodes[2])) {
     console.log(og_note);
-    elmnt.parentNode.childNodes[2].style.float = "right";
-    elmnt.parentNode.childNodes[2].style.opacity = "1"; //show the save button
-    elmnt.setAttribute("contentEditable", true);
-    elmnt.focus();
+    elm.parentNode.childNodes[2].style.float = "right";
+    elm.parentNode.childNodes[2].style.opacity = "1"; //show the save button
+    elm.setAttribute("contentEditable", true);
+    elm.focus();
   }
   else {
     og_note = [og_note[0]];
@@ -612,11 +614,11 @@ function saveEdit(og_note) {
     if (og_note.length > 1) {
       og_note = og_note[og_note.length-1];
     }
-    elmnt = getElm(); // get the save button
-    console.log(elmnt.parentNode.childNodes);
-    var task = elmnt.parentNode.childNodes[1].textContent; // get the text of the edited note
+    elm = getElm(); // get the save button
+    console.log(elm.parentNode.childNodes);
+    var task = elm.parentNode.childNodes[1].textContent; // get the text of the edited note
     console.log(task);
-    var parent = elmnt.parentNode.parentNode.parentNode; // get the index of div element
+    var parent = elm.parentNode.parentNode.parentNode; // get the index of div element
     idx = parent.id.slice(-1);
 
     // get the current list of todos for that note
@@ -642,7 +644,7 @@ function saveEdit(og_note) {
     localStorage.setItem(idx, JSON.stringify(dict));
     console.log(localStorage.getItem(idx));
 
-    elmnt.parentNode.childNodes[2].style.opacity = "0";
+    elm.parentNode.childNodes[2].style.opacity = "0";
     document.querySelector("#pending").style.visibility = "hidden";
 }
 /*
@@ -652,25 +654,25 @@ $(".span").on('keyup', function (e) {
         e.preventDefault();
         // insert 2 br tags (if only one br tag is inserted the cursor won't go to the next line)
         document.execCommand('insertHTML', false, '<br/>');
-        elmnt = getElm();
-        console.log(elmnt);
-        console.log(elmnt.parentNode.childNodes);
+        elm = getElm();
+        console.log(elm);
+        console.log(elm.parentNode.childNodes);
         // click the Add button for that note when enter key is pressed
         saveEdit(og_note);
-        //elmnt.parentNode.childNodes[3].click();
-        elmnt.blur();
-        elmnt.setAttribute("contentEditable", false);
+        //elm.parentNode.childNodes[3].click();
+        elm.blur();
+        elm.setAttribute("contentEditable", false);
     }
 });
 */
 /*
 $(".lists").on('keyup', function (e) {
   if (e.keyCode === 13) {
-      elmnt = getElm();
-      console.log(elmnt);
+      elm = getElm();
+      console.log(elm);
       // click the Add button for that note when enter key is pressed
-      elmnt.blur();
-      elmnt.setAttribute("contentEditable", false);
+      elm.blur();
+      elm.setAttribute("contentEditable", false);
   }
 });
 */

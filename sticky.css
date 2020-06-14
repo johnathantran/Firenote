@@ -192,7 +192,7 @@ span {
 }
 #pending {
   visibility: hidden;
-  color: red;
+  color: rgb(228, 112, 112);
 }
 /*
 #addNote {
