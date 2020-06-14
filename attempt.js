@@ -253,18 +253,18 @@ function addNote() {
 // deletes a note from existence
 function deleteNote() {
 
-  var r = confirm("Are you sure you want to delete this note?");
+  var elmnt = getElm();
+  // get the parent div element (the note)
+  elmnt = elmnt.parentNode;
+  // if there are more than 10 notes, get last 2 chars
+  idx = elmnt.id.slice(-1);
+  if (idx == 0) {
+    idx = elmnt.id.slice(-2);
+  }
+  
+  var header = elmnt.childNodes[0].textContent;
+  var r = confirm("Are you sure you want to delete " + header + "?");
   if (r == true) {
-    var elmnt = getElm();
-
-    // get the parent div element (the note)
-    elmnt = elmnt.parentNode;
-    console.log(elmnt);
-    // if there are more than 10 notes, get last 2 chars
-    idx = elmnt.id.slice(-1);
-    if (idx == 0) {
-      idx = elmnt.id.slice(-2);
-    }
 
     // remove all list items
     var todos;
