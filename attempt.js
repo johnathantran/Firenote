@@ -37,17 +37,25 @@ function createNote(exists,idx) {
   note.classList.add('drag');
   note.innerHTML += '<div id="mydiv' + idx + 'header" class="dragHeader" onmousedown="dragElement()">Note ' + idx;
   note.innerHTML += '<img src="images/edit.png" class="dot" id="edit" onclick="editHeader()">';
-  note.innerHTML += '<img src="images/minimize.png" class="dot" id="minimize" onclick="minHeader()">';
+  note.innerHTML += '<img src="images/minimize.png" class="dot" id="minimize" onclick="minimize()">';
   note.innerHTML += '<img src="images/exit.png" class="dot" id="exit" onclick="deleteNote()"></img>';
   note.innerHTML += '<input class="task" id="task' + idx + '"><button id="add" onclick="add()">+ Add</button>';
   note.innerHTML += '<div class="todoLists" id="todos' + idx + '"></div>';
 
   // if the page is loading
-  if (exists == true) {   
-      note.style.top = localStorage.getItem('posTop' + idx);
+  if (exists == true) { 
+      note.style.top = localStorage.getItem('posTop' + idx); // get note position
       note.style.left = localStorage.getItem('posLeft' + idx);
-      note_header = localStorage.getItem('headerText' + idx);
+      note_header = localStorage.getItem('headerText' + idx); // get note header
       note.childNodes[0].textContent = note_header;
+
+      // check if the note is minimzied
+      console.log(localStorage.getItem('minimized' + idx));
+      if (localStorage.getItem('minimized' + idx) == 'true') {
+        note.childNodes[4].style.display = 'none';
+        note.childNodes[5].style.display = 'none';
+        note.childNodes[6].style.display = 'none';
+      }
   }
   // if adding a new note
   else {
@@ -397,9 +405,12 @@ function hideNote() {
   }
 }
 
-function minHeader() {
+// minimize a note leaving only the header
+function minimize() {
   elmnt = getElm();
   console.log(elmnt.parentNode.childNodes);
+  var idx = elmnt.parentNode.id.slice(-1);
+  console.log(idx);
   var hide_input = elmnt.parentNode.childNodes[4];
   var hide_add = elmnt.parentNode.childNodes[5];
   var hide_todo = elmnt.parentNode.childNodes[6];
@@ -410,12 +421,14 @@ function minHeader() {
     hide_input.style.display = 'none';
     hide_add.style.display = 'none';
     hide_todo.style.display= 'none';
+    localStorage.setItem('minimized' + idx,true);
   }
   else {
     console.log("showing");
     hide_input.style.display = 'inline-block';
     hide_add.style.display = 'inline-block';
     hide_todo.style.display = 'inline-block';
+    localStorage.removeItem('minimized' + idx);
   }
 }
 
