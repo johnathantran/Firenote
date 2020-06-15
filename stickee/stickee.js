@@ -140,6 +140,16 @@ function addNoteEventHandlers() {
       add();
     });
   }
+  // hide a note from the dock
+  var el = document.getElementsByClassName('headerList');
+  console.log(elements);
+
+  for (var i = 0; i < elements.length; i++) {
+      elements[i].addEventListener('click', function() {
+      console.log("dock clicked");  
+      hideNote();
+    });
+  }
 }
 
 // adds event handlers for todo items on a note

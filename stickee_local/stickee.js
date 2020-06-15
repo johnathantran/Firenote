@@ -47,6 +47,154 @@ $(document).ready(function() {
   }
 });
 
+// add event listeners to onclick elements
+document.addEventListener('DOMContentLoaded', function() {
+
+  //hide menu button
+  var el = document.getElementById('hideMenu');
+  el.addEventListener('click', function() {
+      hideMenu(this);
+  });
+
+  // dark mode button
+  var el = document.getElementById('toggleDarkMode');
+  el.addEventListener('click', function() {
+      toggleDarkMode();
+  });
+
+  // clear all button
+  var el = document.getElementById('clearAll');
+  el.addEventListener('click', function() {
+      clearAll();
+  });
+
+  // dock all button
+  var el = document.getElementById('dockAll');
+  el.addEventListener('click', function() {
+      dockAll();
+  });
+
+  // add note button
+  var el = document.getElementById('addNote');
+  el.addEventListener('click', function() {
+      addNote();
+  });
+
+  // hide notes from dock
+  var elements = document.getElementsByClassName('headerList');
+  console.log(elements);
+
+  for (var i = 0; i < elements.length; i++) {
+      elements[i].addEventListener('click', function() {
+      console.log("delete clicked");  
+      hideNote();
+    });
+  }
+});
+
+// NOTE EVENT HANDLERS
+// adds event handlers for elements on a note
+function addNoteEventHandlers() {
+  // drag note
+  var el = document.querySelector('.dragHeader');
+  el.addEventListener('mousedown', function() {
+      dragElement();
+  });
+  // edit header
+  var elements = document.getElementsByClassName('editHeader');
+  console.log(elements);
+
+  for (var i = 0; i < elements.length; i++) {
+      elements[i].addEventListener('click', function() {
+      console.log("edit clicked");  
+      editHeader();
+      });
+  }
+  // minimize note
+  var elements = document.getElementsByClassName('minimize');
+  console.log(elements);
+
+  for (var i = 0; i < elements.length; i++) {
+      elements[i].addEventListener('click', function() {
+      console.log("min clicked");  
+      minimize();
+    });
+  }
+  // delete note
+  var elements = document.getElementsByClassName('deleteNote');
+  console.log(elements);
+
+  for (var i = 0; i < elements.length; i++) {
+      elements[i].addEventListener('click', function() {
+      console.log("delete clicked");  
+      deleteNote();
+    });
+  }
+  // add a todo
+  var elements = document.getElementsByClassName('add');
+  console.log(elements);
+
+  for (var i = 0; i < elements.length; i++) {
+      elements[i].addEventListener('click', function() {
+      console.log("add clicked");  
+      add();
+    });
+  }
+  // hide a note from the dock
+  var el = document.getElementsByClassName('headerList');
+  console.log(elements);
+
+  for (var i = 0; i < elements.length; i++) {
+      elements[i].addEventListener('click', function() {
+      console.log("dock clicked");  
+      hideNote();
+    });
+  }
+}
+
+// adds event handlers for todo items on a note
+function addTodoEventHandlers() {
+  // strikethrough
+  var elements = document.getElementsByClassName('check');
+  console.log(elements);
+
+  for (var i = 0; i < elements.length; i++) {
+      elements[i].addEventListener('click', function() {
+      strikeThrough();
+    });
+  }
+  // remove a todo item
+  var elements = document.getElementsByClassName('crossoff');
+  console.log(elements);
+  for (var i = 0; i < elements.length; i++) {
+      elements[i].addEventListener('click', function() {
+      console.log("crossoff clicked");
+      // crossed is false or true?
+      remove(false);
+    });
+  }
+  // edit a todo item
+  var elements = document.getElementsByClassName('span');
+  console.log(elements);
+
+  for (var i = 0; i < elements.length; i++) {
+      elements[i].addEventListener('click', function() {
+      console.log("edit item clicked");  
+      editNote();
+    });
+  }
+  // save an edit
+  var elements = document.getElementsByClassName('save');
+  console.log(elements);
+
+  for (var i = 0; i < elements.length; i++) {
+      elements[i].addEventListener('click', function() {
+      console.log("save item clicked");  
+      saveEdit();
+    });
+  }
+}
+
 // hides the menu when the 3 bar icon is clicked
 function hideMenu() {
   if (document.querySelector('#menu').style.display == "none") {
@@ -64,11 +212,11 @@ function createNote(exists,idx) {
   note.id = "mydiv" + idx;
   document.body.appendChild(note);
   note.classList.add('drag');
-  note.innerHTML += '<div id="mydiv' + idx + 'header" class="dragHeader" onmousedown="dragElement()">Note ' + idx;
-  note.innerHTML += '<img src="images/edit.png" class="dot" id="edit" onclick="editHeader()">';
-  note.innerHTML += '<img src="images/minimize.png" class="dot" id="minimize" onclick="minimize()">';
-  note.innerHTML += '<img src="images/exit.png" class="dot" id="exit" onclick="deleteNote()"></img>';
-  note.innerHTML += '<input class="task" id="task' + idx + '"  style="display:inline-block;"><button id="add" onclick="add()">+ Add</button>';
+  note.innerHTML += '<div id="mydiv' + idx + 'header" class="dragHeader">Note ' + idx;
+  note.innerHTML += '<img src="images/edit.png" class="editHeader" id="edit">';
+  note.innerHTML += '<img src="images/minimize.png" class="minimize" id="minimize">';
+  note.innerHTML += '<img src="images/exit.png" class="deleteNote" id="exit"></img>';
+  note.innerHTML += '<input class="task" id="task' + idx + '"  style="display:inline-block;"><button id="add" class="add">+ Add</button>';
   note.innerHTML += '<div class="todoLists" id="todos' + idx + '"></div>';
 
   var note_header = 'Note' + idx;
@@ -118,13 +266,14 @@ function createNote(exists,idx) {
   var note_log = document.createElement('div');
   console.log(note_log);
   document.querySelector('#myNotes').appendChild(note_log);
-  note_log.innerHTML += '<p class="headerList" id="headerItem' + idx + '" onclick="hideNote()">' + note_header + '</p>';
+  note_log.innerHTML += '<p class="headerList" id="headerItem' + idx + '">' + note_header + '</p>';
   
   // check if the note is hidden
   if (dict['hidden'] == true) {
     note.style.display = 'none';
     document.querySelector('#headerItem' + idx).style.color = 'silver';
   }
+  addNoteEventHandlers();
 };
 
 // page load
@@ -165,7 +314,6 @@ function loadPage() {
   }
 };
 loadPage();
-
 
 // enable dark mode CSS changes
 function toggleDarkMode() {
@@ -434,7 +582,7 @@ function add() {
 }
 
 // removes an item from a todo list
-function remove(isTodo) {
+function remove() {
 
     var elm = getElm();
     console.log(elm);
@@ -451,7 +599,13 @@ function remove(isTodo) {
     var id = elm.getAttribute('id');
     var todos = getTodos(idx);
 
+    // determine if the todo item is crossed out or not
+    var isTodo= false;
+    if (elm.parentNode.childNodes[2].tagName == 'SPAN') {
+      var isTodo = true;
+    }
     console.log(isTodo);
+
     if (isTodo == false) {
       todos = getCrossed(idx);
       console.log(todos);
@@ -522,11 +676,11 @@ function show(idx) {
       // build list of uncrossed todo list items
       for(var i=0; i<todos_list.length; i++) {
           html += '<li class="lists">';
-          html += '<img class="check" onclick="strikeThrough(false)" src="images/check3.png">';
-          html += '<img class="crossoff" src="images/crossoff3.png" onclick="remove()" id="' + i  + '">';
-          html += '<span class="span" onclick="editNote()">' + todos_list[i] + '</span>';
-          //html += '<img class="save" onclick="saveEdit(og_note)">';
-          html += '<button class="save" onclick="saveEdit(og_note,false)"> save </button></li>';
+          html += '<img class="check" src="images/check3.png">';
+          html += '<img class="crossoff" src="images/crossoff3.png" id="' + i  + '">';
+          html += '<span class="span">' + todos_list[i] + '</span>';
+          //html += '<img class="save">';
+          html += '<button class="save"> save </button></li>';
           //html += '<hr>';
       };
     }
@@ -535,11 +689,11 @@ function show(idx) {
       // build list of crossed todo list items
       for(var i=0; i<crossed_list.length; i++) {
         html += '<li class="lists">';
-        html += '<img class="check" onclick="strikeThrough(true)" src="images/check3.png">';
-        html += '<img class="crossoff" src="images/crossoff3.png" onclick="remove(false)" id="' + i  + '">';
-        html += '<del class="span" onclick="editNote()">' + crossed_list[i] + '</del>';
-        //html += '<img class="save" onclick="saveEdit(og_note)">';
-        html += '<button class="save" onclick="saveEdit(og_note,true)"> save </button></li>';
+        html += '<img class="check" src="images/check3.png">';
+        html += '<img class="crossoff" src="images/crossoff3.png" id="' + i  + '">';
+        html += '<del class="span">' + crossed_list[i] + '</del>';
+        //html += '<img class="save">';
+        html += '<button class="save"> save </button></li>';
       }
     }
     html += '</ul>';
@@ -552,10 +706,11 @@ function show(idx) {
     dict['height'] = document.querySelector('#mydiv' + idx).offsetHeight + "px";
     localStorage.setItem(idx,JSON.stringify(dict));
     */
+    addTodoEventHandlers();
 }
 
 // strikes through a todo list item
-function strikeThrough(crossed) {
+function strikeThrough() {
 
   var elm = getElm();
 
@@ -568,6 +723,13 @@ function strikeThrough(crossed) {
   // get id of the todo item we are trying to remove
   var id = elm.parentNode.childNodes[1].getAttribute('id');
   console.log(elm.parentNode.childNodes[1]);
+  console.log(elm.parentNode.childNodes[2].tagName);
+
+  // determine if the todo item is crossed out or not
+  var crossed = true;
+  if (elm.parentNode.childNodes[2].tagName == 'SPAN') {
+    var crossed = false;
+  }
 
   if (crossed == false) {
     
@@ -792,7 +954,8 @@ function editNote() {
 }
 
 // saves an edit on a todo list item
-function saveEdit(og_note,crossed) {
+function saveEdit() {
+
     spanList = document.querySelectorAll(".span");
     shown_save_count = 0;
 
@@ -805,6 +968,12 @@ function saveEdit(og_note,crossed) {
     console.log(task);
     var parent = elm.parentNode.parentNode.parentNode; // get the index of div element
     idx = parent.id.slice(-1);
+
+    // determine if the todo item is crossed out or not
+    var crossed = true;
+    if (elm.parentNode.childNodes[2].tagName == 'SPAN') {
+      var crossed = false;
+    }
 
     if (crossed == false) {
       console.log("crossed is false");

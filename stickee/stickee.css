@@ -60,7 +60,7 @@
   transition: max-height 0.2s ease-out;
   word-wrap: break-word;
   letter-spacing: normal;
-  font-size: smaller;
+  font-size: 13px;
 }
 .menuIcon {
   position: absolute;
