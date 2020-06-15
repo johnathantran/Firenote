@@ -572,7 +572,7 @@ function add() {
 }
 
 // removes an item from a todo list
-function remove(isTodo) {
+function remove() {
 
     var elm = getElm();
     console.log(elm);
@@ -589,7 +589,13 @@ function remove(isTodo) {
     var id = elm.getAttribute('id');
     var todos = getTodos(idx);
 
+    // determine if the todo item is crossed out or not
+    var isTodo= false;
+    if (elm.parentNode.childNodes[2].tagName == 'SPAN') {
+      var isTodo = true;
+    }
     console.log(isTodo);
+
     if (isTodo == false) {
       todos = getCrossed(idx);
       console.log(todos);
@@ -709,11 +715,10 @@ function strikeThrough() {
   console.log(elm.parentNode.childNodes[1]);
   console.log(elm.parentNode.childNodes[2].tagName);
 
+  // determine if the todo item is crossed out or not
+  var crossed = true;
   if (elm.parentNode.childNodes[2].tagName == 'SPAN') {
     var crossed = false;
-  }
-  else {
-    var crossed = true;
   }
 
   if (crossed == false) {
@@ -939,7 +944,7 @@ function editNote() {
 }
 
 // saves an edit on a todo list item
-function saveEdit(crossed) {
+function saveEdit() {
 
     spanList = document.querySelectorAll(".span");
     shown_save_count = 0;
@@ -953,6 +958,12 @@ function saveEdit(crossed) {
     console.log(task);
     var parent = elm.parentNode.parentNode.parentNode; // get the index of div element
     idx = parent.id.slice(-1);
+
+    // determine if the todo item is crossed out or not
+    var crossed = true;
+    if (elm.parentNode.childNodes[2].tagName == 'SPAN') {
+      var crossed = false;
+    }
 
     if (crossed == false) {
       console.log("crossed is false");
