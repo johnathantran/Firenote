@@ -209,6 +209,9 @@ span {
   vertical-align: middle;
   padding-left: 0px;
 }
+.crossoff:hover, .check:hover {
+  cursor: pointer;
+}
 .crossoff {
   padding-left: 4px;
   padding-right: 5px;
@@ -247,7 +250,7 @@ span {
   cursor: pointer;
 }
 
-#mydiv, .drag {
+.drag {
   position: absolute;
   width: 280px;
   z-index: 1;
@@ -266,10 +269,8 @@ span {
   padding-right: 10px;
   padding-top: 5px;
 }
-#del {
-  float:right;
-  width: 10px;
-  height:15px;
+del {
+  color: silver;
 }
 
 .dragHeader {
