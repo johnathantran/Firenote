@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap" rel="stylesheet">
+<link href="stickee.css" media="all" rel="stylesheet">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+
+<body>
+<div id="container">
+
+  <div id="menu">
+    <div><button class="collapsible" onclick="toggleDarkMode()">dark mode</button></div>
+    <div><button class="clear" onclick="clearAll()">clear all</button></div>
+    <div><button class="clear" onclick="dockAll()">dock all</button></div>
+    <div>
+      <button class="collapsible">help +</button>
+      <div class="content">Get started by clicking the "Add New Note" button.
+        You can edit, minimize, dock, and arrange your sticky notes
+        however you like. Your notes will stay saved even if you close the browser until
+        you clear your cache or click the "clear all" button.
+      </div>
+    </div>
+    <div>
+      <button class="collapsible">contact +</button>
+      <div class="content"> As a first time developer, your support
+        is incredibly important to me to improve and build upon this app.
+      Feel free to contact me at: jtran304@gmail.com for your ideas and feedback!</div>
+    </div>
+  </div>
+
+
+  <div class="menuIcon" onclick="hideMenu(this)">
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+  </div>
+
+  <div id="myNotes">Notes Dock <p id="hideTip"> click to hide or show a note. </p><hr></div><br>
+  <div id="intro">
+    <h1> stickee </h1>
+    <p> welcome to your customizable workspace for virtual sticky notes. jot down your thoughts. write to-do lists. save paper and stay organized. </p>
+    <hr><br>
+    <button id="addNote" class="blue" onclick="addNote()">+ Add New Note</button>
+    <p id="pending"> you have unsaved pending edits. save before adding new edit. </p>
+  </div>
+  <div id="ref">Created by: Johnathan Tran 2020 </div>
+</div>
+
+<script src="stickee.js"></script>
+</body>
+</html>
