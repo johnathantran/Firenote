@@ -634,7 +634,7 @@ function hideNote(idx) {
   elm = getElm();
 
   console.log(idx);
-  if (idx == undefined) {
+  if (idx == undefined) { // if not docking all notes
     idx = elm.id.slice(-2);
     if (isNaN(idx) == true) {
       idx = elm.id.slice(-1);
@@ -643,9 +643,19 @@ function hideNote(idx) {
   dict = JSON.parse(localStorage.getItem(idx));
 
   div_to_hide = document.querySelector('#mydiv' + idx);
+  all_divs = document.querySelectorAll(".drag");
+  console.log(all_divs);
+
   if (div_to_hide.style.display == "none") {
 
     div_to_hide.style.display = "block";
+
+    // bring all the other notes behind the selected note
+    for (j=0; j<all_divs.length; j++) {
+      all_divs[j].style.zIndex = "1";
+    }
+    div_to_hide.style.zIndex = "2";
+
     elm.style.color = "black";
     if (localStorage.getItem('stickee_dark') == 'true') {
       elm.style.color = "white";
@@ -653,6 +663,10 @@ function hideNote(idx) {
     dict['hidden'] = false;
   }
   else {
+    // reset notes zIndexes
+    for (j=0; j<all_divs.length; j++) {
+      all_divs[j].style.zIndex = "1";
+    }
     div_to_hide.style.display = "none";
     elm.style.color = "silver";
     dict['hidden'] = true;

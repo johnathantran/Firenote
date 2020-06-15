@@ -250,7 +250,7 @@ span {
 #mydiv, .drag {
   position: absolute;
   width: 280px;
-  z-index: 9;
+  z-index: 1;
   background-color: #fcfacf;
   /*background-color: #f1f1f1;*/
   border: 1px solid #d3d3d3;
