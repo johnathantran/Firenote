@@ -4,7 +4,7 @@
 // 'headerTextN': the text element of the header of note N
 // 'headerItemN': the text element of the header of note N in the Notes Dock
 
-//localStorage.removeItem(1);
+//localStorage.removeItem(11);
 $(document).ready(function() {
   $(".task").on('keyup', function (e) {
       if (e.keyCode === 13) {
@@ -68,7 +68,7 @@ function createNote(exists,idx) {
   note.innerHTML += '<img src="images/edit.png" class="dot" id="edit" onclick="editHeader()">';
   note.innerHTML += '<img src="images/minimize.png" class="dot" id="minimize" onclick="minimize()">';
   note.innerHTML += '<img src="images/exit.png" class="dot" id="exit" onclick="deleteNote()"></img>';
-  note.innerHTML += '<input class="task" id="task' + idx + '"><button id="add" onclick="add()">+ Add</button>';
+  note.innerHTML += '<input class="task" id="task' + idx + '"  style="display:inline-block;"><button id="add" onclick="add()">+ Add</button>';
   note.innerHTML += '<div class="todoLists" id="todos' + idx + '"></div>';
 
   var note_header = 'Note' + idx;
@@ -104,6 +104,7 @@ function createNote(exists,idx) {
       'posLeft': note.style.left,
       'hidden': false,
     };
+    console.log("Creating item: " + idx);
     localStorage.setItem(idx, JSON.stringify(dict));
     console.log(dict);
   };
@@ -149,7 +150,7 @@ function loadPage() {
     }",0);
   }
   // recreate saved notes on page load
-  for (idx = 1; idx <= 10; idx++) {
+  for (idx = 1; idx <= 20; idx++) { // current max note limit is 20
 
     dict = JSON.parse(localStorage.getItem(idx));
     if (dict !== null) {
@@ -286,17 +287,31 @@ function addNote() {
   console.log(header_list);
 
   // 10 note limit
-  if (header_list.length >= 10) {
-    alert("You have reached the 10 note limit! Please delete a note to add more.");
+  var basic = true; // basic vs premium version of stickee app
+  if ((header_list.length >= 10) && (basic == true)) {
+    alert("You have reached the maximum 10 note limit of the basic version. Please\
+    delete a note or upgrade to add more.");
     return;
   }
+  if (header_list.length >= 20) {
+    alert("You have reached the maximum 20 note limit! Please delete a note to add more.");
+    return;
+  }
+  
   for (j = 0; j < header_list.length; j++) {
-    notes_on_screen.push(header_list[j].id.slice(5)[0]);
+    idx = header_list[j].id.substring(5,7); // get the 6th idx char of "mydivNNheader"
+
+    console.log(header_list[j].id.substring(5,7));
+    if (isNaN(idx) == true) { // if NOT a number, adjust the slice for a single digit
+      idx = header_list[j].id.substring(5,6);
+    }
+    console.log(idx);
+    notes_on_screen.push(idx);
   }
   console.log(notes_on_screen);
-
   // check local storage for existing notes
-  for (j = 1; j <= 10; j++) {
+  for (j = 1; j <= header_list.length + 1; j++) {
+
     note_check = localStorage.getItem(j);
 
     // if the note exists on the screen
@@ -309,11 +324,13 @@ function addNote() {
     }
     // break on first instance that an available slot is found
     else if ((note_check == undefined) || (note_check == null)) {
+      console.log("breaking at " + j);
       first_empty_slot = j;
       break;
     };
     console.log(j + note_check);
   };
+  
   console.log(first_empty_slot);
   console.log(existing_notes);
   idx = first_empty_slot.toString();
@@ -327,11 +344,11 @@ function deleteNote() {
   // get the parent div element (the note)
   elm = elm.parentNode;
   // if there are more than 10 notes, get last 2 chars
-  idx = elm.id.slice(-1);
-  if (idx == 0) {
-    idx = elm.id.slice(-2);
+  idx = elm.id.slice(-2);
+  if (isNaN(idx) == true) {
+    idx = elm.id.slice(-1);
   }
-  
+  console.log(idx);
   var header = elm.childNodes[0].textContent;
   var r = confirm("Are you sure you want to delete " + header + "?");
   if (r == true) {
@@ -368,7 +385,10 @@ function add() {
     console.log(elm);
 
     // get the index of div element
-    idx = elm.id.slice(-1);
+    idx = elm.id.slice(-2);
+    if (isNaN(idx) == true) { // if is NOT a number
+      idx = elm.id.slice(-1); // not a 2 digit number
+    }
     console.log(idx);
 
     // add a task for that note
@@ -397,7 +417,7 @@ function add() {
       }
     }
     else {
-      todos = task;
+      todos = [task];
       console.log(todos);
     }
     dict['todo'] = JSON.stringify(todos);
@@ -417,10 +437,14 @@ function remove(isTodo) {
     // get the parent div element
     parent = elm.parentNode.parentNode.parentNode;
     // get the index of div element
-    idx = parent.id.slice(-1);
-    console.log("Index: " + idx);
-    var id = elm.getAttribute('id');
+    idx = parent.id.slice(-2);
+   
+    if (isNaN(idx) == true) { // if is NOT a number
+      idx = parent.id.slice(-1); // not a 2 digit number
+    }
+    console.log(idx);
 
+    var id = elm.getAttribute('id');
     var todos = getTodos(idx);
 
     console.log(isTodo);
@@ -524,8 +548,10 @@ function strikeThrough(crossed) {
   var elm = getElm();
 
   // get the index of div element
-  idx = elm.parentNode.parentNode.parentNode.id.slice(-1);
-  console.log(idx);
+  idx = elm.parentNode.parentNode.parentNode.id.slice(-2);
+  if (isNaN(idx) == true) { // if is NOT a number
+    idx = elm.parentNode.parentNode.parentNode.id.slice(-1); // not a 2 digit number
+  }
 
   // get id of the todo item we are trying to remove
   var id = elm.parentNode.childNodes[1].getAttribute('id');
@@ -591,14 +617,32 @@ function strikeThrough(crossed) {
   show(idx);
 }
 
+// docks all notes
+function dockAll() {
+  var header_list = document.querySelectorAll(".dragHeader");
+  console.log(header_list);
+  for (j = 1; j <= header_list.length; j++) {
+    console.log(document.querySelector('#mydiv' + j));
+    hideNote(j);
+  }
+}
+
 // hides a note from view by clicking on it in the Notes Dock
-function hideNote() {
+function hideNote(idx) {
   
   // save hidden feature to local storage
   elm = getElm();
-  dict = JSON.parse(localStorage.getItem(elm.id.slice(-1)));
 
-  div_to_hide = document.querySelector('#mydiv' + elm.id.slice(-1));
+  console.log(idx);
+  if (idx == undefined) {
+    idx = elm.id.slice(-2);
+    if (isNaN(idx) == true) {
+      idx = elm.id.slice(-1);
+    }
+  }
+  dict = JSON.parse(localStorage.getItem(idx));
+
+  div_to_hide = document.querySelector('#mydiv' + idx);
   if (div_to_hide.style.display == "none") {
 
     div_to_hide.style.display = "block";
@@ -620,7 +664,12 @@ function hideNote() {
 function minimize() {
   elm = getElm();
   console.log(elm.parentNode.childNodes);
-  var idx = elm.parentNode.id.slice(-1);
+
+  var idx = elm.parentNode.id.slice(-2);
+  if (isNaN(idx) == true) {
+    idx = elm.parentNode.id.slice(-1);
+  }
+
   console.log(idx);
   var hide_input = elm.parentNode.childNodes[4];
   var hide_add = elm.parentNode.childNodes[5];
@@ -628,6 +677,7 @@ function minimize() {
  
   // if visible
   dict = JSON.parse(localStorage.getItem(idx,dict));
+  console.log(hide_add.style.display);
   if (hide_input.style.display == 'inline-block') {
     console.log("hiding");
     hide_input.style.display = 'none';
