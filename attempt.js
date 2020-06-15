@@ -462,9 +462,10 @@ function show(idx) {
       var html = '<ul>';
       for(var i=0; i<todos_list.length; i++) {
           html += '<li class="lists">';
-          html += '<img class="check" onclick="strikeThrough()" src="images/check.png">';
-          html += '<img class="crossoff" src="images/crossoff.png" onclick="remove()" id="' + i  + '">';
+          html += '<img class="check" onclick="strikeThrough()" src="images/check3.png">';
+          html += '<img class="crossoff" src="images/crossoff3.png" onclick="remove()" id="' + i  + '">';
           html += '<span class="span" onclick="editNote()">' + todos_list[i] + '</span>';
+          //html += '<img class="save" onclick="saveEdit(og_note)">';
           html += '<button class="save" onclick="saveEdit(og_note)"> save </button></li>';
           //html += '<hr>';
       };
@@ -581,7 +582,7 @@ function editNote() {
   // check for existing save buttons (pending edits)
   spanList = document.querySelectorAll(".span");
   for (j = 0; j < spanList.length; j++) {
-    save_button = spanList[j].parentNode.childNodes[2];
+    save_button = spanList[j].parentNode.childNodes[3];
 
     if (save_button.style.opacity == '1') {
       displayed = save_button;
@@ -590,18 +591,20 @@ function editNote() {
   };
   // if there are no pending edits, show the save button
   console.log(shown_save_count);
+  save_button = elm.parentNode.childNodes[3];
+
   if (shown_save_count < 1) {
-    elm.parentNode.childNodes[2].style.float = "right";
-    elm.parentNode.childNodes[2].style.opacity = "1"; //show the save button
+    save_button.style.float = "right";
+    save_button.style.opacity = "1"; //show the save button
     elm.setAttribute("contentEditable", true);
     elm.focus();
     shown_save_count++;
   }
   // if you click on the same pending edit, will not prompt the pending message
-  else if ((shown_save_count == 1) && (displayed == elm.parentNode.childNodes[2])) {
+  else if ((shown_save_count == 1) && (displayed == save_button)) {
     console.log(og_note);
-    elm.parentNode.childNodes[2].style.float = "right";
-    elm.parentNode.childNodes[2].style.opacity = "1"; //show the save button
+    save_button.style.float = "right";
+    save_button.style.opacity = "1"; //show the save button
     elm.setAttribute("contentEditable", true);
     elm.focus();
   }
@@ -622,7 +625,7 @@ function saveEdit(og_note) {
     }
     elm = getElm(); // get the save button
     console.log(elm.parentNode.childNodes);
-    var task = elm.parentNode.childNodes[1].textContent; // get the text of the edited note
+    var task = elm.parentNode.childNodes[2].textContent; // get the text of the edited note
     console.log(task);
     var parent = elm.parentNode.parentNode.parentNode; // get the index of div element
     idx = parent.id.slice(-1);
@@ -650,7 +653,8 @@ function saveEdit(og_note) {
     localStorage.setItem(idx, JSON.stringify(dict));
     console.log(localStorage.getItem(idx));
 
-    elm.parentNode.childNodes[2].style.opacity = "0";
+    save_button = elm.parentNode.childNodes[3];
+    save_button.style.opacity = "0";
     document.querySelector("#pending").style.visibility = "hidden";
 }
 /*
@@ -665,7 +669,7 @@ $(".span").on('keyup', function (e) {
         console.log(elm.parentNode.childNodes);
         // click the Add button for that note when enter key is pressed
         saveEdit(og_note);
-        //elm.parentNode.childNodes[3].click();
+        //save_button.click();
         elm.blur();
         elm.setAttribute("contentEditable", false);
     }
