@@ -410,7 +410,7 @@ function add() {
 }
 
 // removes an item from a todo list
-function remove() {
+function remove(isTodo) {
 
     var elm = getElm();
     console.log(elm);
@@ -421,22 +421,34 @@ function remove() {
     console.log("Index: " + idx);
     var id = elm.getAttribute('id');
 
-    var todos = get_todos(idx);
+    var todos = getTodos(idx);
 
+    console.log(isTodo);
+    if (isTodo == false) {
+      todos = getCrossed(idx);
+      console.log(todos);
+      todos.splice(id, 1);
+
+      console.log("Currently in todos: " + todos);
+      dict['strikethrough'] = (todos);
+      localStorage.setItem(idx, JSON.stringify(dict));
+      console.log(localStorage.getItem(idx));
+      show(idx);
+      return;
+    }
     console.log(todos);
-    var removed_item = todos.splice(id, 1);
-
+    todos.splice(id, 1);
     console.log("Currently in todos: " + todos);
     dict['todo'] = JSON.stringify(todos);
     localStorage.setItem(idx, JSON.stringify(dict));
     console.log(localStorage.getItem(idx));
 
     show(idx);
-    return removed_item;
+    return;
 }
 
 // returns a requested list of todo items
-function get_todos(idx) {
+function getTodos(idx) {
 
   var requested_list;
   dict = JSON.parse(localStorage.getItem(idx));
@@ -450,77 +462,133 @@ function get_todos(idx) {
   return requested_list
 }
 
+// returns a list of crossed out todo items
+function getCrossed(idx) {
+  var requested_list;
+  dict = JSON.parse(localStorage.getItem(idx));
+  console.log(dict);
+  todos_list = dict['strikethrough'];
+  console.log(todos_list);
+  if ((todos_list !== null) && (todos_list !== undefined)) {
+    requested_list = dict['strikethrough'];
+  }
+  console.log(dict);
+  console.log(requested_list);
+  return requested_list
+}
+
 // idx is the targeted note index
 function show(idx) {
 
-    var todos_list = get_todos(idx);
+    var todos_list = getTodos(idx);
+    var crossed_list = getCrossed(idx);
     console.log(idx);
-    console.log("Currently in this todo list: " + todos_list);
+    console.log("Currently in this todo list:" + todos_list + "!");
+    console.log("Currently in the crossed list: " + crossed_list);
 
+    var html = '<ul>';
     // if the list of todos is found, shown on screen
-    if ((todos_list !== null) && (todos_list !== undefined)) {
-      var html = '<ul>';
+    if ((todos_list !== null) && (todos_list !== undefined) && (todos_list.toString() !== "")) {
+      
+      console.log("todo runs");
+      // build list of uncrossed todo list items
       for(var i=0; i<todos_list.length; i++) {
           html += '<li class="lists">';
-          html += '<img class="check" onclick="strikeThrough()" src="images/check3.png">';
+          html += '<img class="check" onclick="strikeThrough(false)" src="images/check3.png">';
           html += '<img class="crossoff" src="images/crossoff3.png" onclick="remove()" id="' + i  + '">';
           html += '<span class="span" onclick="editNote()">' + todos_list[i] + '</span>';
           //html += '<img class="save" onclick="saveEdit(og_note)">';
-          html += '<button class="save" onclick="saveEdit(og_note)"> save </button></li>';
+          html += '<button class="save" onclick="saveEdit(og_note,false)"> save </button></li>';
           //html += '<hr>';
       };
-      html += '</ul>';
-      document.getElementById('todos' + idx).innerHTML = html;
-
-      var buttons = document.getElementsByClassName('remove');
-      for (var i=0; i < buttons.length; i++) {
-          buttons[i].addEventListener('click', remove);
-      };
     }
-    /*
-    // if there is only one item in the list left, remove the list
-    else {
-      elm = getElm();
-      console.log(elm);
-      elm.parentNode.remove();
-    };
-    */
+    if (crossed_list !== undefined) {
+      console.log(crossed_list);
+      // build list of crossed todo list items
+      for(var i=0; i<crossed_list.length; i++) {
+        html += '<li class="lists">';
+        html += '<img class="check" onclick="strikeThrough(true)" src="images/check3.png">';
+        html += '<img class="crossoff" src="images/crossoff3.png" onclick="remove(false)" id="' + i  + '">';
+        html += '<del class="span" onclick="editNote()">' + crossed_list[i] + '</del>';
+        //html += '<img class="save" onclick="saveEdit(og_note)">';
+        html += '<button class="save" onclick="saveEdit(og_note,true)"> save </button></li>';
+      }
+    }
+    html += '</ul>';
+    document.getElementById('todos' + idx).innerHTML = html;
 }
 
 // strikes through a todo list item
-function strikeThrough() {
+function strikeThrough(crossed) {
+
   var elm = getElm();
 
   // get the index of div element
   idx = elm.parentNode.parentNode.parentNode.id.slice(-1);
+  console.log(idx);
 
   // get id of the todo item we are trying to remove
   var id = elm.parentNode.childNodes[1].getAttribute('id');
-  var todos = get_todos(idx);
-  var removed_item = todos.splice(id, 1);
+  console.log(elm.parentNode.childNodes[1]);
 
-  console.log(removed_item);
-  console.log("Currently in todos: " + todos);
+  if (crossed == false) {
+    
+    var todos = getTodos(idx);
+    console.log(todos);
+    var removed_item = todos.splice(id, 1);
+    console.log(removed_item);
 
-  dict['todo'] = JSON.stringify(todos);
-  localStorage.setItem(idx, JSON.stringify(dict));
-  console.log(localStorage.getItem(idx));
+    console.log("Currently in todos: " + todos);
 
-  show(idx);
+    dict['todo'] = JSON.stringify(todos);
+    localStorage.setItem(idx, JSON.stringify(dict));
+    console.log(localStorage.getItem(idx));
 
-  // add removed item to the strikethrough list
-  dict = JSON.parse(localStorage.getItem(idx));
-  console.log(dict);
-  var strike_list = dict['strikethrough'];
+    // add removed item to the strikethrough list
+    dict = JSON.parse(localStorage.getItem(idx));
+    console.log(dict);
+    var strike_list = dict['strikethrough'];
 
-  if (strike_list == undefined) {
-    dict['strikethrough'] = [removed_item];
+    if (strike_list == undefined) {
+      dict['strikethrough'] = [removed_item];
+    }
+    else {
+      strike_list.push(removed_item);
+    }
+    localStorage.setItem(idx,JSON.stringify(dict));
+    console.log(localStorage.getItem(idx));
   }
+  // if reinstating an item that was crossed off
   else {
-    strike_list.push(removed_item);
+
+    // first remove the item from the strikethrough list
+    var todos = getCrossed(idx);
+    var removed_item = todos.splice(id, 1);
+    dict['strikethrough'] = todos;
+    localStorage.setItem(idx, JSON.stringify(dict));
+
+    // add removed item back to the todos list
+    // get the current list of todos for that note
+    dict = JSON.parse(localStorage.getItem(idx));
+    var todos_str = dict['todo'];
+    var task = removed_item[0];
+
+    // if there is an actual list
+    if (todos_str !== null) {
+      // add the new task to the list of todos for that note
+      var todos = JSON.parse(todos_str);
+
+      if (todos[todos.length - 1] != task) {
+          todos.push(task);
+      }
+    }
+    else {
+      todos = [task];
+    }
+    dict['todo'] = JSON.stringify(todos);
+    localStorage.setItem(idx, JSON.stringify(dict));
   }
-  localStorage.setItem(idx,JSON.stringify(dict));
-  console.log(localStorage.getItem(idx));
+  show(idx);
 }
 
 // hides a note from view by clicking on it in the Notes Dock
@@ -648,7 +716,7 @@ function editNote() {
 }
 
 // saves an edit on a todo list item
-function saveEdit(og_note) {
+function saveEdit(og_note,crossed) {
     spanList = document.querySelectorAll(".span");
     shown_save_count = 0;
 
@@ -662,32 +730,35 @@ function saveEdit(og_note) {
     var parent = elm.parentNode.parentNode.parentNode; // get the index of div element
     idx = parent.id.slice(-1);
 
-    // get the current list of todos for that note
-    todos = get_todos(idx);
-    //var todos_str = localStorage.getItem('todo' + current_idx);
-    //var todos = JSON.parse(todos_str);
-    console.log(todos);
-    console.log(og_note);
-    console.log(og_note[0])
-    note_idx = todos.indexOf(og_note[0]);
-    console.log(note_idx); // fix error in case that there are 2 of the exact same notes
-    console.log("Edit: " + task);
-    console.log(og_note);
-    console.log(todos[note_idx]);
-    todos[note_idx] = task; // set the old note to the edited note
-    console.log("New edits: " + todos);
-    og_note = []; // reset og_note variable
+    if (crossed == false) {
+      console.log("crossed is false");
+      // get the current list of todos for that note
+      todos = getTodos(idx);
+      //var todos_str = localStorage.getItem('todo' + current_idx);
+      //var todos = JSON.parse(todos_str);
+      console.log(todos);
+      console.log(og_note);
+      console.log(og_note[0])
+      note_idx = todos.indexOf(og_note[0]);
+      console.log(note_idx); // fix error in case that there are 2 of the exact same notes
+      console.log("Edit: " + task);
+      console.log(og_note);
+      console.log(todos[note_idx]);
+      todos[note_idx] = task; // set the old note to the edited note
+      console.log("New edits: " + todos);
+      og_note = []; // reset og_note variable
 
 
-    dict['todo'] = JSON.stringify(todos);
-    console.log(todos);
-    console.log(dict);
-    localStorage.setItem(idx, JSON.stringify(dict));
-    console.log(localStorage.getItem(idx));
+      dict['todo'] = JSON.stringify(todos);
+      console.log(todos);
+      console.log(dict);
+      localStorage.setItem(idx, JSON.stringify(dict));
+      console.log(localStorage.getItem(idx));
 
-    save_button = elm.parentNode.childNodes[3];
-    save_button.style.opacity = "0";
-    document.querySelector("#pending").style.visibility = "hidden";
+      save_button = elm.parentNode.childNodes[3];
+      save_button.style.opacity = "0";
+      document.querySelector("#pending").style.visibility = "hidden";
+    }
 }
 /*
 // these lines make it possible for Enter key to submit a note edit
