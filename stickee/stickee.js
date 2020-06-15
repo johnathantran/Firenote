@@ -92,15 +92,14 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
+// NOTE EVENT HANDLERS
 // adds event handlers for elements on a note
 function addNoteEventHandlers() {
-  // NOTE EVENT HANDLERS
   // drag note
   var el = document.querySelector('.dragHeader');
   el.addEventListener('mousedown', function() {
       dragElement();
   });
-
   // edit header
   var elements = document.getElementsByClassName('editHeader');
   console.log(elements);
@@ -111,7 +110,6 @@ function addNoteEventHandlers() {
       editHeader();
       });
   }
-
   // minimize note
   var elements = document.getElementsByClassName('minimize');
   console.log(elements);
@@ -122,7 +120,6 @@ function addNoteEventHandlers() {
       minimize();
     });
   }
-
   // delete note
   var elements = document.getElementsByClassName('deleteNote');
   console.log(elements);
@@ -133,7 +130,6 @@ function addNoteEventHandlers() {
       deleteNote();
     });
   }
-
   // add a todo
   var elements = document.getElementsByClassName('add');
   console.log(elements);
@@ -144,18 +140,19 @@ function addNoteEventHandlers() {
       add();
     });
   }
+}
 
+// adds event handlers for todo items on a note
+function addTodoEventHandlers() {
   // strikethrough
   var elements = document.getElementsByClassName('check');
   console.log(elements);
+
   for (var i = 0; i < elements.length; i++) {
       elements[i].addEventListener('click', function() {
-      console.log("check clicked");  
-      // crossed is false or true?
-      strikeThrough(false);
+      strikeThrough();
     });
   }
-
   // remove a todo item
   var elements = document.getElementsByClassName('crossoff');
   console.log(elements);
@@ -166,7 +163,6 @@ function addNoteEventHandlers() {
       remove(false);
     });
   }
-
   // edit a todo item
   var elements = document.getElementsByClassName('span');
   console.log(elements);
@@ -175,6 +171,16 @@ function addNoteEventHandlers() {
       elements[i].addEventListener('click', function() {
       console.log("edit item clicked");  
       editNote();
+    });
+  }
+  // save an edit
+  var elements = document.getElementsByClassName('save');
+  console.log(elements);
+
+  for (var i = 0; i < elements.length; i++) {
+      elements[i].addEventListener('click', function() {
+      console.log("save item clicked");  
+      saveEdit();
     });
   }
 }
@@ -257,6 +263,7 @@ function createNote(exists,idx) {
     note.style.display = 'none';
     document.querySelector('#headerItem' + idx).style.color = 'silver';
   }
+  addNoteEventHandlers();
 };
 
 // page load
@@ -297,8 +304,6 @@ function loadPage() {
   }
 };
 loadPage();
-addNoteEventHandlers();
-
 
 // enable dark mode CSS changes
 function toggleDarkMode() {
@@ -658,8 +663,8 @@ function show(idx) {
           html += '<img class="check" src="images/check3.png">';
           html += '<img class="crossoff" src="images/crossoff3.png" id="' + i  + '">';
           html += '<span class="span">' + todos_list[i] + '</span>';
-          //html += '<img class="save" onclick="saveEdit(og_note)">';
-          html += '<button class="save" onclick="saveEdit(og_note,false)"> save </button></li>';
+          //html += '<img class="save">';
+          html += '<button class="save"> save </button></li>';
           //html += '<hr>';
       };
     }
@@ -668,11 +673,11 @@ function show(idx) {
       // build list of crossed todo list items
       for(var i=0; i<crossed_list.length; i++) {
         html += '<li class="lists">';
-        html += '<img class="check" onclick="strikeThrough(true)" src="images/check3.png">';
+        html += '<img class="check" src="images/check3.png">';
         html += '<img class="crossoff" src="images/crossoff3.png" id="' + i  + '">';
         html += '<del class="span">' + crossed_list[i] + '</del>';
-        //html += '<img class="save" onclick="saveEdit(og_note)">';
-        html += '<button class="save" onclick="saveEdit(og_note,true)"> save </button></li>';
+        //html += '<img class="save">';
+        html += '<button class="save"> save </button></li>';
       }
     }
     html += '</ul>';
@@ -685,10 +690,11 @@ function show(idx) {
     dict['height'] = document.querySelector('#mydiv' + idx).offsetHeight + "px";
     localStorage.setItem(idx,JSON.stringify(dict));
     */
+    addTodoEventHandlers();
 }
 
 // strikes through a todo list item
-function strikeThrough(crossed) {
+function strikeThrough() {
 
   var elm = getElm();
 
@@ -701,6 +707,14 @@ function strikeThrough(crossed) {
   // get id of the todo item we are trying to remove
   var id = elm.parentNode.childNodes[1].getAttribute('id');
   console.log(elm.parentNode.childNodes[1]);
+  console.log(elm.parentNode.childNodes[2].tagName);
+
+  if (elm.parentNode.childNodes[2].tagName == 'SPAN') {
+    var crossed = false;
+  }
+  else {
+    var crossed = true;
+  }
 
   if (crossed == false) {
     
@@ -925,7 +939,8 @@ function editNote() {
 }
 
 // saves an edit on a todo list item
-function saveEdit(og_note,crossed) {
+function saveEdit(crossed) {
+
     spanList = document.querySelectorAll(".span");
     shown_save_count = 0;
 
