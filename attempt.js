@@ -397,7 +397,7 @@ function add() {
       }
     }
     else {
-      todos = [task];
+      todos = task;
       console.log(todos);
     }
     dict['todo'] = JSON.stringify(todos);
@@ -736,9 +736,10 @@ function saveEdit(og_note,crossed) {
       todos = getTodos(idx);
       //var todos_str = localStorage.getItem('todo' + current_idx);
       //var todos = JSON.parse(todos_str);
+    
       console.log(todos);
       console.log(og_note);
-      console.log(og_note[0])
+      console.log(og_note[0]);
       note_idx = todos.indexOf(og_note[0]);
       console.log(note_idx); // fix error in case that there are 2 of the exact same notes
       console.log("Edit: " + task);
