@@ -201,7 +201,7 @@ function toggleDarkMode() {
     }",0);
     sheet.insertRule("\
     .bar {\
-     background-color: white;\
+     background-color: #f0efed;\
     }",0);
     
     localStorage.setItem('stickee_dark',true);
@@ -287,7 +287,7 @@ function addNote() {
 
   // 10 note limit
   if (header_list.length >= 10) {
-    alert ("You have reached the 10 note limit. Please delete a note to add more.");
+    alert("You have reached the 10 note limit! Please delete a note to add more.");
     return;
   }
   for (j = 0; j < header_list.length; j++) {
@@ -462,8 +462,8 @@ function show(idx) {
       var html = '<ul>';
       for(var i=0; i<todos_list.length; i++) {
           html += '<li class="lists">';
+          html += '<img class="check" onclick="strikeThrough()" src="images/check.png">';
           html += '<img class="crossoff" src="images/crossoff.png" onclick="remove()" id="' + i  + '">';
-          //html += '<img class="edit" onclick="editNote()" src="images/edit.svg">';
           html += '<span class="span" onclick="editNote()">' + todos_list[i] + '</span>';
           html += '<button class="save" onclick="saveEdit(og_note)"> save </button></li>';
           //html += '<hr>';
