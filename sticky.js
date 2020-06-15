@@ -78,6 +78,10 @@ function createNote(exists,idx) {
       dict = JSON.parse(localStorage.getItem(idx,dict));
       note.style.top = dict['posTop'];
       note.style.left = dict['posLeft'];
+
+      console.log(dict);
+      //note.offsetHeight = dict['height'];
+      //note.offsetWidth = dict['width'];
       note_header = dict['headerText'];
       note.childNodes[0].textContent = note_header;
 
@@ -540,6 +544,14 @@ function show(idx) {
     }
     html += '</ul>';
     document.getElementById('todos' + idx).innerHTML = html;
+
+    // save note's width and height
+    /*
+    dict = JSON.parse(localStorage.getItem(idx));
+    dict['width'] = document.querySelector('#mydiv' + idx).offsetWidth + "px";
+    dict['height'] = document.querySelector('#mydiv' + idx).offsetHeight + "px";
+    localStorage.setItem(idx,JSON.stringify(dict));
+    */
 }
 
 // strikes through a todo list item
