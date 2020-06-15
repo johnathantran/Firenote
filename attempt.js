@@ -424,7 +424,7 @@ function remove() {
     var todos = get_todos(idx);
 
     console.log(todos);
-    todos.splice(id, 1);
+    var removed_item = todos.splice(id, 1);
 
     console.log("Currently in todos: " + todos);
     dict['todo'] = JSON.stringify(todos);
@@ -432,7 +432,7 @@ function remove() {
     console.log(localStorage.getItem(idx));
 
     show(idx);
-    return false;
+    return removed_item;
 }
 
 // returns a requested list of todo items
@@ -487,9 +487,41 @@ function show(idx) {
     */
 }
 
-// Execute a function when the user releases a key on the keyboard
-//document.getElementById('add').addEventListener('click', add);
-// console.log(document.getElementsByClassName(".headerList"))
+// strikes through a todo list item
+function strikeThrough() {
+  var elm = getElm();
+
+  // get the index of div element
+  idx = elm.parentNode.parentNode.parentNode.id.slice(-1);
+
+  // get id of the todo item we are trying to remove
+  var id = elm.parentNode.childNodes[1].getAttribute('id');
+  var todos = get_todos(idx);
+  var removed_item = todos.splice(id, 1);
+
+  console.log(removed_item);
+  console.log("Currently in todos: " + todos);
+
+  dict['todo'] = JSON.stringify(todos);
+  localStorage.setItem(idx, JSON.stringify(dict));
+  console.log(localStorage.getItem(idx));
+
+  show(idx);
+
+  // add removed item to the strikethrough list
+  dict = JSON.parse(localStorage.getItem(idx));
+  console.log(dict);
+  var strike_list = dict['strikethrough'];
+
+  if (strike_list == undefined) {
+    dict['strikethrough'] = [removed_item];
+  }
+  else {
+    strike_list.push(removed_item);
+  }
+  localStorage.setItem(idx,JSON.stringify(dict));
+  console.log(localStorage.getItem(idx));
+}
 
 // hides a note from view by clicking on it in the Notes Dock
 function hideNote() {
