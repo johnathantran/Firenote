@@ -1,0 +1,28 @@
+{
+"manifest_version": 2,
+"name": "stickee",
+"description": "Create virtual sticky notes in a new tab.",
+"version": "1.0",
+
+"chrome_url_overrides" : {
+    "newtab": "stickee.html"
+},
+"browser_action": {
+    "default_icon": "icon128.png";
+},
+
+"app": {
+    "urls": [
+    "http://certification.googleapps.com/app-info/"
+    ],
+    "launch": {
+    "web_url": "http://certification.googleapps.com/"
+    }
+},
+"permissions": [
+"tabs",
+"unlimitedStorage",
+]
+
+"back"
+}
