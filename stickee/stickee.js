@@ -138,67 +138,12 @@ function addNoteEventHandlersOnLoad() {
     console.log("Already have listeners...");
     return;
   }
-
   all_notes = (document.querySelectorAll('.drag'));
   for (i=0; i < all_notes.length; i++) {
     console.log(all_notes[i]);
     addNoteEventHandlers(all_notes[i]);
   }
-
   console.log("Adding listeners...");
-  /*
-  var elements = document.querySelectorAll('.dragHeader');
-  console.log(elements);
-  for (var i = 0; i < elements.length; i++) {
-      console.log(elements[i]);
-      elements[i].addEventListener('onmousedown', function() {
-        dragElement();
-      });
-      
-      console.log("listener added");
-  }
-
-  // edit header
-  var elements = document.getElementsByClassName('editHeader');
-  for (var i = 0; i < elements.length; i++) {
-      elements[i].addEventListener('click', function() {
-      console.log("edit clicked");  
-      editHeader();
-      });
-  }
-  // minimize note
-  var elements = document.getElementsByClassName('minimize');
-  for (var i = 0; i < elements.length; i++) {
-      elements[i].addEventListener('click', function() {
-      console.log("min clicked");  
-      //minimize();
-    });
-  }
-  // delete note
-  var elements = document.getElementsByClassName('deleteNote');
-  for (var i = 0; i < elements.length; i++) {
-      elements[i].addEventListener('click', function() {
-      console.log("delete clicked");  
-      deleteNote();
-    });
-  }
-  // add a todo
-  var elements = document.getElementsByClassName('add');
-  for (var i = 0; i < elements.length; i++) {
-      elements[i].addEventListener('click', function() {
-      console.log("add clicked");  
-      add();
-    });
-  }
-  // hide a note from the dock
-  var el = document.getElementsByClassName('headerList');
-  for (var i = 0; i < elements.length; i++) {
-      elements[i].addEventListener('click', function() {
-      console.log("dock clicked");  
-      hideNote();
-    });
-  }
-  */
   attachedListeners = true;
 }
 
@@ -774,7 +719,7 @@ function add() {
       if (todos_str !== null) {
 
         // add the new task to the list of todos for that note
-        var todos = JSON.parse(todos_str);
+        var todos = todos_str;
         console.log(todos);
         if (todos[todos.length - 1] != task) {
             todos.push(task);
@@ -785,9 +730,9 @@ function add() {
         console.log(todos);
       }
       dict['todo'] = (todos);
-      console.log(dict['todos']);
+      console.log(dict['todo']);
 
-      storeSync(idx,dict)
+      storeSync(idx,dict);
       
       console.log(dict);
       show(idx);
@@ -812,36 +757,40 @@ function remove() {
     console.log(idx);
 
     var id = elm.getAttribute('id');
-    var todos = getTodos(idx);
 
-    // determine if the todo item is crossed out or not
-    var isTodo= false;
-    if (elm.parentNode.childNodes[2].tagName == 'SPAN') {
-      var isTodo = true;
-    }
-    console.log(isTodo);
+    chrome.storage.sync.get([idx.toString()], function(result) {
+      console.log(result);
+      console.log(result[idx]);
+      dict = JSON.parse(result[idx]);
+      console.log(dict);
+      var todos = dict['todo'];
+      var crossed = dict['strikethrough'];
 
-    if (isTodo == false) {
-      todos = getCrossed(idx);
-      console.log(todos);
-      todos.splice(id, 1);
+      // determine if the todo item is crossed out or not
+      var isTodo= false;
+      if (elm.parentNode.childNodes[2].tagName == 'SPAN') {
+        var isTodo = true;
+      }
+      console.log(isTodo);
 
-      console.log("Currently in todos: " + todos);
-      dict['strikethrough'] = (todos);
-      localStorage.setItem(idx, JSON.stringify(dict));
-      console.log(localStorage.getItem(idx));
-      show(idx);
-      return;
-    }
-    console.log(todos);
-    todos.splice(id, 1);
-    console.log("Currently in todos: " + todos);
-    dict['todo'] = JSON.stringify(todos);
-    localStorage.setItem(idx, JSON.stringify(dict));
-    console.log(localStorage.getItem(idx));
+      if (isTodo == false) {
 
-    show(idx);
-    return;
+        console.log(crossed);
+        crossed.splice(id, 1);
+        console.log("Currently in crossed: " + crossed);
+        dict['strikethrough'] = crossed;
+        storeSync(idx,dict);
+        show(idx);
+      }
+      else {
+        console.log(todos);
+        todos.splice(id, 1);
+        console.log("Currently in todos: " + todos);
+        dict['todo'] = todos;
+        storeSync(idx,dict);
+        show(idx);
+      }
+    });
 }
 
 // returns a requested list of todo items
@@ -880,12 +829,13 @@ function show(idx) {
 
   chrome.storage.sync.get([idx.toString()], function(result) {
     console.log(result);
-    console.log(result[idx]);
     dict = JSON.parse(result[idx]);
+    console.log(dict);
+    console.log(dict['todo']);
 
+    var todos_list = dict['todo'];
+    var crossed_list = dict['strikethrough'];
 
-    //var todos_list = getTodos(idx);
-    //var crossed_list = getCrossed(idx);
     console.log(idx);
     console.log("Currently in this todo list:" + todos_list + "!");
     console.log("Currently in the crossed list: " + crossed_list);
@@ -929,6 +879,7 @@ function show(idx) {
     localStorage.setItem(idx,JSON.stringify(dict));
     */
     addTodoEventHandlers();
+  });
 }
 
 // strikes through a todo list item
@@ -955,62 +906,75 @@ function strikeThrough() {
 
   if (crossed == false) {
     
-    var todos = getTodos(idx);
-    console.log(todos);
-    var removed_item = todos.splice(id, 1);
-    console.log(removed_item);
+    chrome.storage.sync.get([idx.toString()], function(result) {
+      console.log(result);
+      console.log(result[idx]);
+      dict = JSON.parse(result[idx]);
+      console.log(dict);
+      console.log(dict['todo'])
 
-    console.log("Currently in todos: " + todos);
+      var todos = dict['todo'];
+      console.log(todos);
 
-    dict['todo'] = JSON.stringify(todos);
-    localStorage.setItem(idx, JSON.stringify(dict));
-    console.log(localStorage.getItem(idx));
+      var removed_item = todos.splice(id, 1);
+      console.log(removed_item);
 
-    // add removed item to the strikethrough list
-    dict = JSON.parse(localStorage.getItem(idx));
-    console.log(dict);
-    var strike_list = dict['strikethrough'];
+      console.log("Currently in todos: " + todos);
 
-    if (strike_list == undefined) {
-      dict['strikethrough'] = [removed_item];
-    }
-    else {
-      strike_list.push(removed_item);
-    }
-    localStorage.setItem(idx,JSON.stringify(dict));
-    console.log(localStorage.getItem(idx));
+      dict['todo'] = todos;
+      storeSync(idx,dict);
+
+      // add removed item to the strikethrough list
+      var strike_list = dict['strikethrough'];
+
+      if (strike_list == undefined) {
+        dict['strikethrough'] = [removed_item];
+      }
+      else {
+        strike_list.push(removed_item);
+      }
+      storeSync(idx,dict);
+      console.log(dict);
+      show(idx);
+    });
   }
   // if reinstating an item that was crossed off
   else {
+    chrome.storage.sync.get([idx.toString()], function(result) {
+      console.log(result);
+      console.log(result[idx]);
+      dict = JSON.parse(result[idx]);
+      console.log(dict);
+      console.log(dict['todo'])
 
-    // first remove the item from the strikethrough list
-    var todos = getCrossed(idx);
-    var removed_item = todos.splice(id, 1);
-    dict['strikethrough'] = todos;
-    localStorage.setItem(idx, JSON.stringify(dict));
+      // first remove the item from the strikethrough list
+      var crossed = dict['strikethrough'];
+      var removed_item = crossed.splice(id, 1);
+      dict['strikethrough'] = crossed;
+      storeSync(idx,dict)
 
-    // add removed item back to the todos list
-    // get the current list of todos for that note
-    dict = JSON.parse(localStorage.getItem(idx));
-    var todos_str = dict['todo'];
-    var task = removed_item[0];
+      // add removed item back to the todos list
+      // get the current list of todos for that note
+      var todos = dict['todo'];
+      var task = removed_item[0];
 
-    // if there is an actual list
-    if (todos_str !== null) {
-      // add the new task to the list of todos for that note
-      var todos = JSON.parse(todos_str);
+      // if there is an actual list
+      if (todos !== null) {
+        // add the new task to the list of todos for that note
+        //var todos = JSON.parse(todos_str);
 
-      if (todos[todos.length - 1] != task) {
-          todos.push(task);
+        if (todos[todos.length - 1] != task) {
+            todos.push(task);
+        }
       }
-    }
-    else {
-      todos = [task];
-    }
-    dict['todo'] = JSON.stringify(todos);
-    localStorage.setItem(idx, JSON.stringify(dict));
+      else {
+        todos = [task];
+      }
+      storeSync(idx,dict)
+      show(idx);
+    });
   }
-  show(idx);
+  
 }
 
 // docks all notes
@@ -1036,38 +1000,45 @@ function hideNote(idx) {
       idx = elm.id.slice(-1);
     }
   }
-  dict = JSON.parse(localStorage.getItem(idx));
 
-  div_to_hide = document.querySelector('#mydiv' + idx);
-  all_divs = document.querySelectorAll(".drag");
-  console.log(all_divs);
+  chrome.storage.sync.get([idx.toString()], function(result) {
+    console.log(result);
+    dict = JSON.parse(result[idx]);
+    console.log(dict);
+    console.log(dict['todo']);
 
-  if (div_to_hide.style.display == "none") {
+    div_to_hide = document.querySelector('#mydiv' + idx);
+    all_divs = document.querySelectorAll(".drag");
+    console.log(all_divs);
 
-    div_to_hide.style.display = "block";
+    if (div_to_hide.style.display == "none") {
 
-    // bring all the other notes behind the selected note
-    for (j=0; j<all_divs.length; j++) {
-      all_divs[j].style.zIndex = "1";
+      div_to_hide.style.display = "block";
+
+      // bring all the other notes behind the selected note
+      for (j=0; j<all_divs.length; j++) {
+        all_divs[j].style.zIndex = "1";
+      }
+      div_to_hide.style.zIndex = "2";
+
+      elm.style.color = "black";
+      if (localStorage.getItem('stickee_dark') == 'true') {
+        elm.style.color = "white";
+      }
+      dict['hidden'] = false;
     }
-    div_to_hide.style.zIndex = "2";
-
-    elm.style.color = "black";
-    if (localStorage.getItem('stickee_dark') == 'true') {
-      elm.style.color = "white";
+    else {
+      // reset notes zIndexes
+      for (j=0; j<all_divs.length; j++) {
+        all_divs[j].style.zIndex = "1";
+      }
+      div_to_hide.style.display = "none";
+      elm.style.color = "silver";
+      dict['hidden'] = true;
     }
-    dict['hidden'] = false;
-  }
-  else {
-    // reset notes zIndexes
-    for (j=0; j<all_divs.length; j++) {
-      all_divs[j].style.zIndex = "1";
-    }
-    div_to_hide.style.display = "none";
-    elm.style.color = "silver";
-    dict['hidden'] = true;
-  }
-  localStorage.setItem(elm.id.slice(-1),JSON.stringify(dict));
+    idx = elm.id.slice(-1);
+    storeSync(idx,dict);
+  });
 }
 
 // minimize a note leaving only the header
