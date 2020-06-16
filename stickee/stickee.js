@@ -4,7 +4,9 @@
 // 'headerTextN': the text element of the header of note N
 // 'headerItemN': the text element of the header of note N in the Notes Dock
 //chrome.storage.sync.remove('1');
-
+chrome.browserAction.onClicked.addListener(function() {
+  chrome.tabs.create({'url':"chrome://newtab"})
+})
 // add event listeneres to onclick elements
 $(document).ready(function() {
 
@@ -738,8 +740,8 @@ function show(idx) {
       // build list of uncrossed todo list items
       for(var i=0; i<todos_list.length; i++) {
           html += '<li class="lists">';
-          html += '<img class="check" src="images/check3.png">';
-          html += '<img class="crossoff" src="images/crossoff3.png" id="' + i  + '">';
+          html += '<img class="check" src="images/check.png">';
+          html += '<img class="crossoff" src="images/crossoff.png" id="' + i  + '">';
           html += '<span class="span">' + todos_list[i] + '</span>';
           //html += '<img class="save">';
           html += '<button class="save"> save </button></li>';
@@ -751,8 +753,8 @@ function show(idx) {
       // build list of crossed todo list items
       for(var i=0; i<crossed_list.length; i++) {
         html += '<li class="lists">';
-        html += '<img class="check" src="images/check3.png">';
-        html += '<img class="crossoff" src="images/crossoff3.png" id="' + i  + '">';
+        html += '<img class="check" src="images/check.png">';
+        html += '<img class="crossoff" src="images/crossoff.png" id="' + i  + '">';
         html += '<del class="span">' + crossed_list[i] + '</del>';
         //html += '<img class="save">';
         html += '<button class="save"> save </button></li>';

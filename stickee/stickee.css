@@ -30,6 +30,9 @@ a {
   vertical-align: -5px;
   padding-right: 3px;
 }
+#help {
+  width: 200px;
+}
 #footer {
   position: absolute;
   bottom: 15px;
@@ -52,7 +55,7 @@ a {
   position: absolute;
   top: 60px;
   right: 15px;
-  width: 200px;
+  width: 300px;
   text-align: right;
   display: block;
 }
