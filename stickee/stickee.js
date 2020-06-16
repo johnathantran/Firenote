@@ -1170,10 +1170,6 @@ function saveEdit() {
     spanList = document.querySelectorAll(".span");
     shown_save_count = 0;
     
-    /*
-    if (og_note.length > 1) {
-      og_note = og_note[og_note.length-1];
-    }*/
     console.log(og_note);
     elm = getElm(); // get the save button
     console.log(elm.parentNode.childNodes);
@@ -1197,23 +1193,12 @@ function saveEdit() {
         console.log("crossed is false");
         // get the current list of todos for that note
         todos = dict['todo'];
-      
-        console.log(todos);
-        console.log(og_note);
+
         note_idx = todos.indexOf(og_note);
-        console.log(note_idx); // fix error in case that there are 2 of the exact same notes
-        console.log("Edit: " + task);
-        console.log(og_note);
-        console.log(todos[note_idx]);
         todos[note_idx] = task; // set the old note to the edited note
-        console.log("New edits: " + todos);
-        // reset og_note variable
 
         dict['todo'] = todos;
-        console.log(todos);
-        console.log(dict);
         storeSync(idx,dict);
-        //localStorage.setItem(idx, JSON.stringify(dict));
         save_button = elm.parentNode.childNodes[3];
         save_button.style.opacity = "0";
         document.querySelector("#pending").style.visibility = "hidden";
@@ -1222,15 +1207,7 @@ function saveEdit() {
         console.log("crossed is true");
         // get the current list of todos for that note
         todos = dict['strikethrough'];
-        //var todos_str = localStorage.getItem('todo' + current_idx);
-        //var todos = JSON.parse(todos_str);
-        console.log(todos);
-        console.log(og_note);
-        
         note_idx = todos.indexOf(og_note);
-        console.log(note_idx);
-        console.log(todos[note_idx]);
-      
 
         for (j=0;j<=todos.length;j++){
           // check for inconsistencies in getCrossed list - fix later  
@@ -1244,20 +1221,9 @@ function saveEdit() {
             break;
           }
         }
-        //note_idx = todos.indexOf(og_note);
-        console.log(note_idx); // fix error in case that there are 2 of the exact same notes
-        console.log("Edit: " + task);
-        console.log(og_note);
-        console.log(todos[note_idx]);
         todos[note_idx] = task; // set the old note to the edited note
-        console.log("New edits: " + todos);
-        og_note = []; // reset og_note variable
-
         dict['strikethrough'] = todos;
-        console.log(todos);
-        console.log(dict);
         storeSync(idx,dict);
-
         save_button = elm.parentNode.childNodes[3];
         save_button.style.opacity = "0";
         document.querySelector("#pending").style.visibility = "hidden";
