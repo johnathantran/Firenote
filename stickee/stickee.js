@@ -83,30 +83,24 @@ document.addEventListener('DOMContentLoaded', function() {
   el.addEventListener('click', function() {
       addNote();
   });
-
-  // hide notes from dock
-  var elements = document.getElementsByClassName('headerList');
-  console.log(elements);
-
-  for (var i = 0; i < elements.length; i++) {
-      elements[i].addEventListener('click', function() {
-      console.log("delete clicked");  
-      hideNote();
-    });
-  }
 });
 
 // NOTE EVENT HANDLERS
 // adds event handlers for elements on a note
-
 function addNoteEventHandlers(note) {
 
+  var idx = note.id.slice(-2);
+  if (isNaN(idx) == true) {
+    idx = note.id.slice(-1);
+  }
   console.log(note.childNodes);
   var header = note.childNodes[0];
   var editHeaderBtn = note.childNodes[1];
   var minBtn = note.childNodes[2];
   var delBtn = note.childNodes[3];  
   var addBtn = note.childNodes[5];
+  var headerItem = document.querySelector('#headerItem' + idx);
+  console.log(headerItem);
 
   // drag note
   header.addEventListener('mousedown', function() {
@@ -129,22 +123,32 @@ function addNoteEventHandlers(note) {
     console.log("clicked");
     add();
   });
+  headerItem.addEventListener('click', function() {
+    console.log("clicked");
+    hideNote();
+  })
 }
 
 attachedListeners = false;
+
 function addNoteEventHandlersOnLoad() {
   
-  if (attachedListeners == true) {
-    console.log("Already have listeners...");
-    return;
-  }
-  all_notes = (document.querySelectorAll('.drag'));
-  for (i=0; i < all_notes.length; i++) {
-    console.log(all_notes[i]);
-    addNoteEventHandlers(all_notes[i]);
-  }
-  console.log("Adding listeners...");
-  attachedListeners = true;
+  chrome.storage.sync.get(['haveListeners'], function(result) {
+    console.log(result);
+    
+    if (attachedListeners == true) {
+      console.log("Already have listeners...");
+      return;
+    }
+    all_notes = (document.querySelectorAll('.drag'));
+    for (i=0; i < all_notes.length; i++) {
+      console.log(all_notes[i]);
+      addNoteEventHandlers(all_notes[i]);
+    }
+    console.log("Adding listeners...");
+    storeSync('haveListeners',true);
+    attachedListeners = true;
+  });
 }
 
 // adds event handlers for todo items on a note
@@ -664,7 +668,7 @@ function clearAll() {
 
   r = confirm("This will remove all of your notes and delete them from your cache. Are you sure you want to proceed?");
   if (r == true) {
-    var header_list = document.querySelectorAll(".dragHeader");
+    var header_list = document.querySelectorAll(".drag");
     console.log(header_list);
 
     
@@ -993,14 +997,14 @@ function hideNote(idx) {
   // save hidden feature to local storage
   elm = getElm();
 
-  console.log(idx);
+  console.log(elm);
   if (idx == undefined) { // if not docking all notes
     idx = elm.id.slice(-2);
     if (isNaN(idx) == true) {
       idx = elm.id.slice(-1);
     }
   }
-
+  console.log(idx);
   chrome.storage.sync.get([idx.toString()], function(result) {
     console.log(result);
     dict = JSON.parse(result[idx]);
@@ -1010,6 +1014,8 @@ function hideNote(idx) {
     div_to_hide = document.querySelector('#mydiv' + idx);
     all_divs = document.querySelectorAll(".drag");
     console.log(all_divs);
+    console.log(div_to_hide);
+    console.log(div_to_hide.style.display);
 
     if (div_to_hide.style.display == "none") {
 
@@ -1028,15 +1034,16 @@ function hideNote(idx) {
       dict['hidden'] = false;
     }
     else {
+      console.log("hiding...");
       // reset notes zIndexes
       for (j=0; j<all_divs.length; j++) {
         all_divs[j].style.zIndex = "1";
       }
       div_to_hide.style.display = "none";
+      console.log(div_to_hide.style.display);
       elm.style.color = "silver";
       dict['hidden'] = true;
     }
-    idx = elm.id.slice(-1);
     storeSync(idx,dict);
   });
 }
@@ -1111,11 +1118,11 @@ function editHeader() {
 }
 
 // allows a list item to be edited
-var og_note = [];
+var og_note;
 function editNote() {
   elm = getElm();
 
-  og_note.push(elm.textContent); // original note content
+  og_note = elm.textContent; // original note content
   console.log(og_note);
   console.log(elm.parentNode.childNodes);
 
@@ -1162,10 +1169,12 @@ function saveEdit() {
 
     spanList = document.querySelectorAll(".span");
     shown_save_count = 0;
-
+    
+    /*
     if (og_note.length > 1) {
       og_note = og_note[og_note.length-1];
-    }
+    }*/
+    console.log(og_note);
     elm = getElm(); // get the save button
     console.log(elm.parentNode.childNodes);
     var task = elm.parentNode.childNodes[2].textContent; // get the text of the edited note
@@ -1174,88 +1183,86 @@ function saveEdit() {
     idx = parent.id.slice(-1);
 
     // determine if the todo item is crossed out or not
-    var crossed = true;
+    var isCrossed = true;
     if (elm.parentNode.childNodes[2].tagName == 'SPAN') {
-      var crossed = false;
+      var isCrossed = false;
     }
 
-    if (crossed == false) {
-      console.log("crossed is false");
-      // get the current list of todos for that note
-      todos = getTodos(idx);
-      //var todos_str = localStorage.getItem('todo' + current_idx);
-      //var todos = JSON.parse(todos_str);
-    
-      console.log(todos);
-      console.log(og_note);
-      console.log(og_note[0]);
-      note_idx = todos.indexOf(og_note[0]);
-      console.log(note_idx); // fix error in case that there are 2 of the exact same notes
-      console.log("Edit: " + task);
-      console.log(og_note);
-      console.log(todos[note_idx]);
-      todos[note_idx] = task; // set the old note to the edited note
-      console.log("New edits: " + todos);
-      og_note = []; // reset og_note variable
-
-
-      dict['todo'] = JSON.stringify(todos);
-      console.log(todos);
-      console.log(dict);
-      localStorage.setItem(idx, JSON.stringify(dict));
-      console.log(localStorage.getItem(idx));
-
-      save_button = elm.parentNode.childNodes[3];
-      save_button.style.opacity = "0";
-      document.querySelector("#pending").style.visibility = "hidden";
-    }
-    else {
-      console.log("crossed is true");
-      // get the current list of todos for that note
-      todos = getCrossed(idx);
-      //var todos_str = localStorage.getItem('todo' + current_idx);
-      //var todos = JSON.parse(todos_str);
-    
-      console.log(todos);
-      console.log(og_note);
+    chrome.storage.sync.get([idx.toString()], function(result) {
+      console.log(result);
+      console.log(result[idx]);
+      dict = JSON.parse(result[idx]);
       
-      note_idx = todos.indexOf(og_note);
-      console.log(note_idx);
-      console.log(todos[note_idx]);
-     
+      if (isCrossed == false) {
+        console.log("crossed is false");
+        // get the current list of todos for that note
+        todos = dict['todo'];
+      
+        console.log(todos);
+        console.log(og_note);
+        note_idx = todos.indexOf(og_note);
+        console.log(note_idx); // fix error in case that there are 2 of the exact same notes
+        console.log("Edit: " + task);
+        console.log(og_note);
+        console.log(todos[note_idx]);
+        todos[note_idx] = task; // set the old note to the edited note
+        console.log("New edits: " + todos);
+        // reset og_note variable
 
-      for (j=0;j<=todos.length;j++){
-        // check for inconsistencies in getCrossed list - fix later  
-        var todo_item = todos[j];
-        if (Array.isArray(todo_item) == true) {
-          todo_item = todos[j][0];
-        }
-        console.log(todo_item);
-        if (todo_item == og_note) {
-          note_idx = j;
-          break;
-        }
+        dict['todo'] = todos;
+        console.log(todos);
+        console.log(dict);
+        storeSync(idx,dict);
+        //localStorage.setItem(idx, JSON.stringify(dict));
+        save_button = elm.parentNode.childNodes[3];
+        save_button.style.opacity = "0";
+        document.querySelector("#pending").style.visibility = "hidden";
       }
-      //note_idx = todos.indexOf(og_note);
-      console.log(note_idx); // fix error in case that there are 2 of the exact same notes
-      console.log("Edit: " + task);
-      console.log(og_note);
-      console.log(todos[note_idx]);
-      todos[note_idx] = task; // set the old note to the edited note
-      console.log("New edits: " + todos);
-      og_note = []; // reset og_note variable
+      else {
+        console.log("crossed is true");
+        // get the current list of todos for that note
+        todos = dict['strikethrough'];
+        //var todos_str = localStorage.getItem('todo' + current_idx);
+        //var todos = JSON.parse(todos_str);
+        console.log(todos);
+        console.log(og_note);
+        
+        note_idx = todos.indexOf(og_note);
+        console.log(note_idx);
+        console.log(todos[note_idx]);
+      
 
+        for (j=0;j<=todos.length;j++){
+          // check for inconsistencies in getCrossed list - fix later  
+          var todo_item = todos[j];
+          if (Array.isArray(todo_item) == true) {
+            todo_item = todos[j][0];
+          }
+          console.log(todo_item);
+          if (todo_item == og_note) {
+            note_idx = j;
+            break;
+          }
+        }
+        //note_idx = todos.indexOf(og_note);
+        console.log(note_idx); // fix error in case that there are 2 of the exact same notes
+        console.log("Edit: " + task);
+        console.log(og_note);
+        console.log(todos[note_idx]);
+        todos[note_idx] = task; // set the old note to the edited note
+        console.log("New edits: " + todos);
+        og_note = []; // reset og_note variable
 
-      dict['strikethrough'] = todos;
-      console.log(todos);
-      console.log(dict);
-      localStorage.setItem(idx, JSON.stringify(dict));
-      console.log(localStorage.getItem(idx));
+        dict['strikethrough'] = todos;
+        console.log(todos);
+        console.log(dict);
+        storeSync(idx,dict);
 
-      save_button = elm.parentNode.childNodes[3];
-      save_button.style.opacity = "0";
-      document.querySelector("#pending").style.visibility = "hidden";
-    }
+        save_button = elm.parentNode.childNodes[3];
+        save_button.style.opacity = "0";
+        document.querySelector("#pending").style.visibility = "hidden";
+      }
+    });
 }
 /*
 // these lines make it possible for Enter key to submit a note edit
