@@ -2,7 +2,7 @@
 "manifest_version": 2,
 "name": "Stickee - Virtual Sticky Notes",
 "description": "Create, edit, and save virtual sticky notes in a new tab.",
-"version": "1.0",
+"version": "1.0.0",
 
 "chrome_url_overrides" : {
     "newtab": "stickee.html"
