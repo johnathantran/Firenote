@@ -4,39 +4,9 @@
 // 'headerTextN': the text element of the header of note N
 // 'headerItemN': the text element of the header of note N in the Notes Dock
 //chrome.storage.sync.remove('1');
-//localStorage.removeItem(11);
-$(document).ready(function() {
-  $(".task").on('keyup', function (e) {
-      if (e.keyCode === 13) {
-          elm = getElm();
-          console.log(elm);
-          // click the Add button for that note when enter key is pressed
-          elm.parentNode.childNodes[5].click();
-      }
-  });
-  // enable edits to note header
-  $(".dragHeader").on('keyup', function (e) {
-      if (e.keyCode === 13) {
-          elm = getElm();
-          var new_header = elm.textContent;
-          elm.setAttribute("contentEditable",false);
-          //elm.parentNode.childNodes[1].src = "images/edit.svg";
-          elm.textContent = new_header;
 
-          var idx = note.id.slice(-2);
-          if (isNaN(idx) == true) {
-            idx = note.id.slice(-1);
-          }
-          // get the current list of todos for that note
-          chrome.storage.sync.get([idx], function(result) {
-            dict = JSON.parse(result[idx]);
-            console.log(dict);
-            dict['headerText'] = header.textContent;
-            storeSync(idx,dict);
-            document.querySelector('#headerItem' + idx).textContent = header.textContent; // update note dock
-          });
-      }
-  });
+// add event listeneres to onclick elements
+$(document).ready(function() {
 
   var coll = document.getElementsByClassName("collapsible");
 
@@ -44,18 +14,16 @@ $(document).ready(function() {
     coll[i].addEventListener("click", function() {
       this.classList.toggle("active");
       var content = this.nextElementSibling;
-      if (content.style.maxHeight){
-        content.style.maxHeight = null;
-      } else {
-        content.style.maxHeight = content.scrollHeight + "px";
-      } 
+
+      if (content !== null) {
+        if (content.style.maxHeight){
+          content.style.maxHeight = null;
+        } else {
+          content.style.maxHeight = content.scrollHeight + "px";
+        };
+      }
     });
   }
-});
-
-// add event listeners to onclick elements
-document.addEventListener('DOMContentLoaded', function() {
-
   //hide menu button
   var el = document.getElementById('hideMenu');
   el.addEventListener('click', function() {
@@ -134,7 +102,6 @@ function addNoteEventHandlers(note) {
     hideNote();
   });
 }
-
 // adds event listeners when page loads
 attachedListeners = false;
 function addNoteEventHandlersOnLoad() {
@@ -199,7 +166,6 @@ function addTodoEventHandlers() {
     });
   }
 }
-
 // hides the menu when the 3 bar icon is clicked
 function hideMenu() {
   if (document.querySelector('#menu').style.display == "none") {
@@ -209,7 +175,6 @@ function hideMenu() {
     document.querySelector('#menu').style.display = "none";
   }
 }
-
 // stores item into Google Chrome sync
 function storeSync(idx,dict) {
   var key = idx.toString(),
@@ -322,7 +287,6 @@ function createNote(exists,idx) {
 function loadPage() {
   
   // check if user has enabled dark mode
-
   chrome.storage.sync.get(['stickee_dark'], function(result) {
     console.log(result['stickee_dark']);
     if (result['stickee_dark'] == true) {
@@ -629,7 +593,6 @@ function clearAll() {
     for (j = 1; j <= header_list.length; j++) {
       console.log("runs");
       console.log(document.querySelector('#mydiv' + j));
-      localStorage.removeItem(j);
       document.querySelector('#mydiv' + j).remove();
       document.querySelector("#headerItem" + j.toString()).remove();
     }
@@ -951,10 +914,15 @@ function hideNote(idx) {
       div_to_hide.style.zIndex = "2";
 
       elm.style.color = "black";
-      if (localStorage.getItem('stickee_dark') == 'true') {
-        elm.style.color = "white";
-      }
-      dict['hidden'] = false;
+
+      chrome.storage.sync.get(['stickee_dark'], function(result) {
+        // check if dark mode was enabled by user
+        if (result['stickee_dark'] == true) {
+          elm.style.color = "white";
+        }
+        dict['hidden'] = false;
+        storeSync(idx,dict);
+      });
     }
     else {
       console.log("hiding...");

@@ -27,6 +27,8 @@ a {
 }
 #email, #github {
   width: 20px;
+  vertical-align: -5px;
+  padding-right: 3px;
 }
 #footer {
   position: absolute;
