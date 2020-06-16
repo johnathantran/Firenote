@@ -23,21 +23,22 @@ $(document).ready(function() {
           //elm.parentNode.childNodes[1].src = "images/edit.svg";
           elm.textContent = new_header;
 
-          idx = elm.parentNode.id.slice(-1);
-
-          dict = chrome.storage.sync.get(idx);
-          console.log("From chrome: " + dict);
-          dict = JSON.parse(localStorage.getItem(idx,dict));
-
-          dict['headerText'] = header.textContent;
-          localStorage.setItem(idx, JSON.stringify(dict));
-          document.querySelector('#headerItem' + idx).textContent = header.textContent; // update note dock
+          var idx = note.id.slice(-2);
+          if (isNaN(idx) == true) {
+            idx = note.id.slice(-1);
+          }
+          // get the current list of todos for that note
+          chrome.storage.sync.get([idx], function(result) {
+            dict = JSON.parse(result[idx]);
+            console.log(dict);
+            dict['headerText'] = header.textContent;
+            storeSync(idx,dict);
+            document.querySelector('#headerItem' + idx).textContent = header.textContent; // update note dock
       }
   });
 
   var coll = document.getElementsByClassName("collapsible");
-  var i;
-  
+
   for (i = 0; i < coll.length; i++) {
     coll[i].addEventListener("click", function() {
       this.classList.toggle("active");
