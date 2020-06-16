@@ -4,7 +4,6 @@
 "description": "Create, edit, and save virtual sticky notes in a new tab.",
 "version": "1.0.0",
 
-
 "chrome_url_overrides" : {
     "newtab": "stickee.html"
 },
