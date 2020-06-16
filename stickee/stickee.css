@@ -22,9 +22,29 @@
 .blue:active {
   box-shadow: inset 0 2px 5px #2370FE;  
 }
-
-
-/* Three dots */
+a {
+  color: #4C8FFB;
+}
+#email, #github {
+  width: 20px;
+}
+#footer {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  text-align: center;
+  font-size: 10pt;
+}
+#bmc {
+  width: 150px;
+  text-align: right;
+  float: right;
+}
+#ref {
+  padding-top: 10px;
+  width: 60%;
+  float: right;
+}
 /* Style the button that is used to open and close the collapsible content */
 #menu {
   position: absolute;
@@ -99,13 +119,6 @@ body {
 .dark-mode {
   background-color: #363640;
   color: #f0f0f0;
-}
-#ref {
-  position: absolute;
-  bottom: 15px;
-  right: 15px;
-  text-align: center;
-  font-size: 10pt;
 }
 input {
   margin-left: 10px;

@@ -61,25 +61,21 @@ document.addEventListener('DOMContentLoaded', function() {
   el.addEventListener('click', function() {
       hideMenu(this);
   });
-
   // dark mode button
   var el = document.getElementById('toggleDarkMode');
   el.addEventListener('click', function() {
       toggleDarkMode();
   });
-
   // clear all button
   var el = document.getElementById('clearAll');
   el.addEventListener('click', function() {
       clearAll();
   });
-
   // dock all button
   var el = document.getElementById('dockAll');
   el.addEventListener('click', function() {
       dockAll();
   });
-
   // add note button
   var el = document.getElementById('addNote');
   el.addEventListener('click', function() {
@@ -100,6 +96,7 @@ function addNoteEventHandlers(note) {
   var editHeaderBtn = note.childNodes[1];
   var minBtn = note.childNodes[2];
   var delBtn = note.childNodes[3];  
+  var taskInput = note.childNodes[4];
   var addBtn = note.childNodes[5];
   var headerItem = document.querySelector('#headerItem' + idx);
   console.log(headerItem);
@@ -121,6 +118,13 @@ function addNoteEventHandlers(note) {
     console.log("clicked");
     deleteNote();
   });
+  taskInput.addEventListener('keyup', function (e) {
+    console.log("typing");
+    if (e.keyCode == 13) {
+      event.preventDefault();
+      addBtn.click();
+    }
+  })
   addBtn.addEventListener('click', function() {
     console.log("clicked");
     add();
@@ -128,7 +132,7 @@ function addNoteEventHandlers(note) {
   headerItem.addEventListener('click', function() {
     console.log("clicked");
     hideNote();
-  })
+  });
 }
 
 // adds event listeners when page loads
@@ -517,7 +521,7 @@ function addNote() {
   // 10 note limit
   var basic = true; // basic vs premium version of stickee app
   if ((header_list.length >= 10) && (basic == true)) {
-    alert("You have reached the maximum 10 note limit of the basic version. Please delete a note or upgrade to add more.");
+    alert("You have reached the maximum 10 note limit. Please delete a note to add more. (I am working on a premium version to allow more notes and other cool features!)");
     return;
   }
   if (header_list.length >= 20) {
@@ -622,7 +626,6 @@ function clearAll() {
     var header_list = document.querySelectorAll(".drag");
     console.log(header_list);
 
-    
     for (j = 1; j <= header_list.length; j++) {
       console.log("runs");
       console.log(document.querySelector('#mydiv' + j));
@@ -1018,6 +1021,7 @@ function editHeader() {
   elm = getElm();
   header = elm.parentNode.childNodes[0];
   console.log(elm.parentNode.childNodes[0].textContent);
+
   if (header.isContentEditable == false) {
     header.setAttribute("contentEditable", true);
     cursorManager.setEndOfContenteditable(header);
