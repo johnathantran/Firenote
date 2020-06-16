@@ -34,6 +34,7 @@ $(document).ready(function() {
             dict['headerText'] = header.textContent;
             storeSync(idx,dict);
             document.querySelector('#headerItem' + idx).textContent = header.textContent; // update note dock
+          });
       }
   });
 
@@ -130,8 +131,8 @@ function addNoteEventHandlers(note) {
   })
 }
 
+// adds event listeners when page loads
 attachedListeners = false;
-
 function addNoteEventHandlersOnLoad() {
   
   chrome.storage.sync.get(['haveListeners'], function(result) {
@@ -245,7 +246,6 @@ function createNote(exists,idx) {
      
       dict = JSON.parse(result[idx]);
       console.log(dict);
-      //dict = JSON.parse(localStorage.getItem(idx,dict));
 
       note.style.top = dict['posTop'];
       note.style.left = dict['posLeft'];
@@ -351,25 +351,9 @@ function loadPage() {
     }
     console.log(all_idx);
 
-    value = '{"todo":null,"headerText":"Note1","minimized":false,"posTop":"451px","posLeft":"182.5px","hidden":false}';
-    /*
-    chrome.storage.sync.set({1 : value}, function() {
-      console.log('Value is set to ' + value);
-    });
-    */
-    //dict = JSON.parse(localStorage.getItem(idx));
     try {
 
       chrome.storage.sync.get(all_idx, function(result) {
-
-        console.log(result['1']);
-
-        /*
-        testRes = result['1'];
-        console.log(testRes);
-        testRes2 = JSON.parse(testRes);
-        console.log(testRes2['posLeft']);
-        */
 
         for (idx=1; idx <= 20; idx++) { // 20 for now
           idx = idx.toString();
@@ -448,39 +432,6 @@ function toggleDarkMode() {
       });
     }
   });
-
-  /*
-  if (localStorage.getItem('stickee_dark') == 'true') {
-    console.log("dark to light");
-
-    sheet.insertRule("\
-    .collapsible, .clear {\
-     background-color: white;\
-     color: black;\
-    }",0);
-    sheet.insertRule("\
-    .bar {\
-     background-color: gray;\
-    }",0);
-
-    localStorage.setItem('stickee_dark',false);
-  }
-  else {
-    console.log("light to dark");
-    
-    sheet.insertRule("\
-    .collapsible, .clear {\
-     background-color: #363640;\
-     color: #fcd488;\
-    }",0);
-    sheet.insertRule("\
-    .bar {\
-     background-color: #f0efed;\
-    }",0);
-    
-    localStorage.setItem('stickee_dark',true);
-  }
-  */
 }
 
 // gets an element
@@ -545,7 +496,6 @@ function dragElement(elm) {
     chrome.storage.sync.get([idx.toString()], function(result) {
       dict = JSON.parse(result[idx]);
       console.log(dict);
-      //dict = JSON.parse(localStorage.getItem(idx));
       dict['posTop'] = elm.style.top;
       dict['posLeft'] = elm.style.left;
       storeSync(idx,dict);
@@ -798,37 +748,6 @@ function remove() {
     });
 }
 
-// returns a requested list of todo items
-function getTodos(idx) {
-
-  var requested_list;
-  
-  dict = JSON.parse(localStorage.getItem(idx));
-  todos_list = dict['todo'];
-  console.log(todos_list);
-  if ((todos_list !== null) && (todos_list !== undefined)) {
-    requested_list = JSON.parse(dict['todo']);
-  }
-  console.log(dict);
-  console.log(requested_list);
-  return requested_list
-}
-
-// returns a list of crossed out todo items
-function getCrossed(idx) {
-  var requested_list;
-  dict = JSON.parse(localStorage.getItem(idx));
-  console.log(dict);
-  todos_list = dict['strikethrough'];
-  console.log(todos_list);
-  if ((todos_list !== null) && (todos_list !== undefined)) {
-    requested_list = dict['strikethrough'];
-  }
-  console.log(dict);
-  console.log(requested_list);
-  return requested_list
-}
-
 // idx is the targeted note index
 function show(idx) {
 
@@ -1071,7 +990,6 @@ function minimize() {
     dict = JSON.parse(result[idx]);
     console.log(dict);
 
-    //dict = JSON.parse(localStorage.getItem(idx,dict));
     console.log(hide_add.style.display);
     if (hide_input.style.display == 'inline-block') {
       console.log("hiding");
@@ -1104,18 +1022,22 @@ function editHeader() {
     header.setAttribute("contentEditable", true);
     cursorManager.setEndOfContenteditable(header);
     //elm.parentNode.childNodes[1].src = "images/edit_toggle.svg";
+    header.focus();
   }
   else {
     header.setAttribute("contentEditable", false);
     //elm.parentNode.childNodes[1].src = "images/edit.svg";
     idx = elm.parentNode.id.slice(-1);
     
-    dict = JSON.parse(localStorage.getItem(idx,dict));
-    dict['headerText'] = header.textContent;
-    localStorage.setItem(idx, JSON.stringify(dict));
-    document.querySelector('#headerItem' + idx).textContent = header.textContent; // update note dock
+    chrome.storage.sync.get([idx.toString()], function(result) {
+      console.log(result);
+      dict = JSON.parse(result[idx]);
+      dict['headerText'] = header.textContent;
+      storeSync(idx,dict);
+      document.querySelector('#headerItem' + idx).textContent = header.textContent; // update note dock
+      header.focus();
+    });
   }
-  header.focus();
 }
 
 // allows a list item to be edited
