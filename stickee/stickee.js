@@ -98,13 +98,66 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // NOTE EVENT HANDLERS
 // adds event handlers for elements on a note
-function addNoteEventHandlers() {
+
+function addNoteEventHandlers(note) {
+
+  console.log(note.childNodes);
+  var header = note.childNodes[0];
+  var editHeaderBtn = note.childNodes[1];
+  var minBtn = note.childNodes[2];
+  var delBtn = note.childNodes[3];  
+  var addBtn = note.childNodes[5];
+
   // drag note
-  var el = document.querySelector('.dragHeader');
-  el.addEventListener('mousedown', function() {
-      console.log("clicked");
-      dragElement();
+  header.addEventListener('mousedown', function() {
+    console.log("clicked");
+    dragElement();
   });
+  editHeaderBtn.addEventListener('click', function() {
+    console.log("clicked");
+    editHeader();
+  });
+  minBtn.addEventListener('click', function() {
+    console.log("clicked");
+    minimize();
+  });
+  delBtn.addEventListener('click', function() {
+    console.log("clicked");
+    deleteNote();
+  });
+  addBtn.addEventListener('click', function() {
+    console.log("clicked");
+    add();
+  });
+}
+
+attachedListeners = false;
+function addNoteEventHandlersOnLoad() {
+  
+  if (attachedListeners == true) {
+    console.log("Already have listeners...");
+    return;
+  }
+
+  all_notes = (document.querySelectorAll('.drag'));
+  for (i=0; i < all_notes.length; i++) {
+    console.log(all_notes[i]);
+    addNoteEventHandlers(all_notes[i]);
+  }
+
+  console.log("Adding listeners...");
+  /*
+  var elements = document.querySelectorAll('.dragHeader');
+  console.log(elements);
+  for (var i = 0; i < elements.length; i++) {
+      console.log(elements[i]);
+      elements[i].addEventListener('onmousedown', function() {
+        dragElement();
+      });
+      
+      console.log("listener added");
+  }
+
   // edit header
   var elements = document.getElementsByClassName('editHeader');
   for (var i = 0; i < elements.length; i++) {
@@ -145,6 +198,8 @@ function addNoteEventHandlers() {
       hideNote();
     });
   }
+  */
+  attachedListeners = true;
 }
 
 // adds event handlers for todo items on a note
@@ -270,7 +325,7 @@ function createNote(exists,idx) {
         note.style.display = 'none';
         document.querySelector('#headerItem' + idx).style.color = 'silver';
       }
-      addNoteEventHandlers();
+    addNoteEventHandlersOnLoad();
     }
     // IF ADDING A NEW NOTE
     else {
@@ -304,7 +359,7 @@ function createNote(exists,idx) {
         note.style.display = 'none';
         document.querySelector('#headerItem' + idx).style.color = 'silver';
       }
-      addNoteEventHandlers();
+      addNoteEventHandlers(note);
     } 
   });
 };
@@ -708,32 +763,37 @@ function add() {
     console.log(task);
 
     // get the current list of todos for that note
-    dict = JSON.parse(localStorage.getItem(idx));
-    console.log(dict);
-    var todos_str = dict['todo'];
-    console.log(todos_str);
+    chrome.storage.sync.get([idx], function(result) {
+      dict = JSON.parse(result[idx]);
+      console.log(dict);
 
-    // if there is an actual list
-    if (todos_str !== null) {
+      var todos_str = dict['todo'];
+      console.log(todos_str);
 
-      // add the new task to the list of todos for that note
-      var todos = JSON.parse(todos_str);
-      console.log(todos);
-      if (todos[todos.length - 1] != task) {
-          todos.push(task);
+      // if there is an actual list
+      if (todos_str !== null) {
+
+        // add the new task to the list of todos for that note
+        var todos = JSON.parse(todos_str);
+        console.log(todos);
+        if (todos[todos.length - 1] != task) {
+            todos.push(task);
+        }
       }
-    }
-    else {
-      todos = [task];
-      console.log(todos);
-    }
-    dict['todo'] = JSON.stringify(todos);
-    console.log(dict['todos']);
-    localStorage.setItem(idx, JSON.stringify(dict));
-    console.log(dict);
-    show(idx);
+      else {
+        todos = [task];
+        console.log(todos);
+      }
+      dict['todo'] = (todos);
+      console.log(dict['todos']);
 
-    elm.childNodes[4].value = "";
+      storeSync(idx,dict)
+      
+      console.log(dict);
+      show(idx);
+
+      elm.childNodes[4].value = "";
+    });
 }
 
 // removes an item from a todo list
@@ -788,6 +848,7 @@ function remove() {
 function getTodos(idx) {
 
   var requested_list;
+  
   dict = JSON.parse(localStorage.getItem(idx));
   todos_list = dict['todo'];
   console.log(todos_list);
@@ -817,8 +878,14 @@ function getCrossed(idx) {
 // idx is the targeted note index
 function show(idx) {
 
-    var todos_list = getTodos(idx);
-    var crossed_list = getCrossed(idx);
+  chrome.storage.sync.get([idx.toString()], function(result) {
+    console.log(result);
+    console.log(result[idx]);
+    dict = JSON.parse(result[idx]);
+
+
+    //var todos_list = getTodos(idx);
+    //var crossed_list = getCrossed(idx);
     console.log(idx);
     console.log("Currently in this todo list:" + todos_list + "!");
     console.log("Currently in the crossed list: " + crossed_list);
