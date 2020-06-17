@@ -1,2 +1,2 @@
-# sticky
+# Stickee
  custom sticky notes tab
