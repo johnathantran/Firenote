@@ -55,7 +55,7 @@ a {
   position: absolute;
   top: 60px;
   right: 15px;
-  width: 300px;
+  width: 250px;
   text-align: right;
   display: block;
 }
@@ -118,7 +118,7 @@ a {
 }
 body {
   background-color: #fff;
-  color: #333;
+  color: rgb(95, 95, 95);
   font-family: 'Lato', sans-serif;
 }
 .dark-mode {
@@ -153,10 +153,17 @@ input {
   background: #F7F7F7;
   cursor: pointer;
 }
-
+#centeredTitle {
+  text-align: center;
+}
 h1 {
   font-family: 'Montserrat', sans-serif;
   letter-spacing: 3px;
+  display: inline-block;
+}
+#fire {
+  color: rgb(233, 174, 47);
+  color: #ffc355;
 }
 ul {
   margin-top: 0px;
@@ -182,6 +189,7 @@ li {
 }
 #intro {
   display: inline-block;
+  font-size: 10pt;
 }
 #logo {
   width: 240px;
@@ -202,9 +210,9 @@ li {
   font-size: 10pt;
   font-weight: normal;
 }
-.active, .collapsible:hover, .headerList:hover, .clear:hover{
-  background-color: #73befa;
-  color: white;
+.collapsible:hover, .headerList:hover, .clear:hover{
+  border: 2px solid #fda265;
+
   cursor: pointer;
 }
 span {

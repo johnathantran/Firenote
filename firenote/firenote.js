@@ -4,12 +4,10 @@
 // 'headerTextN': the text element of the header of note N
 // 'headerItemN': the text element of the header of note N in the Notes Dock
 //chrome.storage.sync.remove('1');
-chrome.browserAction.onClicked.addListener(function() {
-  chrome.tabs.create({'url':"chrome://newtab"})
-})
-// add event listeneres to onclick elements
-$(document).ready(function() {
 
+// add event listeners to onclick elements
+$(document).ready(function() {
+  
   var coll = document.getElementsByClassName("collapsible");
 
   for (i = 0; i < coll.length; i++) {
@@ -41,11 +39,13 @@ $(document).ready(function() {
   el.addEventListener('click', function() {
       clearAll();
   });
-  // dock all button
+  // dock all button - some bugs to hash out
+  /*
   var el = document.getElementById('dockAll');
   el.addEventListener('click', function() {
       dockAll();
   });
+  */
   // add note button
   var el = document.getElementById('addNote');
   el.addEventListener('click', function() {
@@ -115,6 +115,7 @@ function addNoteEventHandlersOnLoad() {
       console.log("Already have listeners...");
       return;
     }
+
     all_notes = (document.querySelectorAll('.drag'));
     for (i=0; i < all_notes.length; i++) {
       console.log(all_notes[i]);
@@ -123,6 +124,28 @@ function addNoteEventHandlersOnLoad() {
     console.log("Adding listeners...");
     storeSync('haveListeners',true);
     attachedListeners = true;
+    /*
+    chrome.browserAction.onClicked.addListener(function() {
+      chrome.tabs.create({'url':"chrome://newtab"});
+    });
+    */
+  });
+}
+
+hasBtnListener = false;
+function addExtensionBtnListener() {
+  chrome.storage.sync.get(['hasBtnListener'], function(result) {
+    console.log(result);
+
+    if (hasBtnListener == true) {
+      console.log("Already has btn listener...");
+      return;
+    }
+    hasBtnListener = true;
+    chrome.browserAction.onClicked.addListener(function() {
+      chrome.tabs.create({'url':"chrome://newtab"});
+      storeSync('hasBtnListener',true);
+    });
   });
 }
 
@@ -287,7 +310,7 @@ function createNote(exists,idx) {
 
 // page load
 function loadPage() {
-  
+
   // check if user has enabled dark mode
   chrome.storage.sync.get(['stickee_dark'], function(result) {
     console.log(result['stickee_dark']);
@@ -995,12 +1018,12 @@ function editHeader() {
   if (header.isContentEditable == false) {
     header.setAttribute("contentEditable", true);
     cursorManager.setEndOfContenteditable(header);
-    //elm.parentNode.childNodes[1].src = "images/edit_toggle.svg";
+    elm.parentNode.childNodes[1].src = "images/edit_active.png";
     header.focus();
   }
   else {
     header.setAttribute("contentEditable", false);
-    //elm.parentNode.childNodes[1].src = "images/edit.svg";
+    elm.parentNode.childNodes[1].src = "images/edit.png";
     idx = elm.parentNode.id.slice(-1);
     
     chrome.storage.sync.get([idx.toString()], function(result) {
