@@ -78,7 +78,7 @@ function addNoteEventHandlers(note) {
   });
   editHeaderBtn.addEventListener('click', function() {
     console.log("clicked");
-    editHeader();
+    editHeader(idx);
   });
   minBtn.addEventListener('click', function() {
     console.log("clicked");
@@ -92,9 +92,16 @@ function addNoteEventHandlers(note) {
     console.log("typing");
     if (e.keyCode == 13) {
       event.preventDefault();
-      addBtn.click();
+      editHeaderBtn.click();
     }
-  })
+  });
+  header.addEventListener('keyup', function (e) {
+    console.log("typing");
+    if (e.keyCode == 13) {
+      event.preventDefault();
+      editHeaderBtn.click();
+    }
+  });
   addBtn.addEventListener('click', function() {
     console.log("clicked");
     add();
@@ -222,13 +229,13 @@ function createNote(exists,idx) {
   note.id = "mydiv" + idx;
   document.body.appendChild(note);
   note.classList.add('drag');
-  note.innerHTML += '<div id="mydiv' + idx + 'header" class="dragHeader">Note ' + idx;
+  note.innerHTML += '<input class="dragHeader" maxlength="30" readOnly="true" id="mydiv' + idx + 'header" value="Note ' + idx +'">';
   note.innerHTML += '<img src="images/edit.png" class="editHeader" id="edit">';
   note.innerHTML += '<img src="images/minimize.png" class="minimize" id="minimize">';
   note.innerHTML += '<img src="images/exit.png" class="deleteNote" id="exit"></img>';
   note.innerHTML += '<input class="task" id="task' + idx + '"  style="display:inline-block;"><button id="add" class="add">+ Add</button>';
   note.innerHTML += '<div class="todoLists" id="todos' + idx + '"></div>';
-  var note_header = 'Note' + idx;
+  var note_header = 'Note ' + idx;
   
   console.log(exists,idx);
   idx = idx.toString();
@@ -248,7 +255,7 @@ function createNote(exists,idx) {
       //note.offsetHeight = dict['height'];
       //note.offsetWidth = dict['width'];
       note_header = dict['headerText'];
-      note.childNodes[0].textContent = note_header;
+      note.childNodes[0].value = note_header;
 
       // check if the note is minimized
       console.log(dict);
@@ -451,10 +458,12 @@ function dragElement(elm) {
   elm = document.getElementById("mydiv" + idx);
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 
+  document.getElementById(elm.id).onmousedown = dragMouseDown;
+  /*
   if (document.getElementById(elm.id + "header")) {
     // if present, the header is where you move the DIV from:
     document.getElementById(elm.id + "header").onmousedown = dragMouseDown;
-  }
+  }*/
   function dragMouseDown(e) {
     e = e || window.event;
     console.log(e);
@@ -1037,8 +1046,7 @@ function minimize() {
       hide_input.style.display = 'inline-block';
       hide_add.style.display = 'inline-block';
       hide_todo.style.display = 'inline-block';
-      dict['minimized'] = false;
-      
+      dict['minimized'] = false;    
     }
     console.log(idx);
     console.log(dict);
@@ -1047,29 +1055,26 @@ function minimize() {
 }
 
 // allows edit of the header of a note
-function editHeader() {
+function editHeader(idx) {
   elm = getElm();
   header = elm.parentNode.childNodes[0];
-  console.log(elm.parentNode.childNodes[0].textContent);
-
-  if (header.isContentEditable == false) {
-    header.setAttribute("contentEditable", true);
+  
+  if (header.readOnly == true) {
+    header.readOnly = false;
     cursorManager.setEndOfContenteditable(header);
     elm.parentNode.childNodes[1].src = "images/edit_active.png";
     header.focus();
   }
   else {
-    header.setAttribute("contentEditable", false);
     elm.parentNode.childNodes[1].src = "images/edit.png";
-    idx = elm.parentNode.id.slice(-1);
-    
+    header.readOnly = true;
+    header.blur();
     chrome.storage.sync.get([idx.toString()], function(result) {
-      console.log(result);
+  
       dict = JSON.parse(result[idx]);
-      dict['headerText'] = header.textContent;
+      dict['headerText'] = header.value; 
+      document.querySelector('#headerItem' + idx).textContent = header.value; // update note dock
       storeSync(idx,dict);
-      document.querySelector('#headerItem' + idx).textContent = header.textContent; // update note dock
-      header.focus();
     });
   }
 }

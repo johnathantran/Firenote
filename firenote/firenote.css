@@ -296,9 +296,10 @@ del {
   padding-top, padding-bottom: 5px;
   margin-bottom: 10px;
   height: 30px;
-  width: 80%;
+  width: 70%;
   cursor: move;
   z-index: 10;
+  border: none;
   background-color: #fcfacf;
   /*background-color: #f1f1f1;*/
 
