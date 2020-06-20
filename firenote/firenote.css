@@ -125,7 +125,7 @@ body {
   background-color: #363640;
   color: #f0f0f0;
 }
-input {
+.task {
   margin-left: 10px;
   margin-right: 10px;
   margin-bottom: 10px;
@@ -292,11 +292,12 @@ del {
 }
 
 .dragHeader {
-  padding-left,padding-right: 10px;
+  margin-left: 5px;
   padding-top, padding-bottom: 5px;
+  margin-right: 10px;
   margin-bottom: 10px;
   height: 30px;
-  width: 70%;
+  width: 72%;
   cursor: move;
   z-index: 10;
   border: none;

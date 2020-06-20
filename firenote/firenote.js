@@ -458,12 +458,12 @@ function dragElement(elm) {
   elm = document.getElementById("mydiv" + idx);
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 
-  document.getElementById(elm.id).onmousedown = dragMouseDown;
-  /*
+  //document.getElementById(elm.id).onmousedown = dragMouseDown;
+  
   if (document.getElementById(elm.id + "header")) {
     // if present, the header is where you move the DIV from:
     document.getElementById(elm.id + "header").onmousedown = dragMouseDown;
-  }*/
+  }
   function dragMouseDown(e) {
     e = e || window.event;
     console.log(e);
