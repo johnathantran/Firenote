@@ -40,12 +40,12 @@ $(document).ready(function() {
       clearAll();
   });
   // dock all button - some bugs to hash out
-  /*
+  
   var el = document.getElementById('dockAll');
   el.addEventListener('click', function() {
       dockAll();
   });
-  */
+  
   // add note button
   var el = document.getElementById('addNote');
   el.addEventListener('click', function() {
@@ -895,11 +895,54 @@ function strikeThrough() {
 // docks all notes
 function dockAll() {
   var header_list = document.querySelectorAll(".dragHeader");
-  console.log(header_list);
-  for (j = 1; j <= header_list.length; j++) {
-    console.log(document.querySelector('#mydiv' + j));
-    hideNote(j);
+
+  // recreate saved notes on page load
+  var all_idx = [];
+  for (var i = 1; i <= header_list.length; i++) {
+    all_idx.push(i.toString());
   }
+
+  chrome.storage.sync.get(all_idx, function(result) {
+
+    // check if all elements are hidden
+    var all_hidden = true;
+    for (var i = 1; i <= header_list.length; i++) {
+      dict = JSON.parse(result[i]);
+      if (dict['hidden'] == false) {
+        all_hidden = false;
+        break;
+      } 
+    }
+    // if all notes are hidden, show them all
+    if (all_hidden == true) {
+
+      for (var i = 1; i <= header_list.length; i++) {
+        dict = JSON.parse(result[i]);
+        dict['hidden'] = false;
+        div_to_hide = document.querySelector('#mydiv' + i.toString());
+        div_to_hide.style.display = "block";
+  
+        // change notes dock colors
+        if (document.getElementById('toggleDarkMode').style.color == '#fcd488') {
+          document.querySelector('#headerItem' + i).style.color = "white";
+        }
+        storeSync(i,dict);
+      }
+      return;
+    }
+    // if not, hide the ones that are showing
+    for (var i = 1; i <= header_list.length; i++) {
+
+      div_to_hide = document.querySelector('#mydiv' + i.toString());
+
+      // check if a note exists with the given key/index
+      dict = JSON.parse(result[i]);
+      dict['hidden'] = true;
+      div_to_hide.style.display = "none";
+      document.querySelector('#headerItem' + i).style.color = "silver";
+      storeSync(i,dict);
+    }
+  });
 }
 
 // hides a note from view by clicking on it in the Notes Dock
@@ -931,7 +974,7 @@ function hideNote(idx) {
     if (div_to_hide.style.display == "none") {
 
       div_to_hide.style.display = "block";
-
+      
       // bring all the other notes behind the selected note
       for (j=0; j<all_divs.length; j++) {
         all_divs[j].style.zIndex = "1";

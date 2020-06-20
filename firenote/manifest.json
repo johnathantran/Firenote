@@ -1,8 +1,8 @@
 {
 "manifest_version": 2,
-"name": "Firenote - Virtual Sticky Notes",
-"description": "Create, edit, and save virtual sticky notes in a new tab.",
-"version": "1.0.1",
+"name": "Firenote - Notes & Lists in New Tab",
+"description": "Create, edit, and save notes and lists every time you open a new tab.",
+"version": "1.0.2",
 
 "chrome_url_overrides" : {
     "newtab": "firenote.html"
