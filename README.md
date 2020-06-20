@@ -1,2 +1,2 @@
-# Stickee
- custom sticky notes tab
+# Firenote
+ Custom sticky notes tab
