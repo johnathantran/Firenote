@@ -913,33 +913,27 @@ function dockAll() {
         break;
       } 
     }
-    // if all notes are hidden, show them all
-    if (all_hidden == true) {
+    for (var i = 1; i <= header_list.length; i++) {
+      dict = JSON.parse(result[i]);
+      div_to_hide = document.querySelector('#mydiv' + i.toString());
 
-      for (var i = 1; i <= header_list.length; i++) {
-        dict = JSON.parse(result[i]);
+      // reveal all notes if they are all hidden
+      if (all_hidden == true) {
+        
         dict['hidden'] = false;
-        div_to_hide = document.querySelector('#mydiv' + i.toString());
         div_to_hide.style.display = "block";
-  
+        document.querySelector('#headerItem' + i).style.color = "rgb(95, 95, 95)";
         // change notes dock colors
         if (document.getElementById('toggleDarkMode').style.color == '#fcd488') {
           document.querySelector('#headerItem' + i).style.color = "white";
         }
-        storeSync(i,dict);
       }
-      return;
-    }
-    // if not, hide the ones that are showing
-    for (var i = 1; i <= header_list.length; i++) {
-
-      div_to_hide = document.querySelector('#mydiv' + i.toString());
-
-      // check if a note exists with the given key/index
-      dict = JSON.parse(result[i]);
-      dict['hidden'] = true;
-      div_to_hide.style.display = "none";
-      document.querySelector('#headerItem' + i).style.color = "silver";
+      // else hide the notes that are showing
+      else {
+        dict['hidden'] = true;
+        div_to_hide.style.display = "none";
+        document.querySelector('#headerItem' + i).style.color = "silver";
+      }
       storeSync(i,dict);
     }
   });
