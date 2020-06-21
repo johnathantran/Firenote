@@ -40,12 +40,10 @@ $(document).ready(function() {
       clearAll();
   });
   // dock all button - some bugs to hash out
-  
   var el = document.getElementById('dockAll');
   el.addEventListener('click', function() {
       dockAll();
   });
-  
   // add note button
   var el = document.getElementById('addNote');
   el.addEventListener('click', function() {
@@ -92,7 +90,7 @@ function addNoteEventHandlers(note) {
     console.log("typing");
     if (e.keyCode == 13) {
       event.preventDefault();
-      editHeaderBtn.click();
+      addBtn.click();
     }
   });
   header.addEventListener('keyup', function (e) {
@@ -319,9 +317,9 @@ function createNote(exists,idx) {
 function loadPage() {
 
   // check if user has enabled dark mode
-  chrome.storage.sync.get(['stickee_dark'], function(result) {
-    console.log(result['stickee_dark']);
-    if (result['stickee_dark'] == true) {
+  chrome.storage.sync.get(['firenote_dark'], function(result) {
+    console.log(result['firenote_dark']);
+    if (result['firenote_dark'] == true) {
       
       var sheet = (function() {
         // Create the <style> tag
@@ -394,10 +392,10 @@ function toggleDarkMode() {
 
   document.body.classList.toggle("dark-mode");
 
-  chrome.storage.sync.get(['stickee_dark'], function(result) {
+  chrome.storage.sync.get(['firenote_dark'], function(result) {
 
     // check if dark mode was enabled by user
-    if (result['stickee_dark'] == true) {
+    if (result['firenote_dark'] == true) {
       console.log("dark to light");
 
       sheet.insertRule("\
@@ -410,7 +408,7 @@ function toggleDarkMode() {
        background-color: gray;\
       }",0);
 
-      chrome.storage.sync.set({'stickee_dark' : false}, function() {
+      chrome.storage.sync.set({'firenote_dark' : false}, function() {
         console.log('Value is set to false');
       });
     }
@@ -427,7 +425,7 @@ function toggleDarkMode() {
        background-color: #f0efed;\
       }",0);
       
-      chrome.storage.sync.set({'stickee_dark' : true}, function() {
+      chrome.storage.sync.set({'firenote_dark' : true}, function() {
         console.log('Value is set to true');
       });
     }
@@ -517,7 +515,7 @@ function addNote() {
   console.log(header_list);
 
   // 10 note limit
-  var basic = true; // basic vs premium version of stickee app
+  var basic = true; // basic vs premium version of firenote app
   if ((header_list.length >= 10) && (basic == true)) {
     alert("You have reached the maximum 10 note limit. Please delete a note to add more. (I am working on a premium version to allow more notes and other cool features!)");
     return;
@@ -986,9 +984,9 @@ function hideNote(idx) {
 
       elm.style.color = "black";
 
-      chrome.storage.sync.get(['stickee_dark'], function(result) {
+      chrome.storage.sync.get(['firenote_dark'], function(result) {
         // check if dark mode was enabled by user
-        if (result['stickee_dark'] == true) {
+        if (result['firenote_dark'] == true) {
           elm.style.color = "white";
         }
         dict['hidden'] = false;
@@ -1061,9 +1059,14 @@ function editHeader(idx) {
   
   if (header.readOnly == true) {
     header.readOnly = false;
-    cursorManager.setEndOfContenteditable(header);
-    elm.parentNode.childNodes[1].src = "images/edit_active.png";
+    // setting focus on input
     header.focus();
+    var val = header.value; // store the value of the element
+    header.value = ''; // clear the value of the element
+    header.value = val; // set that value back
+    console.log(elm.parentNode.childNodes);
+    elm.parentNode.childNodes[1].src = "images/edit_active.png";
+
   }
   else {
     elm.parentNode.childNodes[1].src = "images/edit.png";
@@ -1221,70 +1224,3 @@ $(".lists").on('keyup', function (e) {
   }
 });
 */
-
-//Namespace management idea from http://enterprisejquery.com/2010/10/how-good-c-habits-can-encourage-bad-javascript-habits-part-1/
-(function( cursorManager ) {
-
-    //From: http://www.w3.org/TR/html-markup/syntax.html#syntax-elements
-    var voidNodeTags = ['AREA', 'BASE', 'BR', 'COL', 'EMBED', 'HR', 'IMG', 'INPUT', 'KEYGEN', 'LINK', 'MENUITEM', 'META', 'PARAM', 'SOURCE', 'TRACK', 'WBR', 'BASEFONT', 'BGSOUND', 'FRAME', 'ISINDEX'];
-
-    //From: https://stackoverflow.com/questions/237104/array-containsobj-in-javascript
-    Array.prototype.contains = function(obj) {
-        var i = this.length;
-        while (i--) {
-            if (this[i] === obj) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    //Basic idea from: https://stackoverflow.com/questions/19790442/test-if-an-element-can-contain-text
-    function canContainText(node) {
-        if(node.nodeType == 1) { //is an element node
-            return !voidNodeTags.contains(node.nodeName);
-        } else { //is not an element node
-            return false;
-        }
-    };
-
-    function getLastChildElement(el){
-        var lc = el.lastChild;
-        while(lc && lc.nodeType != 1) {
-            if(lc.previousSibling)
-                lc = lc.previousSibling;
-            else
-                break;
-        }
-        return lc;
-    }
-
-    //Based on Nico Burns's answer
-    cursorManager.setEndOfContenteditable = function(contentEditableElement)
-    {
-
-        while(getLastChildElement(contentEditableElement) &&
-              canContainText(getLastChildElement(contentEditableElement))) {
-            contentEditableElement = getLastChildElement(contentEditableElement);
-        }
-
-        var range,selection;
-        if(document.createRange)//Firefox, Chrome, Opera, Safari, IE 9+
-        {
-            range = document.createRange();//Create a range (a range is a like the selection but invisible)
-            range.selectNodeContents(contentEditableElement);//Select the entire contents of the element with the range
-            range.collapse(false);//collapse the range to the end point. false means collapse to end rather than the start
-            selection = window.getSelection();//get the selection object (allows you to change selection)
-            selection.removeAllRanges();//remove any selections already made
-            selection.addRange(range);//make the range you have just created the visible selection
-        }
-        else if(document.selection)//IE 8 and lower
-        {
-            range = document.body.createTextRange();//Create a range (a range is a like the selection but invisible)
-            range.moveToElementText(contentEditableElement);//Select the entire contents of the element with the range
-            range.collapse(false);//collapse the range to the end point. false means collapse to end rather than the start
-            range.select();//Select the range (make it the visible selection
-        }
-    }
-
-}( window.cursorManager = window.cursorManager || {}));
