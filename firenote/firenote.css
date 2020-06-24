@@ -25,10 +25,15 @@
 a {
   color: #4C8FFB;
 }
-#email, #github {
+#email, #github, #star {
   width: 20px;
   vertical-align: -5px;
   padding-right: 3px;
+}
+#signature {
+  font-size: 11pt;
+  font-weight: bold;
+  letter-spacing: 1px;
 }
 #help {
   width: 200px;
