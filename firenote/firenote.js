@@ -4,10 +4,9 @@
 // 'headerTextN': the text element of the header of note N
 // 'headerItemN': the text element of the header of note N in the Notes Dock
 //chrome.storage.sync.remove('1');
-
 // add event listeners to onclick elements
 $(document).ready(function() {
-  
+ 
   var coll = document.getElementsByClassName("collapsible");
 
   for (i = 0; i < coll.length; i++) {
@@ -47,8 +46,25 @@ $(document).ready(function() {
   // add note button
   var el = document.getElementById('addNote');
   el.addEventListener('click', function() {
-      addNote();
+      addNote(memo=false);
   });
+  // add memo button
+  var el = document.getElementById('addMemo');
+  el.addEventListener('click', function() {
+      addNote(memo=true);
+  });
+});
+
+// message button
+var el = document.getElementById('msgBtn');
+el.addEventListener('click', function() {
+  var msgText = document.getElementById('msgText');
+  if (msgText.style.opacity == "1") {
+    fade(msgText);
+  }
+  else {
+    msgText.style.opacity = "1";
+  }
 });
 
 // NOTE EVENT HANDLERS
@@ -63,9 +79,33 @@ function addNoteEventHandlers(note) {
   var header = note.childNodes[0];
   var editHeaderBtn = note.childNodes[1];
   var minBtn = note.childNodes[2];
-  var delBtn = note.childNodes[3];  
-  var taskInput = note.childNodes[4];
-  var addBtn = note.childNodes[5];
+  var delBtn = note.childNodes[3];
+  
+  // if it's a memo style note
+  if (note.childNodes[4].nodeName == 'TEXTAREA') {
+    var memoBtn = note.childNodes[5];
+    memoBtn.addEventListener('click', function() {
+      console.log("saved");
+      saveMemo(idx);
+    });
+  }
+  else { // if it's a list style note
+    var taskInput = note.childNodes[4];
+    var addBtn = note.childNodes[5];
+
+    taskInput.addEventListener('keyup', function (e) {
+      console.log("typing");
+      if (e.keyCode == 13) {
+        event.preventDefault();
+        addBtn.click();
+      }
+    });
+    addBtn.addEventListener('click', function() {
+      console.log("clicked");
+      add();
+    });
+  }
+
   var headerItem = document.querySelector('#headerItem' + idx);
   console.log(headerItem);
 
@@ -86,13 +126,6 @@ function addNoteEventHandlers(note) {
     console.log("clicked");
     deleteNote();
   });
-  taskInput.addEventListener('keyup', function (e) {
-    console.log("typing");
-    if (e.keyCode == 13) {
-      event.preventDefault();
-      addBtn.click();
-    }
-  });
   header.addEventListener('keyup', function (e) {
     console.log("typing");
     if (e.keyCode == 13) {
@@ -100,15 +133,12 @@ function addNoteEventHandlers(note) {
       editHeaderBtn.click();
     }
   });
-  addBtn.addEventListener('click', function() {
-    console.log("clicked");
-    add();
-  });
   headerItem.addEventListener('click', function() {
     console.log("clicked");
     hideNote();
   });
 }
+
 // adds event listeners when page loads
 attachedListeners = false;
 function addNoteEventHandlersOnLoad() {
@@ -219,7 +249,7 @@ function storeSync(idx,dict) {
 }
 
 // creates notes when the page is loaded (note exists), or when the Add Note button is clicked (note does not exist yet)
-function createNote(exists,idx) {
+function createNote(exists,idx,memo) {
 
   console.log("Iteration");
 
@@ -231,8 +261,16 @@ function createNote(exists,idx) {
   note.innerHTML += '<img src="images/edit.png" class="editHeader" id="edit">';
   note.innerHTML += '<img src="images/minimize.png" class="minimize" id="minimize">';
   note.innerHTML += '<img src="images/exit.png" class="deleteNote" id="exit"></img>';
-  note.innerHTML += '<input class="task" id="task' + idx + '"  style="display:inline-block;"><button id="add" class="add">+ Add</button>';
-  note.innerHTML += '<div class="todoLists" id="todos' + idx + '"></div>';
+  
+  if (memo == true) {
+    note.innerHTML += '<textarea maxlength="300" class="memo" rows="8" spellcheck="false" id="memo' + idx +'" style="display:inline-block;"></textarea>';
+    note.innerHTML += '<button class="saveMemo">Save Memo</button>';
+  }
+  else {
+    note.innerHTML += '<input maxlength="100" class="task" id="task' + idx + '" style="display:inline-block;"><button id="add" class="add">+ Add</button>';
+    note.innerHTML += '<div class="todoLists" id="todos' + idx + '"></div>';
+  }
+
   var note_header = 'Note ' + idx;
   
   console.log(exists,idx);
@@ -274,6 +312,12 @@ function createNote(exists,idx) {
         note.style.display = 'none';
         document.querySelector('#headerItem' + idx).style.color = 'silver';
       }
+
+      // if note is a memo, query saved text
+      if (memo == true) {
+        note.childNodes[4].value = dict['memo'];
+      }
+
     addNoteEventHandlersOnLoad();
     }
     // IF ADDING A NEW NOTE
@@ -291,6 +335,8 @@ function createNote(exists,idx) {
         'posTop': note.style.top, 
         'posLeft': note.style.left,
         'hidden': false,
+        'isMemo': memo,
+        'memo': null,
       };
       console.log("Creating item: " + idx);
 
@@ -359,9 +405,12 @@ function loadPage() {
           // check if a note exists with the given key/index
           try {
             result2 = JSON.parse(result[idx]);
-            console.log(result2);
-            createNote(exists=true,idx);
-            show(idx);
+            memo = result2['isMemo'];
+            createNote(exists=true,idx,memo);
+            
+            if (memo == false) {
+              show(idx);
+            }
           }
           catch (err) {
             console.log(err);
@@ -504,7 +553,7 @@ function dragElement(elm) {
 }
 
 // adds a note to the screen when "Add Note" is clicked
-function addNote() {
+function addNote(memo) {
 
   var existing_notes = [];
   var first_empty_slot = 1;
@@ -582,7 +631,7 @@ function addNote() {
       console.log(first_empty_slot);
       console.log(existing_notes);
       idx = first_empty_slot.toString();
-      createNote(exists=false,idx);
+      createNote(exists=false,idx,memo);
     });
   }
   catch(err) {
@@ -721,7 +770,7 @@ function remove() {
 
       // determine if the todo item is crossed out or not
       var isTodo= false;
-      if (elm.parentNode.childNodes[2].tagName == 'SPAN') {
+      if (elm.parentNode.childNodes[3].tagName == 'SPAN') {
         var isTodo = true;
       }
       console.log(isTodo);
@@ -744,6 +793,34 @@ function remove() {
         show(idx);
       }
     });
+}
+
+// save memo
+function saveMemo(idx) {
+  elm = getElm();
+  memo_text = elm.parentNode.childNodes[4];
+  console.log(memo_text.value);
+
+  chrome.storage.sync.get([idx.toString()], function(result) {
+    console.log(result);
+    console.log(result[idx]);
+    dict = JSON.parse(result[idx]);
+    console.log(dict);
+    //memo_text_new = memo_text.value.replace(/\r\n|\r|\n/g,"</br>");
+    dict['memo'] = memo_text.value;
+    console.log(dict)
+    storeSync(idx,dict);
+  });
+}
+
+// show memo
+function showMemo(idx) {
+  chrome.storage.sync.get([idx.toString()], function(result) {
+    console.log(result);
+    dict = JSON.parse(result[idx]);
+    console.log(dict);
+    console.log(dict['memo']);
+  });
 }
 
 // idx is the targeted note index
@@ -772,9 +849,8 @@ function show(idx) {
           html += '<li class="lists">';
           html += '<img class="check" src="images/check.png">';
           html += '<img class="crossoff" src="images/crossoff.png" id="' + i  + '">';
-          html += '<span class="span">' + todos_list[i] + '</span>';
-          //html += '<img class="save">';
-          html += '<button class="save"> save </button></li>';
+          html += '<img src="images/save.png" style="display:none;" class="save"></img>';
+          html += '<span class="span">' + todos_list[i] + '</span>';     
           //html += '<hr>';
       };
     }
@@ -785,9 +861,8 @@ function show(idx) {
         html += '<li class="lists">';
         html += '<img class="check" src="images/check.png">';
         html += '<img class="crossoff" src="images/crossoff.png" id="' + i  + '">';
+        html += '<img src="images/save.png" style="display:none;" class="save"></img>';
         html += '<del class="span">' + crossed_list[i] + '</del>';
-        //html += '<img class="save">';
-        html += '<button class="save"> save </button></li>';
       }
     }
     html += '</ul>';
@@ -822,7 +897,7 @@ function strikeThrough() {
 
   // determine if the todo item is crossed out or not
   var crossed = true;
-  if (elm.parentNode.childNodes[2].tagName == 'SPAN') {
+  if (elm.parentNode.childNodes[3].tagName == 'SPAN') {
     var crossed = false;
   }
 
@@ -1056,7 +1131,8 @@ function minimize() {
 function editHeader(idx) {
   elm = getElm();
   header = elm.parentNode.childNodes[0];
-  
+  pending = document.querySelector('#pending');
+
   if (header.readOnly == true) {
     header.readOnly = false;
     // setting focus on input
@@ -1066,12 +1142,14 @@ function editHeader(idx) {
     header.value = val; // set that value back
     console.log(elm.parentNode.childNodes);
     elm.parentNode.childNodes[1].src = "images/edit_active.png";
-
+    pending.textContent = "edit pending save.";
+    pending.style.opacity = "1";
   }
   else {
     elm.parentNode.childNodes[1].src = "images/edit.png";
     header.readOnly = true;
     header.blur();
+    fade(pending);
     chrome.storage.sync.get([idx.toString()], function(result) {
   
       dict = JSON.parse(result[idx]);
@@ -1086,6 +1164,9 @@ function editHeader(idx) {
 var og_note;
 function editNote() {
   elm = getElm();
+  var pending = document.querySelector("#pending");
+  pending.textContent = "edit pending save.";
+  pending.style.opacity = "1";
 
   og_note = elm.textContent; // original note content
   console.log(og_note);
@@ -1096,20 +1177,21 @@ function editNote() {
   // check for existing save buttons (pending edits)
   spanList = document.querySelectorAll(".span");
   for (j = 0; j < spanList.length; j++) {
-    save_button = spanList[j].parentNode.childNodes[3];
+    console.log(spanList[j].parentNode.childNodes);
+    save_button = spanList[j].parentNode.childNodes[2];
 
-    if (save_button.style.opacity == '1') {
+    if (save_button.style.display == 'inline-block') {
       displayed = save_button;
       shown_save_count++;
     };
   };
   // if there are no pending edits, show the save button
   console.log(shown_save_count);
-  save_button = elm.parentNode.childNodes[3];
+  save_button = elm.parentNode.childNodes[2];
 
   if (shown_save_count < 1) {
-    save_button.style.float = "right";
-    save_button.style.opacity = "1"; //show the save button
+
+    save_button.style.display = "inline-block"; //show the save button
     elm.setAttribute("contentEditable", true);
     elm.focus();
     shown_save_count++;
@@ -1117,35 +1199,36 @@ function editNote() {
   // if you click on the same pending edit, will not prompt the pending message
   else if ((shown_save_count == 1) && (displayed == save_button)) {
     console.log(og_note);
-    save_button.style.float = "right";
-    save_button.style.opacity = "1"; //show the save button
+ 
+    save_button.style.display = "inline-block"; //show the save button
     elm.setAttribute("contentEditable", true);
     elm.focus();
   }
   else {
     og_note = [og_note[0]];
     console.log(shown_save_count);
-    document.querySelector("#pending").style.visibility = "visible";
+    pending.textContent = "you have unsaved pending edits. save before adding new edit.";
+    pending.style.opacity = "1";
   };
 }
 
 // saves an edit on a todo list item
 function saveEdit() {
-
+    var pending = document.querySelector("#pending");
     spanList = document.querySelectorAll(".span");
     shown_save_count = 0;
     
     console.log(og_note);
     elm = getElm(); // get the save button
     console.log(elm.parentNode.childNodes);
-    var task = elm.parentNode.childNodes[2].textContent; // get the text of the edited note
+    var task = elm.parentNode.childNodes[3].textContent; // get the text of the edited note
     console.log(task);
     var parent = elm.parentNode.parentNode.parentNode; // get the index of div element
     idx = parent.id.slice(-1);
 
     // determine if the todo item is crossed out or not
     var isCrossed = true;
-    if (elm.parentNode.childNodes[2].tagName == 'SPAN') {
+    if (elm.parentNode.childNodes[3].tagName == 'SPAN') {
       var isCrossed = false;
     }
 
@@ -1164,9 +1247,11 @@ function saveEdit() {
 
         dict['todo'] = todos;
         storeSync(idx,dict);
-        save_button = elm.parentNode.childNodes[3];
-        save_button.style.opacity = "0";
-        document.querySelector("#pending").style.visibility = "hidden";
+        save_button = elm.parentNode.childNodes[2];
+        save_button.style.display = "none";
+        pending.textContent = "edit saved.";
+        fade(pending);
+        //pending.style.opacity = "0";
       }
       else {
         console.log("crossed is true");
@@ -1189,11 +1274,30 @@ function saveEdit() {
         todos[note_idx] = task; // set the old note to the edited note
         dict['strikethrough'] = todos;
         storeSync(idx,dict);
-        save_button = elm.parentNode.childNodes[3];
-        save_button.style.opacity = "0";
-        document.querySelector("#pending").style.visibility = "hidden";
+        save_button = elm.parentNode.childNodes[2];
+        save_button.style.display = "none";
+        console.log(save_button.style.display);
+        pending.textContent = "edit saved.";
+        fade(pending);
+        //pending.style.opacity = "0";
       }
     });
+}
+
+// fade an element out
+function fade(element) {
+  var op = 1;  // initial opacity
+  var timer = setInterval(function () {
+      if (op <= 0.1){
+          clearInterval(timer);
+          //element.style.display = 'none';
+          op = 0;
+      }
+      element.style.opacity = op;
+      element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+      op -= op * 0.08;
+    
+  }, 50);
 }
 /*
 // these lines make it possible for Enter key to submit a note edit

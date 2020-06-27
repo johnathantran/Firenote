@@ -45,13 +45,33 @@ a {
   text-align: center;
   font-size: 10pt;
 }
+#messages {
+  position: absolute;
+  bottom: 0px;
+  left: 15px;
+  text-align: center;
+}
+#msgBtn {
+  font-size: 30pt;
+  font-weight: bolder;
+  display: inline-block;
+}
+#msgText {
+  display: inline-block;
+  width: 700px;
+  vertical-align: 0pt;
+  margin-left: 10px;
+  opacity: 0;
+  text-align: left;
+}
 #bmc {
   width: 150px;
   text-align: right;
   float: right;
 }
 #ref {
-  padding-top: 10px;
+  padding-top: 5px;
+  text-align: right;
   width: 60%;
   float: right;
 }
@@ -115,7 +135,7 @@ a {
   display: inline-block;
   margin-right: 5px;
 }
-#edit:hover,#minimize:hover,#exit:hover {
+#edit:hover,#minimize:hover,#exit:hover, #msgBtn {
   cursor: pointer;
 }
 .todoLists,.task,#add {
@@ -137,9 +157,10 @@ body {
   border-radius: 10px;
   border: 2px solid silver;
   width: 65%;
+  caret-color: silver;
 }
 
-#add,.save{
+#add,.saveMemo{
   margin-left: 5px;
   margin-bottom: 5px;
   color: #444444;
@@ -151,7 +172,44 @@ body {
   font-size: 9pt;
   outline: none;
 }
-#add:hover,.save:hover {
+
+textArea {
+  white-space: "pre-line";
+  resize: none;
+  margin-left: 5px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  border-radius: 5px;
+  border: 1px solid silver;
+  width: 93%;
+  background-color: #fcfacf;
+}
+
+span:focus, .task:focus {
+  outline: none;
+}
+
+.dragHeader:focus {
+  outline: none !important;
+  
+}
+
+.save {
+  width: 10px;
+  height:10px;
+  line-height: 0px; /*or you could use 4em*/
+  vertical-align: middle;
+  padding-left: 0px;
+  padding-right: 10px;
+}
+
+.saveMemo {
+  float: right;
+  margin-right: 7px;
+  margin-bottom: 10px;
+}
+
+#add:hover{
   border: 1px #C6C6C6 solid;
   box-shadow: 1px 1px 1px #EAEAEA;
   color: #333333;
@@ -222,19 +280,12 @@ li {
 }
 span {
   word-wrap:break-word;
+  white-space: "pre-line";
 }
 #pending {
-  visibility: hidden;
-  color: rgb(228, 112, 112);
-}
-.save {
-  border-radius: 40px;
-  height: 18px;
-  vertical-align: middle;
   opacity: 0;
-  line-height: 0px;
-  margin-right: 9px;
-  display: inline-block;
+
+  color: rgb(228, 112, 112);
 }
 .crossoff, .check {
   width: 10px;
@@ -243,7 +294,7 @@ span {
   vertical-align: middle;
   padding-left: 0px;
 }
-.crossoff:hover, .check:hover {
+.crossoff:hover, .check:hover, .save:hover {
   cursor: pointer;
 }
 .crossoff {
