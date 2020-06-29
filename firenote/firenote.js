@@ -38,7 +38,7 @@ $(document).ready(function() {
   el.addEventListener('click', function() {
       clearAll();
   });
-  // dock all button - some bugs to hash out
+  // dock all button
   var el = document.getElementById('dockAll');
   el.addEventListener('click', function() {
       dockAll();
@@ -104,6 +104,7 @@ function addNoteEventHandlers(note) {
   else { // if it's a list style note
     var taskInput = note.childNodes[4];
     var addBtn = note.childNodes[5];
+    var undoBtn = note.childNodes[6];
 
     taskInput.addEventListener('keyup', function (e) {
       if (e.keyCode == 13) {
@@ -115,6 +116,9 @@ function addNoteEventHandlers(note) {
       console.log("clicked");
       add();
     });
+    undoBtn.addEventListener('click', function() {
+      undo();
+    })
   }
 
   var headerItem = document.querySelector('#headerItem' + idx);
@@ -298,7 +302,8 @@ function createNote(exists,idx,memo) {
     note.innerHTML += '<button class="saveMemo">Save Memo</button>';
   }
   else {
-    note.innerHTML += '<input maxlength="100" class="task" placeholder="Add an item" id="task' + idx + '" style="display:inline-block;"><button id="add" class="add"><img class="addIcon" src="images/add.png"></button>';
+    note.innerHTML += '<input maxlength="100" class="task" placeholder="Add an item" id="task' + idx + '" style="display:inline-block;"><img src="images/add.png" id="add" class="add">';
+    note.innerHTML += '<img class="undo" id="undo' + idx + '" src="images/undo.png">';
     note.innerHTML += '<div class="todoLists" id="todos' + idx + '"></div>';
   }
 
@@ -731,7 +736,7 @@ function add() {
 
     // add a task for that note
     var todos = new Array;
-    console.log(elm.childNodes);
+    console.log(elm.parentNode);
     if (elm.childNodes[4].value == "") {
       return;
     }
@@ -807,21 +812,48 @@ function remove() {
       if (isTodo == false) {
 
         console.log(crossed);
-        crossed.splice(id, 1);
+        var removed = crossed.splice(id, 1);
+        console.log(removed);
         console.log("Currently in crossed: " + crossed);
         dict['strikethrough'] = crossed;
+        dict['removed'] = removed;
         storeSync(idx,dict);
+        
         show(idx);
       }
       else {
         console.log(todos);
-        todos.splice(id, 1);
+        var removed = todos.splice(id, 1);
+        console.log(removed);
         console.log("Currently in todos: " + todos);
         dict['todo'] = todos;
+        dict['removed'] = removed;
         storeSync(idx,dict);
         show(idx);
       }
     });
+}
+
+// recovers a deleted list item
+function undo() {
+  elm = getElm();
+
+  // get the index of div element
+  idx = elm.parentNode.id.slice(-2);
+  if (isNaN(idx) == true) { // if is NOT a number
+    idx = elm.parentNode.id.slice(-1); // not a 2 digit number
+  }
+  chrome.storage.sync.get([idx.toString()], function(result) {
+    dict = JSON.parse(result[idx]);
+    if (dict['removed'] == undefined) {
+      dict['removed'] = "";
+      var pending = document.getElementById('pending');
+      pending.textContent = "no item found to undo.";
+      pending.style.opacity = "1";
+    }
+    elm.parentNode.childNodes[4].value = dict['removed'];
+    elm.parentNode.childNodes[5].click();
+  });
 }
 
 // save memo
@@ -1132,7 +1164,8 @@ function minimize() {
   console.log(idx);
   var hide_input = elm.parentNode.childNodes[4];
   var hide_add = elm.parentNode.childNodes[5];
-  var hide_todo = elm.parentNode.childNodes[6];
+  var hide_undo = elm.parentNode.childNodes[6];
+  var hide_todo = elm.parentNode.childNodes[7];
  
   // if visible
   chrome.storage.sync.get([idx.toString()], function(result) {
@@ -1146,6 +1179,7 @@ function minimize() {
       console.log("hiding");
       hide_input.style.display = 'none';
       hide_add.style.display = 'none';
+      hide_undo.style.display = 'none';
       hide_todo.style.display= 'none';
       dict['minimized'] = true;
       
@@ -1154,6 +1188,7 @@ function minimize() {
       console.log("showing");
       hide_input.style.display = 'inline-block';
       hide_add.style.display = 'inline-block';
+      hide_undo.style.display = 'inline-block';
       hide_todo.style.display = 'inline-block';
       dict['minimized'] = false;    
     }
@@ -1205,6 +1240,10 @@ function editNote() {
   pending.style.opacity = "1";
 
   og_note = elm.value; // original note content
+  if (elm.tagName == 'DEL') {
+    og_note = elm.textContent;
+    console.log(elm.textContent);
+  }
   console.log(og_note);
   console.log(elm.parentNode.childNodes);
 
@@ -1213,7 +1252,7 @@ function editNote() {
   // check for existing save buttons (pending edits)
   spanList = document.querySelectorAll(".span");
   for (j = 0; j < spanList.length; j++) {
-    console.log(spanList[j].parentNode.childNodes);
+
     save_button = spanList[j].parentNode.childNodes[2];
 
     if (save_button.style.display == 'inline-block') {

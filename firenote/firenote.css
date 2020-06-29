@@ -185,7 +185,7 @@ body {
   border: none;
   border-bottom: 1px solid silver;
   caret-color: silver;
-  width: 84%;
+  width: 78%;
   margin-left: 5px;
   margin-bottom: 14px;
   font-size: 11pt;
@@ -215,7 +215,6 @@ body {
   font-size: 9pt;
   outline: none;
 }
-
 /*
 .saveMemo {
   background: transparent;
@@ -229,21 +228,20 @@ body {
 .saveMemoIcon {
   width: 53px;
 }
-.add {
-  background: transparent;
+.add, .undo {
   font-weight: bold;
   font-size: 16pt;
   outline: none;
-  margin-left: 5px;
-  margin-bottom: 5px;
+  margin-left: 7px;
+  margin-bottom: 0px;
   color: #444444;
   border: none;
+  width: 13px; 
 }
-.addIcon {
-  width: 15px;
-  transition: all .2s ease-in-out;
+.undo {
+  margin-left: 7px;
 }
-.addIcon:hover {
+.add:hover, .undo:hover, .check:hover, .crossoff:hover {
   transform: scale(1.1);
   cursor:pointer
 }
