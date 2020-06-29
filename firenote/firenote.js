@@ -77,7 +77,6 @@ function addNoteEventHandlers(note) {
   if (isNaN(idx) == true) {
     idx = note.id.slice(-1);
   }
-  console.log(note.childNodes);
   var header = note.childNodes[0];
   var editHeaderBtn = note.childNodes[1];
   var minBtn = note.childNodes[2];
@@ -88,10 +87,15 @@ function addNoteEventHandlers(note) {
     var memoText = note.childNodes[4];
     var memoBtn = note.childNodes[6];
     memoBtn.addEventListener('click', function() {
-      console.log("saved");
+      console.log("Memo saved");
       saveMemo(idx);
     });
-               
+    
+    memoText.addEventListener('click', function() {
+      document.getElementById('pending').textContent = "edit pending save.";
+      document.getElementById('pending').style.opacity = "1";
+      memoBtn.style.display = "inline-block"; // show the save button
+    });
     memoText.addEventListener('keyup', countCharacters, false);
 
   }
@@ -100,7 +104,6 @@ function addNoteEventHandlers(note) {
     var addBtn = note.childNodes[5];
 
     taskInput.addEventListener('keyup', function (e) {
-      console.log("typing");
       if (e.keyCode == 13) {
         event.preventDefault();
         addBtn.click();
@@ -221,6 +224,13 @@ function addTodoEventHandlers() {
       console.log("edit item clicked");  
       editNote();
       });
+    elements[i].addEventListener('keyup', function (e) {
+      console.log("typing");
+      if (e.keyCode == 13) {
+        event.preventDefault();
+        saveEdit();
+      }
+    });
   }
   // save an edit
   var elements = document.getElementsByClassName('save');
@@ -282,7 +292,7 @@ function createNote(exists,idx,memo) {
   
   if (memo == true) {
     note.innerHTML += '<textarea placeholder="Type a memo here..." maxlength="300" class="memo" rows="8" spellcheck="false" id="memo' + idx +'" style="display:inline-block;"></textarea>';
-    note.innerHTML += '<p class="memoCounter" id="memoCounter' + idx + '"> 300 characters left </p>';
+    note.innerHTML += '<p class="memoCounter" id="memoCounter' + idx + '">Max 300 characters</p>';
     note.innerHTML += '<button class="saveMemo">Save Memo</button>';
   }
   else {
@@ -332,6 +342,8 @@ function createNote(exists,idx,memo) {
       // if note is a memo, query saved text
       if (memo == true) {
         note.childNodes[4].value = dict['memo'];
+        textEntered = note.childNodes[4].value;
+        note.childNodes[5].textContent = (300 - textEntered.length) + " characters left";
       }
 
     addNoteEventHandlersOnLoad();
@@ -815,11 +827,13 @@ function remove() {
 function saveMemo(idx) {
   elm = getElm();
   memo_text = elm.parentNode.childNodes[4];
+  memoBtn = elm.parentNode.childNodes[6];
   console.log(memo_text.value);
   var pending = document.querySelector("#pending");
   pending.textContent = "edit saved.";
   pending.style.opacity = "1";
   fade(pending);
+  memoBtn.style.display = "none"; //show the save button
 
   chrome.storage.sync.get([idx.toString()], function(result) {
     console.log(result);
@@ -870,7 +884,7 @@ function show(idx) {
           html += '<img class="check" src="images/check.png">';
           html += '<img class="crossoff" src="images/crossoff.png" id="' + i  + '">';
           html += '<img src="images/save.png" style="display:none;" class="save"></img>';
-          html += '<span class="span">' + todos_list[i] + '</span>';     
+          html += '<input type="text" class="span" value="' + todos_list[i] + '">';     
           //html += '<hr>';
       };
     }
@@ -917,7 +931,7 @@ function strikeThrough() {
 
   // determine if the todo item is crossed out or not
   var crossed = true;
-  if (elm.parentNode.childNodes[3].tagName == 'SPAN') {
+  if (elm.parentNode.childNodes[3].tagName == 'INPUT') {
     var crossed = false;
   }
 
@@ -1188,7 +1202,7 @@ function editNote() {
   pending.textContent = "edit pending save.";
   pending.style.opacity = "1";
 
-  og_note = elm.textContent; // original note content
+  og_note = elm.value; // original note content
   console.log(og_note);
   console.log(elm.parentNode.childNodes);
 
@@ -1241,14 +1255,14 @@ function saveEdit() {
     console.log(og_note);
     elm = getElm(); // get the save button
     console.log(elm.parentNode.childNodes);
-    var task = elm.parentNode.childNodes[3].textContent; // get the text of the edited note
+    var task = elm.parentNode.childNodes[3].value; // get the text of the edited note
     console.log(task);
     var parent = elm.parentNode.parentNode.parentNode; // get the index of div element
     idx = parent.id.slice(-1);
 
     // determine if the todo item is crossed out or not
     var isCrossed = true;
-    if (elm.parentNode.childNodes[3].tagName == 'SPAN') {
+    if (elm.parentNode.childNodes[3].tagName == 'INPUT') {
       var isCrossed = false;
     }
 
@@ -1263,8 +1277,10 @@ function saveEdit() {
         todos = dict['todo'];
 
         note_idx = todos.indexOf(og_note);
+        console.log(task);
+        console.log(todos);
         todos[note_idx] = task; // set the old note to the edited note
-
+        console.log(todos);
         dict['todo'] = todos;
         storeSync(idx,dict);
         save_button = elm.parentNode.childNodes[2];

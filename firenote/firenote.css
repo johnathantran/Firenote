@@ -188,7 +188,13 @@ body {
   width: 65%;
   caret-color: silver;
 }
-
+.span {
+  background: none;
+  border: none;
+}
+.span:focus {
+  outline: none;
+}
 .add,.saveMemo {
   margin-left: 5px;
   margin-bottom: 5px;
@@ -201,7 +207,9 @@ body {
   font-size: 9pt;
   outline: none;
 }
-
+.saveMemo {
+  display: none;
+}
 textArea {
   white-space: "pre-line";
   resize: none;
