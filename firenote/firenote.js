@@ -60,9 +60,11 @@ var el = document.getElementById('msgBtn');
 el.addEventListener('click', function() {
   var msgText = document.getElementById('msgText');
   if (msgText.style.opacity == "1") {
-    fade(msgText);
+    document.getElementById('releaseNotes').style.display = "inline-block";
+    msgText.style.opacity = "0";
   }
   else {
+    document.getElementById('releaseNotes').style.display = "none";
     msgText.style.opacity = "1";
   }
 });
@@ -83,11 +85,15 @@ function addNoteEventHandlers(note) {
   
   // if it's a memo style note
   if (note.childNodes[4].nodeName == 'TEXTAREA') {
-    var memoBtn = note.childNodes[5];
+    var memoText = note.childNodes[4];
+    var memoBtn = note.childNodes[6];
     memoBtn.addEventListener('click', function() {
       console.log("saved");
       saveMemo(idx);
     });
+               
+    memoText.addEventListener('keyup', countCharacters, false);
+
   }
   else { // if it's a list style note
     var taskInput = note.childNodes[4];
@@ -210,10 +216,11 @@ function addTodoEventHandlers() {
   console.log(elements);
 
   for (var i = 0; i < elements.length; i++) {
-      elements[i].addEventListener('click', function() {
+
+    elements[i].addEventListener('click', function() {
       console.log("edit item clicked");  
       editNote();
-    });
+      });
   }
   // save an edit
   var elements = document.getElementsByClassName('save');
@@ -248,11 +255,22 @@ function storeSync(idx,dict) {
   });
 }
 
+// dynamically change number of characters remaining in memo
+function countCharacters(e) {    
+  var elm = getElm();
+  console.log(elm);
+  console.log(elm.parentNode.childNodes);
+  var textEntered, countRemaining, counter;          
+  textEntered = elm.parentNode.childNodes[4].value;
+  countRemaining = elm.parentNode.childNodes[5]; 
+  counter = (300 - (textEntered.length));
+  countRemaining.textContent = counter + " characters left";       
+}
+
 // creates notes when the page is loaded (note exists), or when the Add Note button is clicked (note does not exist yet)
 function createNote(exists,idx,memo) {
 
-  console.log("Iteration");
-
+  idx = idx.toString();
   var note = document.createElement('div');
   note.id = "mydiv" + idx;
   document.body.appendChild(note);
@@ -263,7 +281,8 @@ function createNote(exists,idx,memo) {
   note.innerHTML += '<img src="images/exit.png" class="deleteNote" id="exit"></img>';
   
   if (memo == true) {
-    note.innerHTML += '<textarea maxlength="300" class="memo" rows="8" spellcheck="false" id="memo' + idx +'" style="display:inline-block;"></textarea>';
+    note.innerHTML += '<textarea placeholder="Type a memo here..." maxlength="300" class="memo" rows="8" spellcheck="false" id="memo' + idx +'" style="display:inline-block;"></textarea>';
+    note.innerHTML += '<p class="memoCounter" id="memoCounter' + idx + '"> 300 characters left </p>';
     note.innerHTML += '<button class="saveMemo">Save Memo</button>';
   }
   else {
@@ -272,9 +291,6 @@ function createNote(exists,idx,memo) {
   }
 
   var note_header = 'Note ' + idx;
-  
-  console.log(exists,idx);
-  idx = idx.toString();
  
   chrome.storage.sync.get([idx], function(result) {
 
@@ -800,6 +816,10 @@ function saveMemo(idx) {
   elm = getElm();
   memo_text = elm.parentNode.childNodes[4];
   console.log(memo_text.value);
+  var pending = document.querySelector("#pending");
+  pending.textContent = "edit saved.";
+  pending.style.opacity = "1";
+  fade(pending);
 
   chrome.storage.sync.get([idx.toString()], function(result) {
     console.log(result);
@@ -1299,32 +1319,3 @@ function fade(element) {
     
   }, 50);
 }
-/*
-// these lines make it possible for Enter key to submit a note edit
-$(".span").on('keyup', function (e) {
-    if (e.keyCode === 13) {
-        e.preventDefault();
-        // insert 2 br tags (if only one br tag is inserted the cursor won't go to the next line)
-        document.execCommand('insertHTML', false, '<br/>');
-        elm = getElm();
-        console.log(elm);
-        console.log(elm.parentNode.childNodes);
-        // click the Add button for that note when enter key is pressed
-        saveEdit(og_note);
-        //save_button.click();
-        elm.blur();
-        elm.setAttribute("contentEditable", false);
-    }
-});
-*/
-/*
-$(".lists").on('keyup', function (e) {
-  if (e.keyCode === 13) {
-      elm = getElm();
-      console.log(elm);
-      // click the Add button for that note when enter key is pressed
-      elm.blur();
-      elm.setAttribute("contentEditable", false);
-  }
-});
-*/

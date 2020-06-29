@@ -1,3 +1,25 @@
+::-webkit-scrollbar {
+  width: 6px;
+}
+/* Track */
+::-webkit-scrollbar-track {
+  -webkit-border-radius: 11px;
+  border-radius: 11px;
+  background-color: rgb(158, 158, 158);
+}
+/* Handle */
+::-webkit-scrollbar-thumb {
+  -webkit-border-radius: 11px;
+  border-radius: 11px;
+  background:rgb(226, 226, 226);
+  /*border: 0.1px solid rgb(160, 160, 160);*/
+}
+::-webkit-scrollbar-thumb:window-inactive {
+background: rgb(226, 226, 226);
+}
+#addMemo {
+  margin-left: 5px;
+}
 /* Normal white Button as seen on Google.com*/
 .blue {
   color: #444444;
@@ -61,7 +83,14 @@ a {
   width: 700px;
   vertical-align: 0pt;
   margin-left: 10px;
+  opacity: 1;
+  text-align: left;
   opacity: 0;
+}
+#releaseNotes {
+  display: inline-block;
+  vertical-align: 5pt;
+  margin-left: 10px;
   text-align: left;
 }
 #bmc {
@@ -138,7 +167,7 @@ a {
 #edit:hover,#minimize:hover,#exit:hover, #msgBtn {
   cursor: pointer;
 }
-.todoLists,.task,#add {
+.todoLists,.task,.add {
   display: inline-block;
 }
 body {
@@ -155,12 +184,12 @@ body {
   margin-right: 10px;
   margin-bottom: 10px;
   border-radius: 10px;
-  border: 2px solid silver;
+  border: 1px solid silver;
   width: 65%;
   caret-color: silver;
 }
 
-#add,.saveMemo{
+.add,.saveMemo {
   margin-left: 5px;
   margin-bottom: 5px;
   color: #444444;
@@ -179,12 +208,20 @@ textArea {
   margin-left: 5px;
   margin-right: 5px;
   margin-bottom: 5px;
+  border: none;
+  /*
   border-radius: 5px;
   border: 1px solid silver;
+  */
   width: 93%;
   background-color: #fcfacf;
-}
 
+}
+textArea:focus {
+  border: 1px solid silver;
+  border-radius: 5px;
+  outline: none;
+}
 span:focus, .task:focus {
   outline: none;
 }
@@ -209,7 +246,7 @@ span:focus, .task:focus {
   margin-bottom: 10px;
 }
 
-#add:hover{
+.add:hover, .saveMemo:hover{
   border: 1px #C6C6C6 solid;
   box-shadow: 1px 1px 1px #EAEAEA;
   color: #333333;
@@ -284,8 +321,11 @@ span {
 }
 #pending {
   opacity: 0;
-
   color: rgb(228, 112, 112);
+}
+.memoCounter {
+  display: inline-block;
+  color: rgb(133, 131, 131);
 }
 .crossoff, .check {
   width: 10px;
