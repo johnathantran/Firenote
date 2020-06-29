@@ -53,6 +53,22 @@ $(document).ready(function() {
   el.addEventListener('click', function() {
       addNote(memo=true);
   });
+  var modal = document.getElementById("myModal");
+  var btn = document.getElementById("myBtn");
+  var span = document.getElementsByClassName("close")[0];
+  btn.onclick = function() {
+    modal.style.display = "block";
+  }
+  // When the user clicks on <span> (x), close the modal
+  span.onclick = function() {
+    modal.style.display = "none";
+  }
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  }
 });
 
 // message button
@@ -122,7 +138,6 @@ function addNoteEventHandlers(note) {
   }
 
   var headerItem = document.querySelector('#headerItem' + idx);
-  console.log(headerItem);
 
   // drag note
   header.addEventListener('mousedown', function() {
@@ -162,13 +177,11 @@ function addNoteEventHandlersOnLoad() {
     console.log(result);
     
     if (attachedListeners == true) {
-      console.log("Already have listeners...");
       return;
     }
 
     all_notes = (document.querySelectorAll('.drag'));
     for (i=0; i < all_notes.length; i++) {
-      console.log(all_notes[i]);
       addNoteEventHandlers(all_notes[i]);
     }
     console.log("Adding listeners...");
@@ -203,8 +216,6 @@ function addExtensionBtnListener() {
 function addTodoEventHandlers() {
   // strikethrough
   var elements = document.getElementsByClassName('check');
-  console.log(elements);
-
   for (var i = 0; i < elements.length; i++) {
       elements[i].addEventListener('click', function() {
       strikeThrough();
@@ -212,7 +223,6 @@ function addTodoEventHandlers() {
   }
   // remove a todo item
   var elements = document.getElementsByClassName('crossoff');
-  console.log(elements);
   for (var i = 0; i < elements.length; i++) {
       elements[i].addEventListener('click', function() {
       console.log("crossoff clicked");
@@ -222,8 +232,6 @@ function addTodoEventHandlers() {
   }
   // edit a todo item
   var elements = document.getElementsByClassName('span');
-  console.log(elements);
-
   for (var i = 0; i < elements.length; i++) {
 
     elements[i].addEventListener('click', function() {
@@ -240,8 +248,6 @@ function addTodoEventHandlers() {
   }
   // save an edit
   var elements = document.getElementsByClassName('save');
-  console.log(elements);
-
   for (var i = 0; i < elements.length; i++) {
       elements[i].addEventListener('click', function() {
       console.log("save item clicked");  
@@ -327,11 +333,11 @@ function createNote(exists,idx,memo) {
       note.childNodes[0].value = note_header;
 
       // check if the note is minimized
-      console.log(dict);
       if (dict['minimized'] == true) {
         note.childNodes[4].style.display = 'none';
         note.childNodes[5].style.display = 'none';
         note.childNodes[6].style.display = 'none';
+        note.childNodes[7].style.display = 'none';
       }
       // adds the new note header to Notes Dock
       note_list = document.querySelector('#myNotes');
@@ -804,7 +810,7 @@ function remove() {
 
       // determine if the todo item is crossed out or not
       var isTodo= false;
-      if (elm.parentNode.childNodes[3].tagName == 'INPUT') {
+      if (elm.parentNode.childNodes[3].style.textDecoration !== 'line-through') {
         var isTodo = true;
       }
       console.log(isTodo);
@@ -845,6 +851,7 @@ function undo() {
   }
   chrome.storage.sync.get([idx.toString()], function(result) {
     dict = JSON.parse(result[idx]);
+    console.log(dict['removed'])
     if (dict['removed'] == undefined) {
       dict['removed'] = "";
       var pending = document.getElementById('pending');
@@ -930,7 +937,7 @@ function show(idx) {
         html += '<img class="check" src="images/check.png">';
         html += '<img class="crossoff" src="images/crossoff.png" id="' + i  + '">';
         html += '<img src="images/save.png" style="display:none;" class="save"></img>';
-        html += '<del class="span">' + crossed_list[i] + '</del>';
+        html += '<input style="text-decoration:line-through; color:silver;" class="span" value="' + crossed_list[i] + '">';
       }
     }
     html += '</ul>';
@@ -965,7 +972,7 @@ function strikeThrough() {
 
   // determine if the todo item is crossed out or not
   var crossed = true;
-  if (elm.parentNode.childNodes[3].tagName == 'INPUT') {
+  if (elm.parentNode.childNodes[3].style.textDecoration !== 'line-through') {
     var crossed = false;
   }
 
@@ -1057,6 +1064,7 @@ function dockAll() {
     // check if all elements are hidden
     var all_hidden = true;
     for (var i = 1; i <= header_list.length; i++) {
+      console.log(result)
       dict = JSON.parse(result[i]);
       if (dict['hidden'] == false) {
         all_hidden = false;
@@ -1240,10 +1248,6 @@ function editNote() {
   pending.style.opacity = "1";
 
   og_note = elm.value; // original note content
-  if (elm.tagName == 'DEL') {
-    og_note = elm.textContent;
-    console.log(elm.textContent);
-  }
   console.log(og_note);
   console.log(elm.parentNode.childNodes);
 
@@ -1303,7 +1307,7 @@ function saveEdit() {
 
     // determine if the todo item is crossed out or not
     var isCrossed = true;
-    if (elm.parentNode.childNodes[3].tagName == 'INPUT') {
+    if (elm.parentNode.childNodes[3].style.textDecoration !== 'line-through') {
       var isCrossed = false;
     }
 
