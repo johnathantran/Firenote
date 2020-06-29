@@ -92,8 +92,10 @@ function addNoteEventHandlers(note) {
     });
     
     memoText.addEventListener('click', function() {
-      document.getElementById('pending').textContent = "edit pending save.";
-      document.getElementById('pending').style.opacity = "1";
+      if (memoText.value.length < 300) {
+        document.getElementById('pending').textContent = "edit pending save.";
+        document.getElementById('pending').style.opacity = "1";
+      }
       memoBtn.style.display = "inline-block"; // show the save button
     });
     memoText.addEventListener('keyup', countCharacters, false);
@@ -296,7 +298,7 @@ function createNote(exists,idx,memo) {
     note.innerHTML += '<button class="saveMemo">Save Memo</button>';
   }
   else {
-    note.innerHTML += '<input maxlength="100" class="task" id="task' + idx + '" style="display:inline-block;"><button id="add" class="add">+ Add</button>';
+    note.innerHTML += '<input maxlength="100" class="task" placeholder="Add an item" id="task' + idx + '" style="display:inline-block;"><button id="add" class="add"><img class="addIcon" src="images/add.png"></button>';
     note.innerHTML += '<div class="todoLists" id="todos' + idx + '"></div>';
   }
 
@@ -678,8 +680,7 @@ function deleteNote() {
   if (isNaN(idx) == true) {
     idx = elm.id.slice(-1);
   }
-  console.log(idx);
-  var header = elm.childNodes[0].textContent;
+  var header = elm.childNodes[0].value;
   var r = confirm("Are you sure you want to delete " + header + "?");
   if (r== false) {
     return;
@@ -798,7 +799,7 @@ function remove() {
 
       // determine if the todo item is crossed out or not
       var isTodo= false;
-      if (elm.parentNode.childNodes[3].tagName == 'SPAN') {
+      if (elm.parentNode.childNodes[3].tagName == 'INPUT') {
         var isTodo = true;
       }
       console.log(isTodo);
@@ -826,6 +827,7 @@ function remove() {
 // save memo
 function saveMemo(idx) {
   elm = getElm();
+
   memo_text = elm.parentNode.childNodes[4];
   memoBtn = elm.parentNode.childNodes[6];
   console.log(memo_text.value);

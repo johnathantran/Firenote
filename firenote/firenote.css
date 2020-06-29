@@ -9,8 +9,7 @@
 }
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  -webkit-border-radius: 11px;
-  border-radius: 11px;
+ 
   background:rgb(226, 226, 226);
   /*border: 0.1px solid rgb(160, 160, 160);*/
 }
@@ -28,6 +27,7 @@ background: rgb(226, 226, 226);
   padding: 5px 10px;
   border-radius: 2px;
   font-family: 'Montserrat','sans-serif';
+  font-weight: 600;
   font-size: 9pt;
   outline: none;
   color: white;
@@ -179,14 +179,21 @@ body {
   background-color: #363640;
   color: #f0f0f0;
 }
+
 .task {
-  margin-left: 10px;
-  margin-right: 10px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  border: 1px solid silver;
-  width: 65%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid silver;
   caret-color: silver;
+  width: 84%;
+  margin-left: 5px;
+  margin-bottom: 14px;
+  font-size: 11pt;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+}
+::placeholder {
+  opacity: 0.7;
 }
 .span {
   background: none;
@@ -195,7 +202,8 @@ body {
 .span:focus {
   outline: none;
 }
-.add,.saveMemo {
+
+.saveMemo {
   margin-left: 5px;
   margin-bottom: 5px;
   color: #444444;
@@ -207,6 +215,39 @@ body {
   font-size: 9pt;
   outline: none;
 }
+
+/*
+.saveMemo {
+  background: transparent;
+  outline: none;
+  border: none;
+  font-weight: bold;
+  font-size: 9pt;
+  border-bottom: 2px solid gray;
+  color: gray;
+}*/
+.saveMemoIcon {
+  width: 53px;
+}
+.add {
+  background: transparent;
+  font-weight: bold;
+  font-size: 16pt;
+  outline: none;
+  margin-left: 5px;
+  margin-bottom: 5px;
+  color: #444444;
+  border: none;
+}
+.addIcon {
+  width: 15px;
+  transition: all .2s ease-in-out;
+}
+.addIcon:hover {
+  transform: scale(1.1);
+  cursor:pointer
+}
+
 .saveMemo {
   display: none;
 }
@@ -254,7 +295,7 @@ span:focus, .task:focus {
   margin-bottom: 10px;
 }
 
-.add:hover, .saveMemo:hover{
+.saveMemo:hover{
   border: 1px #C6C6C6 solid;
   box-shadow: 1px 1px 1px #EAEAEA;
   color: #333333;
@@ -313,6 +354,11 @@ li {
   font-weight: bold;
   border: 1px solid #d3d3d3;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
+}
+#dockTitle {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  letter-spacing: 2px;
 }
 .headerList {
   font-size: 10pt;
@@ -393,26 +439,25 @@ span {
 }
 del {
   color: silver;
+  font-family: 'Lato',sans-serif;
 }
 
 .dragHeader {
   margin-left: 5px;
   padding-top, padding-bottom: 5px;
   margin-right: 10px;
-  margin-bottom: 10px;
   height: 30px;
   width: 72%;
   cursor: move;
   z-index: 10;
   border: none;
   background-color: #fcfacf;
-  /*background-color: #f1f1f1;*/
-
   color: #61615c;
   font-weight: 700;
   vertical-align: middle;
   line-height: 30px;
-
+  font-size: 11pt;
+  font-family: 'Montserrat', sans-serif;'
   float: left;
   overflow: hidden;
   p {
