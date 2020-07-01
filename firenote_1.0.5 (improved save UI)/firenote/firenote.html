@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="firenote.css" media="all" rel="stylesheet">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <script src="jquery-3.5.1.min.js"></script>
+</head>
+
+<body>
+<div id="container">
+
+  <div id="menu">
+    <div><button class="collapsible" id="toggleDarkMode">dark mode</button></div>
+    <div><button class="clear" id="clearAll">clear all</button></div>
+    <div><button class="clear" id="dockAll">dock all</button></div>
+    <div><button class="clear" id="myBtn">quick guide +</button></div>
+    <div>
+      <button class="collapsible">contact +</button>
+      <div class="content"> <p>As a first time developer, your support
+        is incredibly important to me to improve and build upon this app.
+      Feel free to contact me with your ideas, feedback, and bug reports: </p>
+      <p><img id="email" src="images/email.png"><a href = "mailto: firenoteapp@gmail.com"> firenoteapp@gmail.com</a></p>
+      <p><img id="star" src="images/star.png"><a href="https://chrome.google.com/webstore/detail/firenote-notes-todo-lists/fffpcpifbaimmmmclpmfhjgbiokbhnea?hl=en" target="_blank"> Leave a Review</a></p>
+      <p><img id="github" src="images/web.png"><a href="https://sites.google.com/view/firenote" target="_blank"> Firenote Home</a></p>
+      <p> I will do my best to respond within 24 hours. If you enjoy this app, you can support me by buying me a coffee with the link below :) </p>
+      <p>I'd like to keep this extension free on the Chrome store and develop more features in the future.
+        Thank you! </p>
+      <p id="signature">- jtran </p></div>
+    </div>
+  </div>
+
+  <div class="menuIcon" id="hideMenu">
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+  </div>
+
+  <div id="myNotes"><p id="dockTitle">Notes Dock</p><p id="hideTip"> click to hide or show a note. </p><hr></div><br>
+  <div id="intro">
+    <div id="centerTitle"><h1 id="fire">fire</h1><h1>note</h1></div>
+    <p> welcome to your customizable workspace for virtual sticky notes. jot down your thoughts. write to-do lists. save paper and stay organized. </p>
+    <hr><br>
+    <button id="addNote" class="blue">+ Add New List</button>
+    <button id="addMemo" class="blue">+ Add New Memo</button>
+    <p id="pending"> edit pending save. </p>
+  </div>
+  <div id="footer">
+    <a href="https://www.buymeacoffee.com/jtran" target="_blank"><img id="bmc" src="images/bmc-button.png"></a>
+  </div>
+  
+
+  <!-- The Modal -->
+  <div id="myModal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h1>a quick guide</h1>
+      <hr>
+      <h3> You can add "List" and "Memo" notes to your workspace. Both will sync to your Google account so you can access your notes anywhere.</h3>
+      <p> "List" notes allow you to add, remove, and cross out items in a todo-list format. "Memo" notes allow you to write and save short paragraph-style notes.
+        You can drag notes across the screen by double-clicking the note headers.
+      </p>
+      <img id="guide" src="images/help.png">
+
+      <table class="center">
+        <tr>
+          <td><strong>1. Edit Title </strong></td>
+          <td>Click to edit title. Click again or hit Enter to save changes.</td>
+        </tr>
+        <tr>
+          <td><strong>2. Minimize </strong></td>
+          <td>Minimize note. To completely hide the note, click on the note title in the Notes Dock.</td>
+        </tr>
+        <tr>
+          <td><strong>3. Delete Note </strong></td>
+          <td>Delete note. Careful - this cannot be undone.</td>
+        </tr>
+        <tr>
+          <td><strong>4. Add Item </strong></td>
+          <td>Type in your input and click the "+" button or hit Enter to add an item to the list.</td>
+        </tr>
+        <tr>
+          <td><strong>5. Undo Remove </strong></td>
+          <td>Recovers the most recent item deleted from the list.</td>
+        </tr>
+        <tr>
+          <td><strong>6. Edit Item </strong></td>
+          <td>Click on any item on the list to edit its contents. Click the "Save" icon that appears or hit Enter to save your edit.</td>
+        </tr>
+        <tr>
+          <td><strong>7. Cross Off </strong></td>
+          <td>Crosses off an item from the list.</td>
+        </tr>
+        <tr>
+          <td><strong>8. Remove Item </strong></td>
+          <td>Removes an item from the list. This can be undone with your most recent removal. </td>
+        </tr>
+        <tr>
+          <td><strong>9. Save Memo </strong></td>
+          <td>Saves a memo-style note. Remember to do this every time you make an edit.</td>
+        </tr>
+      </table>
+
+
+    </div>
+  </div>
+ 
+  <div id="messages">
+    <div id="msgBtn"><img id="messageImg" src="images/message.png"></div>
+    <p id="releaseNotes"> 2.0 release notes </p>
+    <div id="msgText">
+      <strong>Version 2.0 is released! Some big changes here: </strong>
+      <ol>
+        <li>"Memo" notes have been added as an alternative to the list-style feature.</li>
+        <li>Added an "Undo" button to recover the most recent removed item from a list.</li>
+        <li>You can save edits to list items now by pressing Enter.</li>
+        <li>UI for notes have been updated.</li>
+        
+      </ol>
+      <p> This is a big update so please let me know if there are any issues with your notes and I will resolve them as quickly as possible (firenoteapp@gmail.com).
+        Your existing notes may not reflect all of these new features. If this is the case, contact me and try recreating the note by adding a new note and copying the items over.
+      Thank you and I am here for you to correct any issues. Please leave a review if you enjoy this app! </p>
+  </div>
+</div>
+
+<script src="firenote.js"></script>
+</body>
+</html>
