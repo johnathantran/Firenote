@@ -260,9 +260,13 @@ body {
 ::placeholder {
   opacity: 0.7;
 }
+.lists {
+  width: 250px;
+}
 .span {
   background: none;
   border: none;
+  width: 80%;
 }
 .span:focus {
   outline: none;
@@ -349,7 +353,7 @@ span:focus, .task:focus {
   line-height: 0px; /*or you could use 4em*/
   vertical-align: middle;
   padding-left: 0px;
-  padding-right: 10px;
+  padding-right: 5px;
 }
 
 .saveMemo {
