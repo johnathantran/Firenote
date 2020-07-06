@@ -238,6 +238,7 @@ function addTodoEventHandlers() {
       console.log("edit item clicked");  
       editNote();
       });
+    /*
     elements[i].addEventListener('keyup', function (e) {
       console.log("typing");
       if (e.keyCode == 13) {
@@ -245,6 +246,7 @@ function addTodoEventHandlers() {
         saveEdit();
       }
     });
+    */
   }
   // save an edit
   var elements = document.getElementsByClassName('save');
@@ -303,12 +305,12 @@ function createNote(exists,idx,memo) {
   note.innerHTML += '<img src="images/exit.png" class="deleteNote" id="exit"></img>';
   
   if (memo == true) {
-    note.innerHTML += '<textarea placeholder="Type a memo here..." maxlength="300" class="memo" rows="8" spellcheck="false" id="memo' + idx +'" style="display:inline-block;"></textarea>';
-    note.innerHTML += '<p class="memoCounter" id="memoCounter' + idx + '">Max 300 characters</p>';
+    note.innerHTML += '<textarea placeholder="Type a memo here..." maxlength="500" class="memo" rows="8" spellcheck="false" id="memo' + idx +'" style="display:inline-block;"></textarea>';
+    note.innerHTML += '<p class="memoCounter" id="memoCounter' + idx + '">Max 500 characters</p>';
     note.innerHTML += '<button class="saveMemo">Save Memo</button>';
   }
   else {
-    note.innerHTML += '<input maxlength="100" class="task" placeholder="Add an item" id="task' + idx + '" style="display:inline-block;"><img src="images/add.png" id="add" class="add">';
+    note.innerHTML += '<input maxlength="250" class="task" placeholder="Add an item" id="task' + idx + '" style="display:inline-block;"><img src="images/add.png" id="add" class="add">';
     note.innerHTML += '<img class="undo" id="undo' + idx + '" src="images/undo.png">';
     note.innerHTML += '<div class="todoLists" id="todos' + idx + '"></div>';
   }
@@ -860,6 +862,37 @@ function undo() {
     }
     elm.parentNode.childNodes[4].value = dict['removed'];
     elm.parentNode.childNodes[5].click();
+
+    /*
+    var task = dict['removed'];
+    console.log(task);
+
+    // get the current list of todos for that note
+    var todos_str = dict['todo'];
+    console.log(todos_str);
+
+    // if there is an actual list
+    if (todos_str !== null) {
+
+      // add the new task to the list of todos for that note
+      var todos = todos_str;
+      console.log(todos);
+      if (todos[todos.length - 1] != task) {
+          todos.push(task);
+      }
+    }
+    else {
+      todos = [task];
+      console.log(todos);
+    }
+    dict['todo'] = (todos);
+    console.log(dict['todo']);
+
+    storeSync(idx,dict);
+    
+    console.log(dict);
+    show(idx);
+    */
   });
 }
 
@@ -925,7 +958,7 @@ function show(idx) {
           html += '<img class="check" src="images/check.png">';
           html += '<img class="crossoff" src="images/crossoff.png" id="' + i  + '">';
           html += '<img src="images/save.png" style="display:none;" class="save"></img>';
-          html += '<input type="text" class="span" value="' + todos_list[i] + '">';     
+          html += '<span type="text" class="span">' + todos_list[i] + '</span>';     
           //html += '<hr>';
       };
     }
@@ -937,7 +970,7 @@ function show(idx) {
         html += '<img class="check" src="images/check.png">';
         html += '<img class="crossoff" src="images/crossoff.png" id="' + i  + '">';
         html += '<img src="images/save.png" style="display:none;" class="save"></img>';
-        html += '<input style="text-decoration:line-through; color:silver;" class="span" value="' + crossed_list[i] + '">';
+        html += '<span style="text-decoration:line-through; color:silver;" class="span">' + crossed_list[i] + '</span>';
       }
     }
     html += '</ul>';
@@ -1246,8 +1279,7 @@ function editNote() {
   var pending = document.querySelector("#pending");
   pending.textContent = "edit pending save.";
   pending.style.opacity = "1";
-
-  og_note = elm.value; // original note content
+  og_note = elm.textContent; // original note content
   console.log(og_note);
   console.log(elm.parentNode.childNodes);
 
@@ -1300,7 +1332,7 @@ function saveEdit() {
     console.log(og_note);
     elm = getElm(); // get the save button
     console.log(elm.parentNode.childNodes);
-    var task = elm.parentNode.childNodes[3].value; // get the text of the edited note
+    var task = elm.parentNode.childNodes[3].textContent; // get the text of the edited note
     console.log(task);
     var parent = elm.parentNode.parentNode.parentNode; // get the index of div element
     idx = parent.id.slice(-1);
@@ -1332,7 +1364,6 @@ function saveEdit() {
         save_button.style.display = "none";
         pending.textContent = "edit saved.";
         fade(pending);
-        //pending.style.opacity = "0";
       }
       else {
         console.log("crossed is true");
@@ -1360,7 +1391,7 @@ function saveEdit() {
         console.log(save_button.style.display);
         pending.textContent = "edit saved.";
         fade(pending);
-        //pending.style.opacity = "0";
+        elm.parentNode.childNodes[3].blur();
       }
     });
 }

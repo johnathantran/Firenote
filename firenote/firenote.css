@@ -256,6 +256,7 @@ body {
   font-size: 11pt;
   font-family: 'Montserrat', sans-serif;
   font-weight: 500;
+  white-space: pre-wrap;
 }
 ::placeholder {
   opacity: 0.7;
@@ -267,6 +268,7 @@ body {
   background: none;
   border: none;
   width: 80%;
+  white-space: pre-wrap;
 }
 .span:focus {
   outline: none;
