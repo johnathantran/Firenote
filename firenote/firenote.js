@@ -95,18 +95,14 @@ $(document).ready(function() {
     msgText.style.opacity = "1";
   }
   });
-
 });
-
 
 // NOTE EVENT HANDLERS
 // adds event handlers for elements on a note
 function addNoteEventHandlers(note) {
 
-  var idx = note.id.slice(-2);
-  if (isNaN(idx) == true) {
-    idx = note.id.slice(-1);
-  }
+  idx = getIdx(note);
+
   var header = note.childNodes[0];
   var editHeaderBtn = note.childNodes[1];
   var minBtn = note.childNodes[2];
@@ -122,7 +118,7 @@ function addNoteEventHandlers(note) {
     });
     
     memoText.addEventListener('click', function() {
-      if (memoText.value.length < 300) {
+      if (memoText.value.length < 500) {
         document.getElementById('pending').textContent = "edit pending save.";
         document.getElementById('pending').style.opacity = "1";
       }
@@ -149,7 +145,6 @@ function addNoteEventHandlers(note) {
     undoBtn.addEventListener('click', function() {
       undo();
     });
-    
   }
 
   var headerItem = document.querySelector('#headerItem' + idx);
@@ -281,7 +276,7 @@ function addTodoEventHandlers() {
       }
     });
     */
-
+   
     // Context menu
     elements[i].addEventListener("contextmenu", e => {
       move_select = getElm();
@@ -330,13 +325,21 @@ function storeSync(idx,dict) {
 // dynamically change number of characters remaining in memo
 function countCharacters(e) {    
   var elm = getElm();
-  console.log(elm);
-  console.log(elm.parentNode.childNodes);
   var textEntered, countRemaining, counter;          
   textEntered = elm.parentNode.childNodes[4].value;
   countRemaining = elm.parentNode.childNodes[5]; 
-  counter = (300 - (textEntered.length));
+  counter = (500 - (textEntered.length));
   countRemaining.textContent = counter + " characters left";       
+}
+
+// returns the index of the note
+function getIdx(elm) {
+  // if there are more than 10 notes, get last 2 chars
+  idx = elm.id.slice(-2);
+  if (isNaN(idx) == true) {
+    idx = elm.id.slice(-1);
+  }
+  return idx;
 }
 
 // creates notes when the page is loaded (note exists), or when the Add Note button is clicked (note does not exist yet)
@@ -587,16 +590,12 @@ function dragElement(elm) {
   // get the parent div element
   elm = elm.parentNode;
   console.log(elm);
+
   // get the index of div element
-  // if there are more than 10 notes, get last 2 chars
-  idx = elm.id.slice(-1);
-  if (idx == 0) {
-    idx = elm.id.slice(-2);
-  }
+  idx = getIdx(elm);
+
   elm = document.getElementById("mydiv" + idx);
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-
-  //document.getElementById(elm.id).onmousedown = dragMouseDown;
   
   if (document.getElementById(elm.id + "header")) {
     // if present, the header is where you move the DIV from:
@@ -631,7 +630,7 @@ function dragElement(elm) {
     document.onmouseup = null;
     document.onmousemove = null;
     var elm = getElm().parentNode;
-    idx = elm.id.slice(-1);
+    idx = getIdx(elm);
 
     chrome.storage.sync.get([idx.toString()], function(result) {
       dict = JSON.parse(result[idx]);
@@ -736,11 +735,9 @@ function deleteNote() {
   var elm = getElm();
   // get the parent div element (the note)
   elm = elm.parentNode;
-  // if there are more than 10 notes, get last 2 chars
-  idx = elm.id.slice(-2);
-  if (isNaN(idx) == true) {
-    idx = elm.id.slice(-1);
-  }
+
+  idx = getIdx(elm);
+
   var header = elm.childNodes[0].value;
   var r = confirm("Are you sure you want to delete " + header + "?");
   if (r== false) {
@@ -784,11 +781,7 @@ function add() {
     console.log(elm);
 
     // get the index of div element
-    idx = elm.id.slice(-2);
-    if (isNaN(idx) == true) { // if is NOT a number
-      idx = elm.id.slice(-1); // not a 2 digit number
-    }
-    console.log(idx);
+    idx = getIdx(elm);
 
     // add a task for that note
     var todos = new Array;
@@ -839,13 +832,9 @@ function remove() {
     var elm = getElm();
     console.log(elm);
     // get the parent div element
-    parent = elm.parentNode.parentNode.parentNode;
+    var parent = elm.parentNode.parentNode.parentNode;
     // get the index of div element
-    idx = parent.id.slice(-2);
-   
-    if (isNaN(idx) == true) { // if is NOT a number
-      idx = parent.id.slice(-1); // not a 2 digit number
-    }
+    idx = getIdx(parent);
     console.log(idx);
 
     var id = elm.getAttribute('id');
@@ -895,10 +884,8 @@ function undo() {
   elm = getElm();
 
   // get the index of div element
-  idx = elm.parentNode.id.slice(-2);
-  if (isNaN(idx) == true) { // if is NOT a number
-    idx = elm.parentNode.id.slice(-1); // not a 2 digit number
-  }
+  idx = getIdx(elm.parentNode);
+
   chrome.storage.sync.get([idx.toString()], function(result) {
     dict = JSON.parse(result[idx]);
     console.log(dict['removed'])
@@ -1039,12 +1026,10 @@ function show(idx) {
 function strikeThrough() {
 
   var elm = getElm();
+  var parent = elm.parentNode.parentNode.parentNode;
 
   // get the index of div element
-  idx = elm.parentNode.parentNode.parentNode.id.slice(-2);
-  if (isNaN(idx) == true) { // if is NOT a number
-    idx = elm.parentNode.parentNode.parentNode.id.slice(-1); // not a 2 digit number
-  }
+  idx = getIdx(parent);
 
   // get id of the todo item we are trying to remove
   var id = elm.parentNode.childNodes[1].getAttribute('id');
@@ -1184,14 +1169,9 @@ function hideNote(idx) {
   // save hidden feature to local storage
   elm = getElm();
 
-  console.log(elm);
-  if (idx == undefined) { // if not docking all notes
-    idx = elm.id.slice(-2);
-    if (isNaN(idx) == true) {
-      idx = elm.id.slice(-1);
-    }
-  }
+  idx = getIdx(elm);
   console.log(idx);
+
   chrome.storage.sync.get([idx.toString()], function(result) {
     console.log(result);
     dict = JSON.parse(result[idx]);
@@ -1243,12 +1223,8 @@ function hideNote(idx) {
 // minimize a note leaving only the header
 function minimize() {
   elm = getElm();
-  console.log(elm.parentNode.childNodes);
 
-  var idx = elm.parentNode.id.slice(-2);
-  if (isNaN(idx) == true) {
-    idx = elm.parentNode.id.slice(-1);
-  }
+  idx = getIdx(elm.parentNode);
 
   console.log(idx);
   var hide_input = elm.parentNode.childNodes[4];
@@ -1322,20 +1298,19 @@ function editHeader(idx) {
 
 // moves an item up the list
 function moveItem(move_select, direction) {
-  var idx = move_select.parentNode.parentNode.parentNode.id.slice(-1);
+
+  var parent = move_select.parentNode.parentNode.parentNode;
+  idx = getIdx(parent);
+
   var isCrossed = false;
 
   if (move_select.style.textDecoration == 'line-through') {
     isCrossed = true;
   }
   console.log(move_select);
-  // get the index of div element
-  // if there are more than 10 notes, get last 2 chars
-  if (idx == 0) {
-    idx = move_select.parentNode.parentNode.parentNode.id.slice(-2);
-  }
+
   var move_item = move_select.innerHTML;
-  console.log(idx);
+
   chrome.storage.sync.get([idx.toString()], function(result) {
     dict = JSON.parse(result[idx]);
     var todos = dict['todo'];
@@ -1439,8 +1414,9 @@ function saveEdit() {
     console.log(elm.parentNode.childNodes);
     var task = elm.parentNode.childNodes[3].textContent; // get the text of the edited note
     console.log(task);
+
     var parent = elm.parentNode.parentNode.parentNode; // get the index of div element
-    idx = parent.id.slice(-1);
+    idx = getIdx(parent);
 
     // determine if the todo item is crossed out or not
     var isCrossed = true;
