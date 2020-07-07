@@ -276,7 +276,7 @@ function addTodoEventHandlers() {
       }
     });
     */
-   
+
     // Context menu
     elements[i].addEventListener("contextmenu", e => {
       move_select = getElm();
@@ -1045,11 +1045,8 @@ function strikeThrough() {
   if (crossed == false) {
     
     chrome.storage.sync.get([idx.toString()], function(result) {
-      console.log(result);
-      console.log(result[idx]);
+      
       dict = JSON.parse(result[idx]);
-      console.log(dict);
-      console.log(dict['todo'])
 
       var todos = dict['todo'];
       console.log(todos);
@@ -1173,9 +1170,8 @@ function hideNote(idx) {
   console.log(idx);
 
   chrome.storage.sync.get([idx.toString()], function(result) {
-    console.log(result);
+
     dict = JSON.parse(result[idx]);
-    console.log(dict);
     console.log(dict['todo']);
 
     div_to_hide = document.querySelector('#mydiv' + idx);
@@ -1361,8 +1357,7 @@ function editNote() {
   pending.style.opacity = "1";
   og_note = elm.textContent; // original note content
   console.log(og_note);
-  console.log(elm.parentNode.childNodes);
-
+  
   shown_save_count = 0;
   var displayed;
   // check for existing save buttons (pending edits)
