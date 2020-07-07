@@ -61,7 +61,7 @@
       <hr>
       <h3> You can add "List" and "Memo" notes to your workspace. Both will sync to your Google account so you can access your notes anywhere.</h3>
       <p> "List" notes allow you to add, remove, and cross out items in a todo-list format. "Memo" notes allow you to write and save short paragraph-style notes.
-        You can drag notes across the screen by double-clicking the note headers.
+        You can drag notes across the screen by double-clicking the note headers. You can also rearrange list items by right clicking on the item in the list.
       </p>
       <img id="guide" src="images/help.png">
 
@@ -110,20 +110,26 @@
  
   <div id="messages">
     <div id="msgBtn"><img id="messageImg" src="images/message.png"></div>
-    <p id="releaseNotes"> 2.0 release notes </p>
+    <p id="releaseNotes"> 2.0.2 release notes </p>
     <div id="msgText">
-      <strong>Version 2.0 is released! Some big changes here: </strong>
+      <strong>Version 2.0.2 is released! The changes: </strong>
       <ol>
-        <li>"Memo" notes have been added as an alternative to the list-style feature.</li>
-        <li>Added an "Undo" button to recover the most recent removed item from a list.</li>
-        <li>You can save edits to list items now by pressing Enter.</li>
-        <li>UI for notes have been updated.</li>
-        
+        <li>You can now rearrange list items by right clicking the item on the list.</li>
+        <li>Multi-line list items are now available upon request. However, this means that edits to list items will no 
+          longer be saved by pressing the "Enter" key. Instead, manually save edits by clicking the save icon.
+        </li>
       </ol>
-      <p> This is a big update so please let me know if there are any issues with your notes and I will resolve them as quickly as possible (firenoteapp@gmail.com).
+      <p> As always, please let me know of any issues and I will resolve them as quickly as possible (firenoteapp@gmail.com).
         Your existing notes may not reflect all of these new features. If this is the case, contact me and try recreating the note by adding a new note and copying the items over.
-      Thank you and I am here for you to correct any issues. Please leave a review if you enjoy this app! </p>
+      Thank you and I am here for you to make this app a powerful productivity tool for your daily life. Please leave a review if you enjoy this app! </p>
   </div>
+</div>
+
+<div class="contextMenu">
+  <ul class="menu-options">
+    <li class="menu-option moveup">Move Up</li>
+    <li class="menu-option movedown">Move Down</li>
+  </ul>
 </div>
 
 <script src="firenote.js"></script>

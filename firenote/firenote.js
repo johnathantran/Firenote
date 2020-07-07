@@ -6,7 +6,7 @@
 //chrome.storage.sync.remove('1');
 // add event listeners to onclick elements
 $(document).ready(function() {
- 
+  
   var coll = document.getElementsByClassName("collapsible");
 
   for (i = 0; i < coll.length; i++) {
@@ -69,11 +69,22 @@ $(document).ready(function() {
       modal.style.display = "none";
     }
   }
-});
 
-// message button
-var el = document.getElementById('msgBtn');
-el.addEventListener('click', function() {
+  // context menu
+  const move_down = document.querySelector(".movedown");
+  const move_up = document.querySelector(".moveup");
+  // runs this function when a menu item is clicked
+  move_up.addEventListener("click", e => {
+    moveItem(move_select, "up");
+  });
+  // runs this function when a menu item is clicked
+  move_down.addEventListener("click", e => {
+    moveItem(move_select, "down");
+  });
+  
+  // message button
+  var el = document.getElementById('msgBtn');
+  el.addEventListener('click', function() {
   var msgText = document.getElementById('msgText');
   if (msgText.style.opacity == "1") {
     document.getElementById('releaseNotes').style.display = "inline-block";
@@ -83,7 +94,10 @@ el.addEventListener('click', function() {
     document.getElementById('releaseNotes').style.display = "none";
     msgText.style.opacity = "1";
   }
+  });
+
 });
+
 
 // NOTE EVENT HANDLERS
 // adds event handlers for elements on a note
@@ -134,7 +148,8 @@ function addNoteEventHandlers(note) {
     });
     undoBtn.addEventListener('click', function() {
       undo();
-    })
+    });
+    
   }
 
   var headerItem = document.querySelector('#headerItem' + idx);
@@ -232,6 +247,25 @@ function addTodoEventHandlers() {
   }
   // edit a todo item
   var elements = document.getElementsByClassName('span');
+
+  // Context menu
+  const menu = document.querySelector(".contextMenu");
+  let menuVisible = false;
+  const toggleMenu = command => {
+    menu.style.display = command === "show" ? "block" : "none";
+    menuVisible = !menuVisible;
+  };
+  // sets the position of the menu at mouse click
+  const setPosition = ({ top, left }) => {
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
+    toggleMenu("show");
+  };
+  // hides the context menu if you click outside it
+  window.addEventListener("click", e => {
+    if (menuVisible) toggleMenu("hide");
+  });
+
   for (var i = 0; i < elements.length; i++) {
 
     elements[i].addEventListener('click', function() {
@@ -247,6 +281,20 @@ function addTodoEventHandlers() {
       }
     });
     */
+
+    // Context menu
+    elements[i].addEventListener("contextmenu", e => {
+      move_select = getElm();
+      
+      e.preventDefault();
+      const origin = {
+        left: e.pageX,
+        top: e.pageY
+      };
+      setPosition(origin);
+      return false;
+    });
+
   }
   // save an edit
   var elements = document.getElementsByClassName('save');
@@ -1272,12 +1320,69 @@ function editHeader(idx) {
   }
 }
 
+// moves an item up the list
+function moveItem(move_select, direction) {
+  var idx = move_select.parentNode.parentNode.parentNode.id.slice(-1);
+  var isCrossed = false;
+
+  if (move_select.style.textDecoration == 'line-through') {
+    isCrossed = true;
+  }
+  console.log(move_select);
+  // get the index of div element
+  // if there are more than 10 notes, get last 2 chars
+  if (idx == 0) {
+    idx = move_select.parentNode.parentNode.parentNode.id.slice(-2);
+  }
+  var move_item = move_select.innerHTML;
+  console.log(idx);
+  chrome.storage.sync.get([idx.toString()], function(result) {
+    dict = JSON.parse(result[idx]);
+    var todos = dict['todo'];
+  
+    // define if we are working with crossed out items or not
+    if (isCrossed == true) {
+      todos = [].concat.apply([], dict['strikethrough']);
+    }
+
+    // get the note index of the selected list item
+    note_idx = todos.indexOf(move_item);
+
+    if (direction == "down") {
+      new_idx = note_idx + 1;
+      if (new_idx >= todos.length) { return; }
+    }
+    else {
+      new_idx = note_idx - 1;
+      if (new_idx < 0) { return; }
+    }
+  
+    // moves the item to the new index
+    function arraymove(arr, fromIndex, toIndex) {
+      var element = arr[fromIndex];
+      arr.splice(fromIndex, 1);
+      arr.splice(toIndex, 0, element);
+    }
+    console.log(todos);
+    arraymove(todos, note_idx, new_idx);
+    console.log(todos);
+    if (isCrossed == true) {
+      dict['strikethrough'] = todos;
+    }
+    else {
+      dict['todo'] = todos;
+    }
+    storeSync(idx,dict);
+    show(idx);
+  });
+}
+
 // allows a list item to be edited
 var og_note;
 function editNote() {
   elm = getElm();
   var pending = document.querySelector("#pending");
-  pending.textContent = "edit pending save.";
+  pending.textContent = "edit pending save. click save icon to sync changes.";
   pending.style.opacity = "1";
   og_note = elm.textContent; // original note content
   console.log(og_note);

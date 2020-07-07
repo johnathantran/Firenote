@@ -261,9 +261,6 @@ body {
 ::placeholder {
   opacity: 0.7;
 }
-.lists {
-  width: 250px;
-}
 .span {
   background: none;
   border: none;
@@ -386,11 +383,12 @@ h1 {
 ul {
   margin-top: 0px;
   list-style-type: none; /* Remove bullets */
-  font-size: 11pt;
 }
-li {
+.lists {
+  font-size: 11pt;
   margin-left: -35px;
   margin-bottom: 8px;
+  width: 260px;
 }
 #container {
   text-align: center;
@@ -489,7 +487,7 @@ span {
 
 .drag {
   position: absolute;
-  width: 280px;
+  width: 290px;
   z-index: 1;
   background-color: #fcfacf;
   /*background-color: #f1f1f1;*/
@@ -516,9 +514,9 @@ del {
   padding-top, padding-bottom: 5px;
   margin-right: 10px;
   height: 30px;
-  width: 72%;
+  width: 73%;
   cursor: move;
-  z-index: 10;
+  z-index: 5;
   border: none;
   background-color: #fcfacf;
   color: #61615c;
@@ -531,5 +529,66 @@ del {
   overflow: hidden;
   p {
     padding-left: 5px;
+  }
+}
+
+
+/* context menu code */
+.contextMenu {
+  width: 90px;
+  z-index: 6;
+  background-color: #fefefe;
+  opacity: 0.95;
+  color: rgb(53, 53, 53);
+  box-shadow: 0 4px 5px 3px rgba(0, 0, 0, 0.2);
+  position: fixed;
+  display: none;
+  transition: 0.5s display ease-in;
+  font-size: 10pt;
+  text-align: center;
+  padding: 3px;
+}
+.menu-option:hover {
+  background: rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+.menu-options {
+  z-index: 6;
+  margin-bottom: 0px;
+}
+.menu-option {
+  font-size: 8pt;
+  margin-left: -40px;
+  padding: 2px;
+  z-index: 6;
+  cursor: pointer;
+}
+
+button{
+  background: grey;
+  border: none;
+  
+  .next{
+    color:green;
+  }
+  
+  &[disabled="false"]:hover{
+    .next{
+      color: red;
+      animation: move 0.5s;
+      animation-iteration-count: 2;
+    }
+  }
+}
+
+@keyframes move{
+  from{
+    transform: translate(0%);
+  }
+  50%{
+    transform: translate(-40%);
+  }
+  to{
+    transform: transform(0%);
   }
 }
