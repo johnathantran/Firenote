@@ -481,7 +481,6 @@ span {
   border-radius: 10px;
 }
 
-
 .remove:hover, .dot {
   background-color: #dbd9d9;
   cursor: pointer;
@@ -529,11 +528,7 @@ del {
   font-family: 'Montserrat', sans-serif;
   float: left;
   overflow: hidden;
-  
-
-  
 }
-
 
 /* context menu code */
 .contextMenu {

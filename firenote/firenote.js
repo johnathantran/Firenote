@@ -1109,7 +1109,6 @@ function strikeThrough() {
       show(idx);
     });
   }
-  
 }
 
 // docks all notes
