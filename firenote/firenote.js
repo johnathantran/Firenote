@@ -409,7 +409,7 @@ function createNote(exists,idx,memo) {
       if (memo == true) {
         note.childNodes[4].value = dict['memo'];
         textEntered = note.childNodes[4].value;
-        note.childNodes[5].textContent = (300 - textEntered.length) + " characters left";
+        note.childNodes[5].textContent = (500 - textEntered.length) + " characters left";
       }
 
     addNoteEventHandlersOnLoad();
