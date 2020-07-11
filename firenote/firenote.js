@@ -3,7 +3,7 @@
 // 'todoN': represents a LIST of todo items for any note of index N
 // 'headerTextN': the text element of the header of note N
 // 'headerItemN': the text element of the header of note N in the Notes Dock
-//chrome.storage.sync.remove('1');
+// chrome.storage.sync.remove('1');
 // add event listeners to onclick elements
 $(document).ready(function() {
   
@@ -73,6 +73,7 @@ $(document).ready(function() {
   // context menu
   const move_down = document.querySelector(".movedown");
   const move_up = document.querySelector(".moveup");
+  const priority_btn = document.querySelector(".priority");
   // runs this function when a menu item is clicked
   move_up.addEventListener("click", e => {
     moveItem(move_select, "up");
@@ -80,6 +81,10 @@ $(document).ready(function() {
   // runs this function when a menu item is clicked
   move_down.addEventListener("click", e => {
     moveItem(move_select, "down");
+  });
+   // runs this function when a menu item is clicked
+  priority_btn.addEventListener("click", e => {
+    prioritize(move_select, "prioritize");
   });
   
   // message button
@@ -830,52 +835,38 @@ function add() {
 function remove() {
 
     var elm = getElm();
-    console.log(elm);
+
     // get the parent div element
     var parent = elm.parentNode.parentNode.parentNode;
     // get the index of div element
     idx = getIdx(parent);
-    console.log(idx);
 
     var id = elm.getAttribute('id');
 
     chrome.storage.sync.get([idx.toString()], function(result) {
-      console.log(result);
-      console.log(result[idx]);
+
       dict = JSON.parse(result[idx]);
-      console.log(dict);
       var todos = dict['todo'];
       var crossed = dict['strikethrough'];
+      var priority_list = dict['priority'];
+      var list_item = elm.parentNode.childNodes[3];
 
-      // determine if the todo item is crossed out or not
-      var isTodo= false;
-      if (elm.parentNode.childNodes[3].style.textDecoration !== 'line-through') {
-        var isTodo = true;
-      }
-      console.log(isTodo);
-
-      if (isTodo == false) {
-
-        console.log(crossed);
+      // determine if the todo item is crossed out, priority, or regular
+      if (list_item.style.textDecoration == 'line-through') {
         var removed = crossed.splice(id, 1);
-        console.log(removed);
-        console.log("Currently in crossed: " + crossed);
         dict['strikethrough'] = crossed;
-        dict['removed'] = removed;
-        storeSync(idx,dict);
-        
-        show(idx);
+      }
+      else if (list_item.style.fontWeight == 'bold') {
+        var removed = priority_list.splice(id, 1);
+        dict['priority'] = priority_list;
       }
       else {
-        console.log(todos);
         var removed = todos.splice(id, 1);
-        console.log(removed);
-        console.log("Currently in todos: " + todos);
         dict['todo'] = todos;
-        dict['removed'] = removed;
-        storeSync(idx,dict);
-        show(idx);
       }
+      dict['removed'] = removed;
+      storeSync(idx,dict);
+      show(idx);
     });
 }
 
@@ -970,19 +961,30 @@ function showMemo(idx) {
 function show(idx) {
 
   chrome.storage.sync.get([idx.toString()], function(result) {
-    console.log(result);
+
     dict = JSON.parse(result[idx]);
     console.log(dict);
-    console.log(dict['todo']);
 
     var todos_list = dict['todo'];
     var crossed_list = dict['strikethrough'];
+    var priority_list = dict['priority'];
 
     console.log(idx);
+    console.log("Currently in the priority list: " + priority_list);
     console.log("Currently in this todo list:" + todos_list + "!");
     console.log("Currently in the crossed list: " + crossed_list);
 
     var html = '<ul>';
+    // if list of priorities is found, show on screen
+    if (priority_list !== undefined) {
+      for(var i=0; i<priority_list.length; i++) {
+        html += '<li class="lists">';
+        html += '<img class="check" src="images/check.png">';
+        html += '<img class="crossoff" src="images/crossoff.png" id="' + i  + '">';
+        html += '<img src="images/save.png" style="display:none;" class="save"></img>';
+        html += '<span style="font-weight:bold; color:black;" type="text" class="span">' + priority_list[i] + '</span>';   
+      }
+    }
     // if the list of todos is found, shown on screen
     if ((todos_list !== null) && (todos_list !== undefined) && (todos_list.toString() !== "")) {
       
@@ -1033,12 +1035,12 @@ function strikeThrough() {
 
   // get id of the todo item we are trying to remove
   var id = elm.parentNode.childNodes[1].getAttribute('id');
+  var list_item = elm.parentNode.childNodes[3];
   console.log(elm.parentNode.childNodes[1]);
-  console.log(elm.parentNode.childNodes[2].tagName);
 
   // determine if the todo item is crossed out or not
   var crossed = true;
-  if (elm.parentNode.childNodes[3].style.textDecoration !== 'line-through') {
+  if (list_item.style.textDecoration !== 'line-through') {
     var crossed = false;
   }
 
@@ -1049,14 +1051,18 @@ function strikeThrough() {
       dict = JSON.parse(result[idx]);
 
       var todos = dict['todo'];
-      console.log(todos);
+      var priority_list = dict['priority'];
 
-      var removed_item = todos.splice(id, 1);
+      // remove item from the appropriate list
+      if (list_item.style.fontWeight == 'bold') {
+        var removed_item = priority_list.splice(id, 1);
+        dict['priority'] = priority_list;
+      }
+      else {
+        var removed_item = todos.splice(id, 1);
+        dict['todo'] = todos;
+      }
       console.log(removed_item);
-
-      console.log("Currently in todos: " + todos);
-
-      dict['todo'] = todos;
       storeSync(idx,dict);
 
       // add removed item to the strikethrough list
@@ -1076,11 +1082,8 @@ function strikeThrough() {
   // if reinstating an item that was crossed off
   else {
     chrome.storage.sync.get([idx.toString()], function(result) {
-      console.log(result);
-      console.log(result[idx]);
+
       dict = JSON.parse(result[idx]);
-      console.log(dict);
-      console.log(dict['todo'])
 
       // first remove the item from the strikethrough list
       var crossed = dict['strikethrough'];
@@ -1096,8 +1099,135 @@ function strikeThrough() {
       // if there is an actual list
       if (todos !== null) {
         // add the new task to the list of todos for that note
-        //var todos = JSON.parse(todos_str);
+        if (todos[todos.length - 1] != task) {
+            todos.push(task);
+        }
+      }
+      else {
+        todos = [task];
+      }
+      storeSync(idx,dict)
+      show(idx);
+    });
+  }
+}
 
+// prioritizes a todo list item
+function prioritize(move_select) {
+
+  var parent = move_select.parentNode.parentNode.parentNode;
+  var list_item = move_select.parentNode.childNodes[3];
+
+  // get the index of div element
+  idx = getIdx(parent);
+
+  // get id of the todo item we are trying to prioritize
+  var id = move_select.parentNode.childNodes[1].getAttribute('id');
+
+  // determine if the todo item is crossed out or not
+  var crossed = true;
+  if (list_item.style.textDecoration !== 'line-through') {
+    crossed = false;
+  }
+  // determine if the todo item is bold (already prioritized) or not
+  var prioritized = true;
+  if (list_item.style.fontWeight !== 'bold') {
+    prioritized = false;
+  }
+  // regular todo item
+  if ((crossed == false) && (prioritized == false)) {
+    console.log("regular todo");
+    chrome.storage.sync.get([idx.toString()], function(result) {
+      
+      dict = JSON.parse(result[idx]);
+
+      var todos = dict['todo'];
+      console.log(todos);
+
+      var removed_item = todos.splice(id, 1);
+      console.log(removed_item);
+
+      console.log("Currently in todos: " + todos);
+
+      dict['todo'] = todos;
+      storeSync(idx,dict);
+
+      // add removed item to the priority list
+      var priority_list = dict['priority'];
+
+      if (priority_list == undefined) {
+        dict['priority'] = [removed_item];
+      }
+      else {
+        priority_list.push(removed_item);
+      }
+      storeSync(idx,dict);
+      console.log(dict);
+      show(idx);
+    });
+  }
+  // if prioritizing an item that was crossed off
+  else if (crossed == true) {
+    console.log("crossed out");
+    chrome.storage.sync.get([idx.toString()], function(result) {
+      console.log(result);
+      console.log(result[idx]);
+      dict = JSON.parse(result[idx]);
+      console.log(dict);
+      console.log(dict['todo'])
+
+      // first remove the item from the strikethrough list
+      var crossed = dict['strikethrough'];
+      var removed_item = crossed.splice(id, 1);
+      dict['strikethrough'] = crossed;
+      storeSync(idx,dict)
+
+      // add removed item back to the todos list
+      // get the current list of todos for that note
+      var priority_list = dict['priority'];
+      var task = removed_item[0];
+
+      // if there is an actual list
+      if (priority_list !== null) {
+
+        // add the new task to the list of priorities for that note
+        if (priority_list[priority_list.length - 1] != task) {
+            priority_list.push(task);
+        }
+      }
+      else {
+        priority_list = [task];
+      }
+      storeSync(idx,dict)
+      show(idx);
+    });
+  }
+  // if un-prioritizing an item
+  else if (prioritized == true) {
+    console.log("unprioritizing");
+    chrome.storage.sync.get([idx.toString()], function(result) {
+      console.log(result);
+      console.log(result[idx]);
+      dict = JSON.parse(result[idx]);
+      console.log(dict);
+
+      // first remove the item from the priority list
+      var priority_list = dict['priority'];
+      console.log(priority_list);
+      var removed_item = priority_list.splice(id, 1);
+      console.log(removed_item);
+      dict['priority'] = priority_list;
+      storeSync(idx,dict)
+
+      // add removed item back to the todos list
+      // get the current list of todos for that note
+      var todos = dict['todo'];
+      var task = removed_item[0];
+
+      // if there is an actual list
+      if (todos !== null) {
+
+        // add the new task to the list of todos for that note
         if (todos[todos.length - 1] != task) {
             todos.push(task);
         }
@@ -1308,15 +1438,26 @@ function moveItem(move_select, direction) {
 
   chrome.storage.sync.get([idx.toString()], function(result) {
     dict = JSON.parse(result[idx]);
+
     var todos = dict['todo'];
-  
+    if (move_select.style.fontWeight == 'bold') {
+      todos = [].concat.apply([], dict['priority']);
+    }
+    console.log(todos);
+
     // define if we are working with crossed out items or not
     if (isCrossed == true) {
       todos = [].concat.apply([], dict['strikethrough']);
     }
-
+    /*
+    if (move_select.style.fontWeight == 'bold') {
+      todos = [].concat.apply([], dict['strikethrough']);
+    }
+    */
     // get the note index of the selected list item
     note_idx = todos.indexOf(move_item);
+
+    console.log(note_idx);
 
     if (direction == "down") {
       new_idx = note_idx + 1;
@@ -1326,18 +1467,23 @@ function moveItem(move_select, direction) {
       new_idx = note_idx - 1;
       if (new_idx < 0) { return; }
     }
-  
+    console.log(new_idx);
+
     // moves the item to the new index
     function arraymove(arr, fromIndex, toIndex) {
       var element = arr[fromIndex];
       arr.splice(fromIndex, 1);
       arr.splice(toIndex, 0, element);
     }
+
     console.log(todos);
     arraymove(todos, note_idx, new_idx);
     console.log(todos);
     if (isCrossed == true) {
       dict['strikethrough'] = todos;
+    }
+    else if (move_select.style.fontWeight == 'bold'){
+      dict['priority'] = todos;
     }
     else {
       dict['todo'] = todos;
@@ -1406,41 +1552,41 @@ function saveEdit() {
     console.log(og_note);
     elm = getElm(); // get the save button
     console.log(elm.parentNode.childNodes);
-    var task = elm.parentNode.childNodes[3].textContent; // get the text of the edited note
-    console.log(task);
-
+    var list_item = elm.parentNode.childNodes[3];
+    var task = list_item.textContent; // get the text of the edited note
     var parent = elm.parentNode.parentNode.parentNode; // get the index of div element
     idx = getIdx(parent);
-
-    // determine if the todo item is crossed out or not
-    var isCrossed = true;
-    if (elm.parentNode.childNodes[3].style.textDecoration !== 'line-through') {
-      var isCrossed = false;
-    }
 
     chrome.storage.sync.get([idx.toString()], function(result) {
       console.log(result);
       console.log(result[idx]);
       dict = JSON.parse(result[idx]);
-      
-      if (isCrossed == false) {
-        console.log("crossed is false");
-        // get the current list of todos for that note
-        todos = dict['todo'];
 
+      // prioritized todo item
+      if (list_item.style.fontWeight == 'bold') {
+        console.log("bold is true");
+        // get the current list of todos for that note
+        todos = dict['priority'];
         note_idx = todos.indexOf(og_note);
-        console.log(task);
-        console.log(todos);
+
+        for (j=0;j<=todos.length;j++){
+          // check for inconsistencies in getCrossed list - fix later  
+          var todo_item = todos[j];
+          if (Array.isArray(todo_item) == true) {
+            todo_item = todos[j][0];
+          }
+          console.log(todo_item);
+          if (todo_item == og_note) {
+            note_idx = j;
+            break;
+          }
+        }
         todos[note_idx] = task; // set the old note to the edited note
-        console.log(todos);
-        dict['todo'] = todos;
-        storeSync(idx,dict);
-        save_button = elm.parentNode.childNodes[2];
-        save_button.style.display = "none";
-        pending.textContent = "edit saved.";
-        fade(pending);
+        dict['priority'] = todos;
       }
-      else {
+
+      // crossed out todo item
+      else if (list_item.style.textDecoration == 'line-through') {
         console.log("crossed is true");
         // get the current list of todos for that note
         todos = dict['strikethrough'];
@@ -1460,14 +1606,24 @@ function saveEdit() {
         }
         todos[note_idx] = task; // set the old note to the edited note
         dict['strikethrough'] = todos;
-        storeSync(idx,dict);
-        save_button = elm.parentNode.childNodes[2];
-        save_button.style.display = "none";
-        console.log(save_button.style.display);
-        pending.textContent = "edit saved.";
-        fade(pending);
-        elm.parentNode.childNodes[3].blur();
       }
+
+      // regular todo item
+      else {
+        console.log("regular todo");
+        // get the current list of todos for that note
+        todos = dict['todo'];
+        note_idx = todos.indexOf(og_note);
+        todos[note_idx] = task; // set the old note to the edited note
+        dict['todo'] = todos;
+        
+      }
+      storeSync(idx,dict);
+      save_button = elm.parentNode.childNodes[2];
+      save_button.style.display = "none";
+      pending.textContent = "edit saved.";
+      fade(pending);
+      list_item.blur();
     });
 }
 
