@@ -161,7 +161,7 @@ function addNoteEventHandlers(note) {
   });
   editHeaderBtn.addEventListener('click', function() {
     console.log("clicked");
-    editHeader(idx);
+    editHeader();
   });
   minBtn.addEventListener('click', function() {
     console.log("clicked");
@@ -344,6 +344,7 @@ function getIdx(elm) {
   if (isNaN(idx) == true) {
     idx = elm.id.slice(-1);
   }
+  console.log(idx);
   return idx;
 }
 
@@ -388,7 +389,9 @@ function createNote(exists,idx,memo) {
       //note.offsetHeight = dict['height'];
       //note.offsetWidth = dict['width'];
       note_header = dict['headerText'];
+      console.log(note_header);
       note.childNodes[0].value = note_header;
+      console.log(note.childNodes)
 
       // check if the note is minimized
       if (dict['minimized'] == true) {
@@ -1389,9 +1392,10 @@ function minimize() {
 }
 
 // allows edit of the header of a note
-function editHeader(idx) {
+function editHeader() {
   elm = getElm();
-  header = elm.parentNode.childNodes[0];
+  var header = elm.parentNode.childNodes[0];
+  var idx = getIdx(elm.parentNode);
   pending = document.querySelector('#pending');
 
   if (header.readOnly == true) {
@@ -1401,7 +1405,6 @@ function editHeader(idx) {
     var val = header.value; // store the value of the element
     header.value = ''; // clear the value of the element
     header.value = val; // set that value back
-    console.log(elm.parentNode.childNodes);
     elm.parentNode.childNodes[1].src = "images/edit_active.png";
     pending.textContent = "edit pending save.";
     pending.style.opacity = "1";
@@ -1410,11 +1413,12 @@ function editHeader(idx) {
     elm.parentNode.childNodes[1].src = "images/edit.png";
     header.readOnly = true;
     header.blur();
+    console.log(header);
     fade(pending);
     chrome.storage.sync.get([idx.toString()], function(result) {
   
       dict = JSON.parse(result[idx]);
-      dict['headerText'] = header.value; 
+      dict['headerText'] = header.value;
       document.querySelector('#headerItem' + idx).textContent = header.value; // update note dock
       storeSync(idx,dict);
     });
