@@ -650,6 +650,7 @@ function dragElement(elm) {
   }
 }
 
+const max_notes = 10;
 // adds a note to the screen when "Add Note" is clicked
 function addNote(memo) {
 
@@ -663,8 +664,8 @@ function addNote(memo) {
 
   // 10 note limit
   var basic = true; // basic vs premium version of firenote app
-  if ((header_list.length >= 10) && (basic == true)) {
-    alert("You have reached the maximum 10 note limit. Please delete a note to add more. (I am working on a premium version to allow more notes and other cool features!)");
+  if ((header_list.length >= max_notes) && (basic == true)) {
+    alert("You have reached the maximum " + max_notes + " note limit. Please delete a note to add more. (I am working on a premium version to allow more notes and other cool features!)");
     return;
   }
   if (header_list.length >= 20) {
@@ -1209,16 +1210,12 @@ function prioritize(move_select) {
   else if (prioritized == true) {
     console.log("unprioritizing");
     chrome.storage.sync.get([idx.toString()], function(result) {
-      console.log(result);
-      console.log(result[idx]);
+
       dict = JSON.parse(result[idx]);
-      console.log(dict);
 
       // first remove the item from the priority list
       var priority_list = dict['priority'];
-      console.log(priority_list);
       var removed_item = priority_list.splice(id, 1);
-      console.log(removed_item);
       dict['priority'] = priority_list;
       storeSync(idx,dict)
 
@@ -1226,10 +1223,27 @@ function prioritize(move_select) {
       // get the current list of todos for that note
       var todos = dict['todo'];
       var task = removed_item[0];
-
+      
+      function flatten(arr) {
+        let flatArray = [];
+        function pushLoop(a) {
+          let len = a.length;
+          for (i=0; i < len; i++) {
+            if (a[i] && a[i].constructor == Array) {
+              pushLoop(a[i]);
+            } else {
+              flatArray.push(a[i]);
+            }
+          }
+        }
+        pushLoop(arr);
+        return flatArray;
+      }
+      task = flatten(removed_item);
+      if(Array.isArray(task) == true) { task = task[0]; }
+      
       // if there is an actual list
       if (todos !== null) {
-
         // add the new task to the list of todos for that note
         if (todos[todos.length - 1] != task) {
             todos.push(task);
@@ -1246,27 +1260,32 @@ function prioritize(move_select) {
 
 // docks all notes
 function dockAll() {
-  var header_list = document.querySelectorAll(".dragHeader");
+  //var header_list = document.querySelectorAll(".dragHeader");
 
   // recreate saved notes on page load
   var all_idx = [];
-  for (var i = 1; i <= header_list.length; i++) {
+  for (var i = 1; i <= 10; i++) {
     all_idx.push(i.toString());
   }
 
   chrome.storage.sync.get(all_idx, function(result) {
-
+    console.log(result);
     // check if all elements are hidden
     var all_hidden = true;
-    for (var i = 1; i <= header_list.length; i++) {
-      console.log(result)
+    for (var i = 1; i <= max_notes; i++) {
+      
+      if (result[i] == undefined) { continue; }
+
       dict = JSON.parse(result[i]);
       if (dict['hidden'] == false) {
         all_hidden = false;
         break;
-      } 
+      }
     }
-    for (var i = 1; i <= header_list.length; i++) {
+
+    for (var i = 1; i <= max_notes; i++) {
+ 
+      if (result[i] == undefined) { continue; }
       dict = JSON.parse(result[i]);
       div_to_hide = document.querySelector('#mydiv' + i.toString());
 
@@ -1437,7 +1456,6 @@ function moveItem(move_select, direction) {
     isCrossed = true;
   }
   console.log(move_select);
-
   var move_item = move_select.innerHTML;
 
   chrome.storage.sync.get([idx.toString()], function(result) {
@@ -1460,7 +1478,8 @@ function moveItem(move_select, direction) {
     */
     // get the note index of the selected list item
     note_idx = todos.indexOf(move_item);
-
+    console.log(move_select.innerHTML);
+    console.log(move_item);
     console.log(note_idx);
 
     if (direction == "down") {
