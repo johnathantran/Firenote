@@ -119,6 +119,7 @@ function addNoteEventHandlers(note) {
     var memoBtn = note.childNodes[6];
     memoBtn.addEventListener('click', function() {
       console.log("Memo saved");
+      idx = getIdx(note);
       saveMemo(idx);
     });
     
@@ -339,6 +340,7 @@ function countCharacters(e) {
 
 // returns the index of the note
 function getIdx(elm) {
+  console.log(elm);
   // if there are more than 10 notes, get last 2 chars
   idx = elm.id.slice(-2);
   if (isNaN(idx) == true) {
@@ -938,7 +940,7 @@ function saveMemo(idx) {
   pending.style.opacity = "1";
   fade(pending);
   memoBtn.style.display = "none"; //show the save button
-
+  console.log(idx);
   chrome.storage.sync.get([idx.toString()], function(result) {
     console.log(result);
     console.log(result[idx]);
