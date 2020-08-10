@@ -211,23 +211,6 @@ function addNoteEventHandlersOnLoad() {
   });
 }
 
-hasBtnListener = false;
-function addExtensionBtnListener() {
-  chrome.storage.sync.get(['hasBtnListener'], function(result) {
-    console.log(result);
-
-    if (hasBtnListener == true) {
-      console.log("Already has btn listener...");
-      return;
-    }
-    hasBtnListener = true;
-    chrome.browserAction.onClicked.addListener(function() {
-      chrome.tabs.create({'url':"chrome://newtab"});
-      storeSync('hasBtnListener',true);
-    });
-  });
-}
-
 // adds event handlers for todo items on a note
 function addTodoEventHandlers() {
   // strikethrough
@@ -652,7 +635,7 @@ function dragElement(elm) {
   }
 }
 
-const max_notes = 10;
+const max_notes = 12;
 // adds a note to the screen when "Add Note" is clicked
 function addNote(memo) {
 
@@ -767,13 +750,17 @@ function clearAll() {
   r = confirm("This will remove all of your notes and delete them from your cache. Are you sure you want to proceed?");
   if (r == true) {
     var header_list = document.querySelectorAll(".drag");
-    console.log(header_list);
 
-    for (j = 1; j <= header_list.length; j++) {
-      console.log("runs");
-      console.log(document.querySelector('#mydiv' + j));
-      document.querySelector('#mydiv' + j).remove();
-      document.querySelector("#headerItem" + j.toString()).remove();
+    for (j = 1; j <= max_notes; j++) {
+      try {
+        console.log("runs");
+        console.log(document.querySelector('#mydiv' + j));
+        document.querySelector('#mydiv' + j).remove();
+        document.querySelector("#headerItem" + j.toString()).remove();
+      }
+      catch(err) {
+        console.log(err);
+      }
     }
     chrome.storage.sync.clear(function() {
       var error = chrome.runtime.lastError;
@@ -1266,7 +1253,7 @@ function dockAll() {
 
   // recreate saved notes on page load
   var all_idx = [];
-  for (var i = 1; i <= 10; i++) {
+  for (var i = 1; i <= max_notes; i++) {
     all_idx.push(i.toString());
   }
 
