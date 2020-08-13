@@ -321,6 +321,8 @@ body {
 }
 textArea {
   white-space: "pre-line";
+  min-height: 5em;
+	max-height: 50vh;
   resize: none;
   margin-left: 5px;
   margin-right: 5px;

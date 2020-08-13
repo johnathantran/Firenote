@@ -1,3 +1,4 @@
+// version 2.0.6
 // A brief guide to defined variables:
 // N: any integer
 // 'todoN': represents a LIST of todo items for any note of index N
@@ -6,7 +7,7 @@
 // chrome.storage.sync.remove('1');
 // add event listeners to onclick elements
 $(document).ready(function() {
-  
+
   var coll = document.getElementsByClassName("collapsible");
 
   for (i = 0; i < coll.length; i++) {
@@ -117,10 +118,17 @@ function addNoteEventHandlers(note) {
   if (note.childNodes[4].nodeName == 'TEXTAREA') {
     var memoText = note.childNodes[4];
     var memoBtn = note.childNodes[6];
+
+    // event listener for dynamic textarea sizing
+    var box_height;
+    memoText.addEventListener('input', function (event) {
+      box_height = autoExpand(event.target);
+    });
+
     memoBtn.addEventListener('click', function() {
       console.log("Memo saved");
       idx = getIdx(note);
-      saveMemo(idx);
+      saveMemo(idx, box_height);
     });
     
     memoText.addEventListener('click', function() {
@@ -403,6 +411,8 @@ function createNote(exists,idx,memo) {
         note.childNodes[4].value = dict['memo'];
         textEntered = note.childNodes[4].value;
         note.childNodes[5].textContent = (500 - textEntered.length) + " characters left";
+        // set the textarea to the saved height
+        note.childNodes[4].style.height = dict['boxHeight'] + "px"; 
       }
 
     addNoteEventHandlersOnLoad();
@@ -916,9 +926,11 @@ function undo() {
 }
 
 // save memo
-function saveMemo(idx) {
+function saveMemo(idx, box_height) {
   elm = getElm();
 
+  console.log(box_height); // how many pixels tall the textarea is
+  
   memo_text = elm.parentNode.childNodes[4];
   memoBtn = elm.parentNode.childNodes[6];
   console.log(memo_text.value);
@@ -928,13 +940,14 @@ function saveMemo(idx) {
   fade(pending);
   memoBtn.style.display = "none"; //show the save button
   console.log(idx);
+
   chrome.storage.sync.get([idx.toString()], function(result) {
-    console.log(result);
-    console.log(result[idx]);
+
     dict = JSON.parse(result[idx]);
     console.log(dict);
     //memo_text_new = memo_text.value.replace(/\r\n|\r|\n/g,"</br>");
     dict['memo'] = memo_text.value;
+    dict['boxHeight'] = box_height;
     console.log(dict)
     storeSync(idx,dict);
   });
@@ -1654,3 +1667,23 @@ function fade(element) {
     
   }, 50);
 }
+
+// autosizes height of textarea
+var autoExpand = function (field) {
+
+	// Reset field height
+	field.style.height = 'inherit';
+
+	// Get the computed styles for the element
+	var computed = window.getComputedStyle(field);
+
+	// Calculate the height
+	var height = parseInt(computed.getPropertyValue('border-top-width'), 10)
+	             + parseInt(computed.getPropertyValue('padding-top'), 10)
+	             + field.scrollHeight
+	             + parseInt(computed.getPropertyValue('padding-bottom'), 10)
+	             + parseInt(computed.getPropertyValue('border-bottom-width'), 10);
+
+	field.style.height = height + 'px';
+  return height
+};

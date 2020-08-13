@@ -2,7 +2,7 @@
 "manifest_version": 2,
 "name": "Firenote: Notes and Todo Lists in New Tab",
 "description": "Create, edit, and save notes and todo lists every time you open a new tab.",
-"version": "2.0.6",
+"version": "2.0.8",
 
 "chrome_url_overrides" : {
     "newtab": "firenote.html"
