@@ -8,8 +8,8 @@
 // add event listeners to onclick elements
 $(document).ready(function() {
 
+  // adding event listeners to right-side menu
   var coll = document.getElementsByClassName("collapsible");
-
   for (i = 0; i < coll.length; i++) {
     coll[i].addEventListener("click", function() {
       this.classList.toggle("active");
@@ -24,6 +24,7 @@ $(document).ready(function() {
       }
     });
   }
+  // adding event listeners to note dock items
   coll = document.getElementsByClassName("folderCollapsible");
   console.log(coll);
   for (i = 0; i < coll.length; i++) {
@@ -40,6 +41,27 @@ $(document).ready(function() {
       }
     });
   }
+  // adding event listeners to note dock context menu items
+  var el = document.getElementById("orangeMove");
+  el.addEventListener('click',function() {
+    moveToFolder('Orange', move_select);
+  });
+  var el = document.getElementById("pinkMove");
+  el.addEventListener('click',function() {
+    moveToFolder('Pink', move_select);
+  });
+  var el = document.getElementById("blueMove");
+  el.addEventListener('click',function() {
+    moveToFolder('Blue', move_select);
+  });
+  var el = document.getElementById("indigoMove");
+  el.addEventListener('click',function() {
+    moveToFolder('Indigo', move_select);
+  });
+  var el = document.getElementById("greenMove");
+  el.addEventListener('click',function() {
+    moveToFolder('Green', move_select);
+  });
 
 
   //hide menu button
@@ -262,6 +284,7 @@ function addNoteEventHandlers(note) {
   });
 
   headerItem.addEventListener("contextmenu", e => {
+    move_select = getElm();
     e.preventDefault();
     const origin = {
       left: e.pageX,
@@ -410,6 +433,19 @@ function getIdx(elm) {
   return idx;
 }
 
+// move an note to a folder
+function moveToFolder(color, move_select) {
+  console.log(color);
+  var target = document.getElementById("content" + color);
+  console.log(move_select.id);
+  document.getElementById(move_select.id).remove();
+
+  // adds the new note header to Notes Dock
+  var addedItem = document.createElement('div');
+  target.appendChild(move_select);
+  //target.innerHTML += '<p class="headerList" id="headerItem' + idx + '">' + note_header + '</p>';
+
+}
 // create a folder when a colored circle is clicked in the Notes Dock
 function createFolder() {
 
