@@ -41,11 +41,13 @@
   <div id="myNotes"><p id="dockTitle">Notes Dock</p>
     
     <p class="dockSubtitle"> folders </p>
+    <!--
     <span class="circle" id="Orange"></span>
     <span class="circle" id="Pink"></span>
     <span class="circle" id="Blue"></span>
-    <span class="circle" id="Indigo"></span>
+    <span class="circle" id="Red"></span>
     <span class="circle" id="Green"></span>
+    -->
     <hr>
     <p id="hideTip"> right-click to rename folder or hide notes.</p>
     <!-- Collapsible Folders in Notes Dock -->
@@ -61,28 +63,28 @@
       <span class="folderHeader"  >Pink</span>
       <div class="folderExpand">+</div>
     </div>
-    <div class="folderContent" id="contentPink"> No notes added </div>
+    <div class="folderContent" id="contentPink"></div>
 
     <div class="folder folderCollapsible" id="folderBlue">
       <img class="folderImages" src="images/Blue.png">
       <span class="folderHeader"  >Blue</span>
       <div class="folderExpand">+</div>
     </div>
-    <div class="folderContent" id="contentBlue"> No notes added </div>
+    <div class="folderContent" id="contentBlue"></div>
 
-    <div class="folder folderCollapsible" id="folderIndigo">
-      <img class="folderImages" src="images/Indigo.png">
-      <span class="folderHeader" >Indigo</span>
+    <div class="folder folderCollapsible" id="folderRed">
+      <img class="folderImages" src="images/Red.png">
+      <span class="folderHeader" >Red</span>
       <div class="folderExpand">+</div>
     </div>
-    <div class="folderContent" id="contentIndigo"> No notes added </div>
+    <div class="folderContent" id="contentRed"></div>
 
     <div class="folder folderCollapsible" id="folderGreen">
       <img class="folderImages" src="images/Green.png">
       <span class="folderHeader" >Green</span>
       <div class="folderExpand">+</div>
     </div>
-    <div class="folderContent" id="contentGreen"> No notes added </div>
+    <div class="folderContent" id="contentGreen"></div>
     
 
     <p class="dockSubtitle"> notes </p><hr>
@@ -197,8 +199,16 @@
     <li class="menu-option" id="orangeMove"><span class="circle" id="Orange"></span><p class="colorMenuOption">Orange</p></li>
     <li class="menu-option" id="pinkMove"><span class="circle" id="Pink"></span><p class="colorMenuOption">Pink</p></li>
     <li class="menu-option" id="blueMove"><span class="circle" id="Blue"></span><p class="colorMenuOption">Blue</p></li>
-    <li class="menu-option" id="indigoMove"><span class="circle" id="Indigo"></span><p class="colorMenuOption">Indigo</p></li>
     <li class="menu-option" id="greenMove"><span class="circle" id="Green"></span><p class="colorMenuOption">Green</p></li>
+    <li class="menu-option" id="yellowMove"><span class="circle" id="Yellow"></span><p class="colorMenuOption">No Folder</p></li>
+  </ul>
+</div>
+
+<div class="folderDelMenu">
+  <ul class="menu-options">
+    <li class="menu-option priority">Hide Folder</li>
+    <li class="menu-option moveup">Rename Folder</li>
+    <li class="menu-option movedown">Delete Folder</li>
   </ul>
 </div>
 

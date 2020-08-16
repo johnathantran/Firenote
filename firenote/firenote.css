@@ -110,10 +110,9 @@ background: rgb(226, 226, 226);
 }
 
 #Yellow { background-color: #fcfacf; }
-#Orange { background-color: #ffeeaf; }
+#Orange { background-color: #ffdfba; }
 #Pink { background-color: #ffedf8; }
-#Blue { background-color: #d8e8ff; }
-#Indigo { background-color: #c4d6ff; }
+#Blue { background-color: #bae1ff; }
 #Green { background-color: #ceffeb; }
 
 .blueBtn:hover {
@@ -276,12 +275,9 @@ a {
 }
 .folder {
   text-align: center;
-  /*
-  border-radius: 25px;
-  border: 1px solid white;
-*/
+  border: 1px solid rgb(226, 226, 226);
   margin-bottom: 8px;
-
+  border-radius: 25px;
 }
 .folder:hover {
   cursor: pointer;
@@ -533,7 +529,7 @@ ul {
   font-size: 10pt;
   font-weight: normal;
 }
-.collapsible:hover, .headerList:hover, .clear:hover{
+.collapsible:hover,.clear:hover, .headerList:hover{
   border: 2px solid #fda265;
   border-radius: 25px;
   cursor: pointer;

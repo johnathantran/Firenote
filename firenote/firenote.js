@@ -6,6 +6,12 @@
 // 'headerItemN': the text element of the header of note N in the Notes Dock
 // chrome.storage.sync.remove('1');
 // add event listeners to onclick elements
+var colorDict = {"Orange":"#ffdfba",
+"Pink":"#ffedf8",
+"Blue":"#d0ebfc",
+"Green":"#ceffeb",
+"Yellow":"#fcfacf"}
+
 $(document).ready(function() {
 
   // adding event listeners to right-side menu
@@ -54,15 +60,14 @@ $(document).ready(function() {
   el.addEventListener('click',function() {
     moveToFolder('Blue', move_select);
   });
-  var el = document.getElementById("indigoMove");
-  el.addEventListener('click',function() {
-    moveToFolder('Indigo', move_select);
-  });
   var el = document.getElementById("greenMove");
   el.addEventListener('click',function() {
     moveToFolder('Green', move_select);
   });
-
+  var el = document.getElementById("yellowMove");
+  el.addEventListener('click',function() {
+    moveToFolder('Yellow', move_select);
+  });
 
   //hide menu button
   var el = document.getElementById('hideMenu');
@@ -102,6 +107,7 @@ $(document).ready(function() {
     });
   };
 
+  // quick guide modal
   var modal = document.getElementById("myModal");
   var btn = document.getElementById("myBtn");
   var span = document.getElementsByClassName("close")[0];
@@ -119,7 +125,44 @@ $(document).ready(function() {
     }
   }
 
-  // context menu
+  // dev messages button
+  var el = document.getElementById('msgBtn');
+  el.addEventListener('click', function() {
+  var msgText = document.getElementById('msgText');
+  if (msgText.style.opacity == "1") {
+    document.getElementById('releaseNotes').style.display = "inline-block";
+    msgText.style.opacity = "0";
+  }
+  else {
+    document.getElementById('releaseNotes').style.display = "none";
+    msgText.style.opacity = "1";
+  }
+  });
+
+  // ***********************************************************************************************
+  // CONTEXT MENUS
+  // ***********************************************************************************************
+  
+  function createContextMenu(menu) {
+    let menuVisible = false;
+    const toggleMenu = command => {
+      menu.style.display = command === "show" ? "block" : "none";
+      menuVisible = !menuVisible;
+    };
+    // sets the position of the menu at mouse click
+    const setPosition = ({ top, left }) => {
+      menu.style.left = `${left}px`;
+      menu.style.top = `${top}px`;
+      toggleMenu("show");
+    };
+    // hides the context menu if you click outside it
+    window.addEventListener("click", e => {
+      if (menuVisible) toggleMenu("hide");
+    });
+    return;
+  }
+
+  // context menu for todo list items
   const move_down = document.querySelector(".movedown");
   const move_up = document.querySelector(".moveup");
   const priority_btn = document.querySelector(".priority");
@@ -136,42 +179,11 @@ $(document).ready(function() {
     prioritize(move_select, "prioritize");
   });
   
-  // message button
-  var el = document.getElementById('msgBtn');
-  el.addEventListener('click', function() {
-  var msgText = document.getElementById('msgText');
-  if (msgText.style.opacity == "1") {
-    document.getElementById('releaseNotes').style.display = "inline-block";
-    msgText.style.opacity = "0";
-  }
-  else {
-    document.getElementById('releaseNotes').style.display = "none";
-    msgText.style.opacity = "1";
-  }
-  });
+  // context menu for note dock (folder move)
+  createContextMenu(document.querySelector(".folderAddMenu"));
 
-
-
-  // Context menu
-  const menu = document.querySelector(".folderAddMenu");
-  let menuVisible = false;
-  const toggleMenu = command => {
-    menu.style.display = command === "show" ? "block" : "none";
-    menuVisible = !menuVisible;
-  };
-  // sets the position of the menu at mouse click
-  const setPosition = ({ top, left }) => {
-    menu.style.left = `${left}px`;
-    menu.style.top = `${top}px`;
-    toggleMenu("show");
-  };
-  // hides the context menu if you click outside it
-  window.addEventListener("click", e => {
-    if (menuVisible) toggleMenu("hide");
-  });
-
-
-
+  // context menu for folder delete menu
+  createContextMenu(document.querySelector(".folderDelMenu"));
 
 });
 
@@ -265,6 +277,7 @@ function addNoteEventHandlers(note) {
   });
 
   // Context menu
+  
   const menu = document.querySelector(".folderAddMenu");
   console.log(menu);
   let menuVisible = false;
@@ -435,17 +448,40 @@ function getIdx(elm) {
 
 // move an note to a folder
 function moveToFolder(color, move_select) {
-  console.log(color);
+  
+  console.log(colorDict);
+
   var target = document.getElementById("content" + color);
-  console.log(move_select.id);
   document.getElementById(move_select.id).remove();
 
-  // adds the new note header to Notes Dock
-  var addedItem = document.createElement('div');
-  target.appendChild(move_select);
-  //target.innerHTML += '<p class="headerList" id="headerItem' + idx + '">' + note_header + '</p>';
+  // if the folder hasn't been created yet, reveal the folder
+  if (color !== "Yellow") {
+    if (target.innerHTML == "") {
+      document.getElementById("folder" + color).style.display = "block";
+    }
+  }
 
+  // adds the new note header to Notes Dock
+  if (color == "Yellow") {
+    // move the note out of the folder
+    document.querySelector('#myNotes').appendChild(move_select);
+  }
+  else {
+    target.appendChild(move_select);
+  }
+  var idx = getIdx(move_select);
+  var targetNote = document.getElementById("mydiv" + idx);
+  
+  try {
+    targetNote.style.backgroundColor = colorDict[color];
+    document.getElementById("mydiv" + idx + "header").style.backgroundColor = colorDict[color];
+    document.getElementById("memo" + idx).style.backgroundColor = colorDict[color];
+  }
+  catch(err) {
+    console.log(err);
+  }
 }
+
 // create a folder when a colored circle is clicked in the Notes Dock
 function createFolder() {
 
