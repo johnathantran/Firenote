@@ -82,7 +82,7 @@ background: rgb(226, 226, 226);
   margin-top: 3px;
 }
 /* Normal white Button as seen on Google.com*/
-.blue {
+.blueBtn {
   color: #444444;
   background: #F3F3F3;
   border: 1px #DADADA solid;
@@ -97,13 +97,32 @@ background: rgb(226, 226, 226);
   border: 1px #3079ED solid;
   box-shadow: inset 0 1px 0 #80B0FB;
 }
-.blue:hover {
+
+.circle {
+  height: 17px;
+  width: 17px;
+  background-color: #bbb;
+  margin: 2px;
+  border-radius: 50%;
+  display: inline-block;
+  vertical-align: middle;
+  box-shadow: 0px 2px 1px 0px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.19);
+}
+
+#Yellow { background-color: #fcfacf; }
+#Orange { background-color: #ffeeaf; }
+#Pink { background-color: #ffedf8; }
+#Blue { background-color: #d8e8ff; }
+#Indigo { background-color: #c4d6ff; }
+#Green { background-color: #ceffeb; }
+
+.blueBtn:hover {
   cursor: pointer;
   border: 1px #2F5BB7 solid;
   box-shadow: 0 1px 1px #EAEAEA, inset 0 1px 0 #5A94F1;
   background: #3F83F1;
 }
-.blue:active {
+.blueBtn:active {
   box-shadow: inset 0 2px 5px #2370FE;  
 }
 a {
@@ -197,6 +216,14 @@ a {
   font-weight: 700;
   margin: 0 auto;
 }
+.folderCollapsible {
+  display: none;
+  letter-spacing: 1px;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  margin: 0 auto;
+}
 .content {
   padding: 0 18px;
   text-align: right;
@@ -207,6 +234,16 @@ a {
   word-wrap: break-word;
   letter-spacing: normal;
   font-size: 13px;
+}
+.folderContent {
+  padding: 0 18px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  word-wrap: break-word;
+  letter-spacing: normal;
+  font-size: 13px;
+  display: none;
 }
 .menuIcon {
   position: absolute;
@@ -231,11 +268,61 @@ a {
   display: inline-block;
   margin-right: 5px;
 }
-#edit:hover,#minimize:hover,#exit:hover, #msgBtn, #myBtn {
+#edit:hover,#minimize:hover,#exit:hover,#msgBtn,#myBtn,.circle:hover{
   cursor: pointer;
 }
 .todoLists,.task,.add {
   display: inline-block;
+}
+.folder {
+  text-align: center;
+  /*
+  border-radius: 25px;
+  border: 1px solid white;
+*/
+  margin-bottom: 8px;
+
+}
+.folder:hover {
+  cursor: pointer;
+  border: 2px solid #fda265;
+  border-radius: 25px;
+}
+.folderImages {
+  width: 20px;
+  display: inline-block;
+  margin-right: 6px;
+  margin-bottom: -5px;
+  vertical-align: top;
+  padding-top: 3px;
+}
+.folderHeader {
+  display: inline-block;
+  background: transparent;
+  border: none;
+  caret-color: silver;
+  width: 60%;
+  margin-left: 5px;
+  margin-bottom: 3px;
+  margin-top: 3px;
+  font-size: 9pt;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  white-space: pre-wrap;
+  letter-spacing: 1px;
+}
+.folderSave {
+  margin-right: 4px;
+  font-size: 7pt;
+ 
+}
+.folderExpand {
+  display: inline-block;
+  font-size: 12pt;
+}
+.folderHeader::placeholder {
+  
+  opacity: 1;
 }
 body {
   background-color: #fff;
@@ -269,7 +356,7 @@ body {
   width: 80%;
   white-space: pre-wrap;
 }
-.span:focus {
+.span:focus, .folderHeader:focus {
   outline: none;
 }
 
@@ -430,8 +517,17 @@ ul {
 }
 #dockTitle {
   font-family: 'Montserrat', sans-serif;
+  font-size: 11pt;
   font-weight: 600;
   letter-spacing: 2px;
+}
+.dockSubtitle {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 8pt;
+  font-weight: 600;
+  letter-spacing: 2px;
+  margin-top: 15px;
+  margin-bottom: 2px;
 }
 .headerList {
   font-size: 10pt;
@@ -439,7 +535,7 @@ ul {
 }
 .collapsible:hover, .headerList:hover, .clear:hover{
   border: 2px solid #fda265;
-
+  border-radius: 25px;
   cursor: pointer;
 }
 span {
@@ -535,7 +631,7 @@ del {
 }
 
 /* context menu code */
-.contextMenu {
+.contextMenu, .folderAddMenu {
   width: 90px;
   z-index: 6;
   background-color: #fefefe;
@@ -548,6 +644,16 @@ del {
   font-size: 10pt;
   text-align: center;
   padding: 3px;
+}
+
+.colorMenuOption {
+  padding-left: 8px;
+  display: inline-block;
+}
+.folderAddMenu {
+  width: 140px;
+  text-align: left;
+  padding: 10px;
 }
 .menu-option:hover {
   background: rgba(0, 0, 0, 0.2);

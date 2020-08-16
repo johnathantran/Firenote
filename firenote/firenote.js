@@ -24,6 +24,24 @@ $(document).ready(function() {
       }
     });
   }
+  coll = document.getElementsByClassName("folderCollapsible");
+  console.log(coll);
+  for (i = 0; i < coll.length; i++) {
+    coll[i].addEventListener("click", function() {
+      this.classList.toggle("active");
+      var content = this.nextElementSibling;
+      console.log(content);
+      if (content !== null) {
+        if (content.style.maxHeight){
+          content.style.maxHeight = null;
+        } else {
+          content.style.maxHeight = content.scrollHeight + "px";
+        };
+      }
+    });
+  }
+
+
   //hide menu button
   var el = document.getElementById('hideMenu');
   el.addEventListener('click', function() {
@@ -54,6 +72,14 @@ $(document).ready(function() {
   el.addEventListener('click', function() {
       addNote(memo=true);
   });
+  // add folder buttons
+  var el = document.getElementsByClassName('circle');
+  for (i = 0; i < el.length; i++) {
+    el[i].addEventListener('click', function() {
+        createFolder();
+    });
+  };
+
   var modal = document.getElementById("myModal");
   var btn = document.getElementById("myBtn");
   var span = document.getElementsByClassName("close")[0];
@@ -101,6 +127,30 @@ $(document).ready(function() {
     msgText.style.opacity = "1";
   }
   });
+
+
+
+  // Context menu
+  const menu = document.querySelector(".folderAddMenu");
+  let menuVisible = false;
+  const toggleMenu = command => {
+    menu.style.display = command === "show" ? "block" : "none";
+    menuVisible = !menuVisible;
+  };
+  // sets the position of the menu at mouse click
+  const setPosition = ({ top, left }) => {
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
+    toggleMenu("show");
+  };
+  // hides the context menu if you click outside it
+  window.addEventListener("click", e => {
+    if (menuVisible) toggleMenu("hide");
+  });
+
+
+
+
 });
 
 // NOTE EVENT HANDLERS
@@ -191,6 +241,35 @@ function addNoteEventHandlers(note) {
     console.log("clicked");
     hideNote();
   });
+
+  // Context menu
+  const menu = document.querySelector(".folderAddMenu");
+  console.log(menu);
+  let menuVisible = false;
+  const toggleMenu = command => {
+    menu.style.display = command === "show" ? "block" : "none";
+    menuVisible = !menuVisible;
+  };
+  // sets the position of the menu at mouse click
+  const setPosition = ({ top, left }) => {
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
+    toggleMenu("show");
+  };
+  // hides the context menu if you click outside it
+  window.addEventListener("click", e => {
+    if (menuVisible) toggleMenu("hide");
+  });
+
+  headerItem.addEventListener("contextmenu", e => {
+    e.preventDefault();
+    const origin = {
+      left: e.pageX,
+      top: e.pageY
+    };
+    setPosition(origin);
+    return false;
+  });
 }
 
 // adds event listeners when page loads
@@ -264,16 +343,6 @@ function addTodoEventHandlers() {
       console.log("edit item clicked");  
       editNote();
       });
-    /*
-    elements[i].addEventListener('keyup', function (e) {
-      console.log("typing");
-      if (e.keyCode == 13) {
-        event.preventDefault();
-        saveEdit();
-      }
-    });
-    */
-
     // Context menu
     elements[i].addEventListener("contextmenu", e => {
       move_select = getElm();
@@ -286,8 +355,8 @@ function addTodoEventHandlers() {
       setPosition(origin);
       return false;
     });
-
   }
+
   // save an edit
   var elements = document.getElementsByClassName('save');
   for (var i = 0; i < elements.length; i++) {
@@ -339,6 +408,34 @@ function getIdx(elm) {
   }
   console.log(idx);
   return idx;
+}
+
+// create a folder when a colored circle is clicked in the Notes Dock
+function createFolder() {
+
+  // show the selected folder if it isn't already shown
+  var color = getElm().id;
+  var showFolder = document.getElementById("folder" + color);
+  showFolder.style.display = "block";
+  /*
+  // adds the new note header to Notes Dock
+  note_list = document.querySelector('#myNotes');
+  var note_log = document.createElement('div');
+  note_log.classList.add("folder");
+  note_log.classList.add("folderCollapsible");
+  var color = getElm().id;
+  console.log(note_log);
+  note_list.insertBefore(note_log, note_list.childNodes[16]); // 17 is the beginning index of the actual note headers
+  note_log.innerHTML += '<img class="folderImages" src="images/' + color + '.png">';
+  note_log.innerHTML += '<span class="folderHeader" contentEditable="true" id="folder' + color + '">' + color + '</span>';
+  note_log.innerHTML += '<div class="folderExpand">+</div>';
+
+  var content = document.createElement('div');
+  content.classList.add("content");
+  content.innerHTML += 'Test Content';
+  note_list.insertBefore(content, note_list.childNodes[17]);
+  console.log(note_list.childNodes);
+  */
 }
 
 // creates notes when the page is loaded (note exists), or when the Add Note button is clicked (note does not exist yet)
@@ -544,14 +641,21 @@ function toggleDarkMode() {
     if (result['firenote_dark'] == true) {
       console.log("dark to light");
 
+      // change the collapsible menu colors
       sheet.insertRule("\
       .collapsible, .clear {\
        background-color: white;\
-       color: black;\
+       color: gray;\
       }",0);
+      // change the menu bar colors
       sheet.insertRule("\
       .bar {\
        background-color: gray;\
+      }",0);
+      // change the folder header item colors
+      sheet.insertRule("\
+      .folder {\
+       color: gray;\
       }",0);
 
       chrome.storage.sync.set({'firenote_dark' : false}, function() {
@@ -570,7 +674,10 @@ function toggleDarkMode() {
       .bar {\
        background-color: #f0efed;\
       }",0);
-      
+      sheet.insertRule("\
+      .folder {\
+       color: #f0efed;\
+      }",0);
       chrome.storage.sync.set({'firenote_dark' : true}, function() {
         console.log('Value is set to true');
       });

@@ -38,13 +38,61 @@
     <div class="bar"></div>
   </div>
 
-  <div id="myNotes"><p id="dockTitle">Notes Dock</p><p id="hideTip"> click to hide or show a note. </p><hr></div><br>
+  <div id="myNotes"><p id="dockTitle">Notes Dock</p>
+    
+    <p class="dockSubtitle"> folders </p>
+    <span class="circle" id="Orange"></span>
+    <span class="circle" id="Pink"></span>
+    <span class="circle" id="Blue"></span>
+    <span class="circle" id="Indigo"></span>
+    <span class="circle" id="Green"></span>
+    <hr>
+    <p id="hideTip"> right-click to rename folder or hide notes.</p>
+    <!-- Collapsible Folders in Notes Dock -->
+    <div class="folder folderCollapsible" id="folderOrange">
+      <img class="folderImages" src="images/Orange.png">
+      <span class="folderHeader"  id="folderOrange">Orange</span>
+      <div class="folderExpand">+</div>
+    </div>
+    <div class="folderContent" id="contentOrange"> No notes added </div>
+
+    <div class="folder folderCollapsible" id="folderPink">
+      <img class="folderImages" src="images/Pink.png">
+      <span class="folderHeader"  >Pink</span>
+      <div class="folderExpand">+</div>
+    </div>
+    <div class="folderContent" id="contentPink"> No notes added </div>
+
+    <div class="folder folderCollapsible" id="folderBlue">
+      <img class="folderImages" src="images/Blue.png">
+      <span class="folderHeader"  >Blue</span>
+      <div class="folderExpand">+</div>
+    </div>
+    <div class="folderContent" id="contentBlue"> No notes added </div>
+
+    <div class="folder folderCollapsible" id="folderIndigo">
+      <img class="folderImages" src="images/Indigo.png">
+      <span class="folderHeader" >Indigo</span>
+      <div class="folderExpand">+</div>
+    </div>
+    <div class="folderContent" id="contentIndigo"> No notes added </div>
+
+    <div class="folder folderCollapsible" id="folderGreen">
+      <img class="folderImages" src="images/Green.png">
+      <span class="folderHeader" >Green</span>
+      <div class="folderExpand">+</div>
+    </div>
+    <div class="folderContent" id="contentGreen"> No notes added </div>
+    
+
+    <p class="dockSubtitle"> notes </p><hr>
+  </div><br>
   <div id="intro">
     <div id="centerTitle"><h1 id="fire">fire</h1><h1>note</h1></div>
-    <p> welcome to your customizable workspace for virtual sticky notes. jot down your thoughts. write to-do lists. save paper and stay organized. </p>
+    <p> your customizable workspace for virtual sticky notes and to-do lists.</p>
     <hr><br>
-    <button id="addNote" class="blue">+ Add New List</button>
-    <button id="addMemo" class="blue">+ Add New Memo</button>
+    <button id="addNote" class="blueBtn">+ Add New List</button>
+    <button id="addMemo" class="blueBtn">+ Add New Memo</button>
     <p id="pending"> edit pending save. </p>
   </div>
   <div id="footer">
@@ -140,6 +188,17 @@
     <li class="menu-option priority">Prioritize</li>
     <li class="menu-option moveup">Move Up</li>
     <li class="menu-option movedown">Move Down</li>
+  </ul>
+</div>
+
+<div class="folderAddMenu">
+  <p id="hideTip"> Move to folder: </p>
+  <ul class="menu-options">
+    <li class="menu-option orangeMove"><span class="circle" id="Orange"></span><p class="colorMenuOption">Orange</p></li>
+    <li class="menu-option pinkMove"><span class="circle" id="Pink"></span><p class="colorMenuOption">Pink</p></li>
+    <li class="menu-option blueMove"><span class="circle" id="Blue"></span><p class="colorMenuOption">Blue</p></li>
+    <li class="menu-option indigoMove"><span class="circle" id="Indigo"></span><p class="colorMenuOption">Indigo</p></li>
+    <li class="menu-option greenMove"><span class="circle" id="Green"></span><p class="colorMenuOption">Green</p></li>
   </ul>
 </div>
 
