@@ -627,7 +627,7 @@ del {
 }
 
 /* context menu code */
-.contextMenu, .folderAddMenu {
+.contextMenu, .folderAddMenu, .folderDelMenu {
   width: 90px;
   z-index: 6;
   background-color: #fefefe;

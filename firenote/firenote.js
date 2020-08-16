@@ -1,4 +1,4 @@
-// version 2.0.6
+// version 2.1
 // A brief guide to defined variables:
 // N: any integer
 // 'todoN': represents a LIST of todo items for any note of index N
@@ -6,7 +6,7 @@
 // 'headerItemN': the text element of the header of note N in the Notes Dock
 // chrome.storage.sync.remove('1');
 // add event listeners to onclick elements
-var colorDict = {"Orange":"#ffdfba",
+var color_dict = {"Orange":"#ffdfba",
 "Pink":"#ffedf8",
 "Blue":"#d0ebfc",
 "Green":"#ceffeb",
@@ -142,26 +142,6 @@ $(document).ready(function() {
   // ***********************************************************************************************
   // CONTEXT MENUS
   // ***********************************************************************************************
-  
-  function createContextMenu(menu) {
-    let menuVisible = false;
-    const toggleMenu = command => {
-      menu.style.display = command === "show" ? "block" : "none";
-      menuVisible = !menuVisible;
-    };
-    // sets the position of the menu at mouse click
-    const setPosition = ({ top, left }) => {
-      menu.style.left = `${left}px`;
-      menu.style.top = `${top}px`;
-      toggleMenu("show");
-    };
-    // hides the context menu if you click outside it
-    window.addEventListener("click", e => {
-      if (menuVisible) toggleMenu("hide");
-    });
-    return;
-  }
-
   // context menu for todo list items
   const move_down = document.querySelector(".movedown");
   const move_up = document.querySelector(".moveup");
@@ -178,16 +158,48 @@ $(document).ready(function() {
   priority_btn.addEventListener("click", e => {
     prioritize(move_select, "prioritize");
   });
-  
-  // context menu for note dock (folder move)
-  createContextMenu(document.querySelector(".folderAddMenu"));
 
-  // context menu for folder delete menu
-  createContextMenu(document.querySelector(".folderDelMenu"));
+  // create context menu for hiding and renaming folder
+  var setPosition2 = createContextMenu(document.querySelector(".folderDelMenu"));
+  var folder_list = ["folderOrange","folderPink","folderBlue","folderGreen"];
 
+  for (i=0; i < folder_list.length; i++) {
+    document.getElementById(folder_list[i]).addEventListener("contextmenu", e => {
+      move_select = getElm();
+      e.preventDefault();
+      const origin = {
+        left: e.pageX,
+        top: e.pageY
+      };
+      setPosition2(origin);
+      return false;
+    });
+  }
 });
 
+// creates a context menu
+function createContextMenu(menu) {
+  let menuVisible = false;
+  const toggleMenu = command => {
+    menu.style.display = command === "show" ? "block" : "none";
+    menuVisible = !menuVisible;
+  };
+  // sets the position of the menu at mouse click
+  const setPosition = ({ top, left }) => {
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
+    toggleMenu("show");
+  };
+  // hides the context menu if you click outside it
+  window.addEventListener("click", e => {
+    if (menuVisible) toggleMenu("hide");
+  });
+  return setPosition;
+}
+
+// ***********************************************************************************************
 // NOTE EVENT HANDLERS
+// ***********************************************************************************************
 // adds event handlers for elements on a note
 function addNoteEventHandlers(note) {
 
@@ -276,26 +288,8 @@ function addNoteEventHandlers(note) {
     hideNote();
   });
 
-  // Context menu
-  
-  const menu = document.querySelector(".folderAddMenu");
-  console.log(menu);
-  let menuVisible = false;
-  const toggleMenu = command => {
-    menu.style.display = command === "show" ? "block" : "none";
-    menuVisible = !menuVisible;
-  };
-  // sets the position of the menu at mouse click
-  const setPosition = ({ top, left }) => {
-    menu.style.left = `${left}px`;
-    menu.style.top = `${top}px`;
-    toggleMenu("show");
-  };
-  // hides the context menu if you click outside it
-  window.addEventListener("click", e => {
-    if (menuVisible) toggleMenu("hide");
-  });
-
+  // context menu for add to folder
+  var setPosition = createContextMenu(document.querySelector(".folderAddMenu"));
   headerItem.addEventListener("contextmenu", e => {
     move_select = getElm();
     e.preventDefault();
@@ -308,6 +302,10 @@ function addNoteEventHandlers(note) {
   });
 }
 
+
+// ***********************************************************************************************
+// NOTE EVENT HANDLERS ON PAGE LOAD
+// ***********************************************************************************************
 // adds event listeners when page loads
 attachedListeners = false;
 function addNoteEventHandlersOnLoad() {
@@ -334,6 +332,10 @@ function addNoteEventHandlersOnLoad() {
   });
 }
 
+
+// ***********************************************************************************************
+// TODO LIST EVENT HANDLERS
+// ***********************************************************************************************
 // adds event handlers for todo items on a note
 function addTodoEventHandlers() {
   // strikethrough
@@ -355,23 +357,8 @@ function addTodoEventHandlers() {
   // edit a todo item
   var elements = document.getElementsByClassName('span');
 
-  // Context menu
-  const menu = document.querySelector(".contextMenu");
-  let menuVisible = false;
-  const toggleMenu = command => {
-    menu.style.display = command === "show" ? "block" : "none";
-    menuVisible = !menuVisible;
-  };
-  // sets the position of the menu at mouse click
-  const setPosition = ({ top, left }) => {
-    menu.style.left = `${left}px`;
-    menu.style.top = `${top}px`;
-    toggleMenu("show");
-  };
-  // hides the context menu if you click outside it
-  window.addEventListener("click", e => {
-    if (menuVisible) toggleMenu("hide");
-  });
+  // assign listeners to context menu for to-do list items
+  const setPosition = createContextMenu(document.querySelector(".contextMenu"));
 
   for (var i = 0; i < elements.length; i++) {
 
@@ -379,7 +366,7 @@ function addTodoEventHandlers() {
       console.log("edit item clicked");  
       editNote();
       });
-    // Context menu
+    // add a listener for the context menu to each element in the to-do list
     elements[i].addEventListener("contextmenu", e => {
       move_select = getElm();
       
@@ -392,7 +379,6 @@ function addTodoEventHandlers() {
       return false;
     });
   }
-
   // save an edit
   var elements = document.getElementsByClassName('save');
   for (var i = 0; i < elements.length; i++) {
@@ -402,6 +388,7 @@ function addTodoEventHandlers() {
     });
   }
 }
+
 // hides the menu when the 3 bar icon is clicked
 function hideMenu() {
   if (document.querySelector('#menu').style.display == "none") {
@@ -446,11 +433,12 @@ function getIdx(elm) {
   return idx;
 }
 
-// move an note to a folder
+
+// ***********************************************************************************************
+// MOVE NOTE TO FOLDER
+// ***********************************************************************************************
 function moveToFolder(color, move_select) {
   
-  console.log(colorDict);
-
   var target = document.getElementById("content" + color);
   document.getElementById(move_select.id).remove();
 
@@ -473,44 +461,33 @@ function moveToFolder(color, move_select) {
   var targetNote = document.getElementById("mydiv" + idx);
   
   try {
-    targetNote.style.backgroundColor = colorDict[color];
-    document.getElementById("mydiv" + idx + "header").style.backgroundColor = colorDict[color];
-    document.getElementById("memo" + idx).style.backgroundColor = colorDict[color];
+    targetNote.style.backgroundColor = color_dict[color];
+    document.getElementById("mydiv" + idx + "header").style.backgroundColor = color_dict[color];
+    document.getElementById("memo" + idx).style.backgroundColor = color_dict[color];
   }
   catch(err) {
     console.log(err);
   }
 }
 
+// ***********************************************************************************************
 // create a folder when a colored circle is clicked in the Notes Dock
+// ***********************************************************************************************
 function createFolder() {
 
   // show the selected folder if it isn't already shown
   var color = getElm().id;
   var showFolder = document.getElementById("folder" + color);
   showFolder.style.display = "block";
-  /*
-  // adds the new note header to Notes Dock
-  note_list = document.querySelector('#myNotes');
-  var note_log = document.createElement('div');
-  note_log.classList.add("folder");
-  note_log.classList.add("folderCollapsible");
-  var color = getElm().id;
-  console.log(note_log);
-  note_list.insertBefore(note_log, note_list.childNodes[16]); // 17 is the beginning index of the actual note headers
-  note_log.innerHTML += '<img class="folderImages" src="images/' + color + '.png">';
-  note_log.innerHTML += '<span class="folderHeader" contentEditable="true" id="folder' + color + '">' + color + '</span>';
-  note_log.innerHTML += '<div class="folderExpand">+</div>';
+  console.log(showFolder);
 
-  var content = document.createElement('div');
-  content.classList.add("content");
-  content.innerHTML += 'Test Content';
-  note_list.insertBefore(content, note_list.childNodes[17]);
-  console.log(note_list.childNodes);
-  */
+
+
 }
 
+// ***********************************************************************************************
 // creates notes when the page is loaded (note exists), or when the Add Note button is clicked (note does not exist yet)
+// ***********************************************************************************************
 function createNote(exists,idx,memo) {
 
   idx = idx.toString();
@@ -625,7 +602,9 @@ function createNote(exists,idx,memo) {
   });
 };
 
-// page load
+// ***********************************************************************************************
+// LOAD THE PAGE
+// ***********************************************************************************************
 function loadPage() {
 
   // check if user has enabled dark mode
@@ -692,7 +671,9 @@ function loadPage() {
 };
 loadPage();
 
+// ***********************************************************************************************
 // enable dark mode CSS changes
+// ***********************************************************************************************
 function toggleDarkMode() {
 
   var sheet = (function() {
@@ -757,7 +738,9 @@ function toggleDarkMode() {
   });
 }
 
+// ***********************************************************************************************
 // gets an element
+// ***********************************************************************************************
 function getElm(e) {
    e = e || window.event;
    e = e.target || e.srcElement;
@@ -765,7 +748,9 @@ function getElm(e) {
    return e;
 };
 
+// ***********************************************************************************************
 // allows an element to be dragged
+// ***********************************************************************************************
 function dragElement(elm) {
   // get the div header element
   elm = getElm();
@@ -824,8 +809,10 @@ function dragElement(elm) {
   }
 }
 
-const max_notes = 12;
+// ***********************************************************************************************
 // adds a note to the screen when "Add Note" is clicked
+// ***********************************************************************************************
+const max_notes = 12;
 function addNote(memo) {
 
   var existing_notes = [];
@@ -912,7 +899,9 @@ function addNote(memo) {
   }
 }
 
+// ***********************************************************************************************
 // deletes a note from existence
+// ***********************************************************************************************
 function deleteNote() {
 
   var elm = getElm();
@@ -933,7 +922,9 @@ function deleteNote() {
   chrome.storage.sync.remove(idx.toString());
 }
 
+// ***********************************************************************************************
 // remove all notes
+// ***********************************************************************************************
 function clearAll() {
 
   r = confirm("This will remove all of your notes and delete them from your cache. Are you sure you want to proceed?");
@@ -960,7 +951,9 @@ function clearAll() {
   }
 }
 
+// ***********************************************************************************************
 // add a new todo list item to an existing list
+// ***********************************************************************************************
 function add() {
     // get the parent div element
     var elm = getElm();
@@ -1013,7 +1006,9 @@ function add() {
     });
 }
 
+// ***********************************************************************************************
 // removes an item from a todo list
+// ***********************************************************************************************
 function remove() {
 
     var elm = getElm();
@@ -1052,7 +1047,9 @@ function remove() {
     });
 }
 
+// ***********************************************************************************************
 // recovers a deleted list item
+// ***********************************************************************************************
 function undo() {
   elm = getElm();
 
@@ -1070,41 +1067,12 @@ function undo() {
     }
     elm.parentNode.childNodes[4].value = dict['removed'];
     elm.parentNode.childNodes[5].click();
-
-    /*
-    var task = dict['removed'];
-    console.log(task);
-
-    // get the current list of todos for that note
-    var todos_str = dict['todo'];
-    console.log(todos_str);
-
-    // if there is an actual list
-    if (todos_str !== null) {
-
-      // add the new task to the list of todos for that note
-      var todos = todos_str;
-      console.log(todos);
-      if (todos[todos.length - 1] != task) {
-          todos.push(task);
-      }
-    }
-    else {
-      todos = [task];
-      console.log(todos);
-    }
-    dict['todo'] = (todos);
-    console.log(dict['todo']);
-
-    storeSync(idx,dict);
-    
-    console.log(dict);
-    show(idx);
-    */
   });
 }
 
+// ***********************************************************************************************
 // save memo
+// ***********************************************************************************************
 function saveMemo(idx, box_height) {
   elm = getElm();
 
@@ -1132,7 +1100,9 @@ function saveMemo(idx, box_height) {
   });
 }
 
+// ***********************************************************************************************
 // show memo
+// ***********************************************************************************************
 function showMemo(idx) {
   chrome.storage.sync.get([idx.toString()], function(result) {
     console.log(result);
@@ -1142,7 +1112,9 @@ function showMemo(idx) {
   });
 }
 
+// ***********************************************************************************************
 // idx is the targeted note index
+// ***********************************************************************************************
 function show(idx) {
 
   chrome.storage.sync.get([idx.toString()], function(result) {
@@ -1209,7 +1181,9 @@ function show(idx) {
   });
 }
 
+// ***********************************************************************************************
 // strikes through a todo list item
+// ***********************************************************************************************
 function strikeThrough() {
 
   var elm = getElm();
@@ -1297,7 +1271,9 @@ function strikeThrough() {
   }
 }
 
+// ***********************************************************************************************
 // prioritizes a todo list item
+// ***********************************************************************************************
 function prioritize(move_select) {
 
   var parent = move_select.parentNode.parentNode.parentNode;
@@ -1439,7 +1415,9 @@ function prioritize(move_select) {
   }
 }
 
+// ***********************************************************************************************
 // docks all notes
+// ***********************************************************************************************
 function dockAll() {
   //var header_list = document.querySelectorAll(".dragHeader");
 
@@ -1492,7 +1470,9 @@ function dockAll() {
   });
 }
 
+// ***********************************************************************************************
 // hides a note from view by clicking on it in the Notes Dock
+// ***********************************************************************************************
 function hideNote(idx) {
   
   // save hidden feature to local storage
@@ -1548,7 +1528,9 @@ function hideNote(idx) {
   });
 }
 
+// ***********************************************************************************************
 // minimize a note leaving only the header
+// ***********************************************************************************************
 function minimize() {
   elm = getElm();
 
@@ -1591,7 +1573,9 @@ function minimize() {
   });
 }
 
+// ***********************************************************************************************
 // allows edit of the header of a note
+// ***********************************************************************************************
 function editHeader() {
   elm = getElm();
   var header = elm.parentNode.childNodes[0];
@@ -1625,7 +1609,9 @@ function editHeader() {
   }
 }
 
+// ***********************************************************************************************
 // moves an item up the list
+// ***********************************************************************************************
 function moveItem(move_select, direction) {
 
   var parent = move_select.parentNode.parentNode.parentNode;
@@ -1652,11 +1638,7 @@ function moveItem(move_select, direction) {
     if (isCrossed == true) {
       todos = [].concat.apply([], dict['strikethrough']);
     }
-    /*
-    if (move_select.style.fontWeight == 'bold') {
-      todos = [].concat.apply([], dict['strikethrough']);
-    }
-    */
+
     // get the note index of the selected list item
     note_idx = todos.indexOf(move_item);
     console.log(move_select.innerHTML);
@@ -1697,7 +1679,9 @@ function moveItem(move_select, direction) {
   });
 }
 
+// ***********************************************************************************************
 // allows a list item to be edited
+// ***********************************************************************************************
 var og_note;
 function editNote() {
   elm = getElm();
@@ -1747,7 +1731,9 @@ function editNote() {
   };
 }
 
+// ***********************************************************************************************
 // saves an edit on a todo list item
+// ***********************************************************************************************
 function saveEdit() {
     var pending = document.querySelector("#pending");
     spanList = document.querySelectorAll(".span");
@@ -1831,7 +1817,9 @@ function saveEdit() {
     });
 }
 
+// ***********************************************************************************************
 // fade an element out
+// ***********************************************************************************************
 function fade(element) {
   var op = 1;  // initial opacity
   var timer = setInterval(function () {
@@ -1847,7 +1835,9 @@ function fade(element) {
   }, 50);
 }
 
+// ***********************************************************************************************
 // autosizes height of textarea
+// ***********************************************************************************************
 var autoExpand = function (field) {
 
 	// Reset field height
