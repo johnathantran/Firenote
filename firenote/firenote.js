@@ -1,24 +1,33 @@
-// version 2.1
-// A brief guide to defined variables:
-// N: any integer
-// 'todoN': represents a LIST of todo items for any note of index N
-// 'headerTextN': the text element of the header of note N
-// 'headerItemN': the text element of the header of note N in the Notes Dock
-// chrome.storage.sync.remove('1');
-// add event listeners to onclick elements
+/*
+version 2.1
+A brief guide to defined variables:
+N: any integer
+'todoN': represents a LIST of todo items for any note of index N
+'headerTextN': the text element of the header of note N
+'headerItemN': the text element of the header of note N in the Notes Dock
 
+
+SECTIONS IN THIS CODE:
+
+I. GLOBAL VARIABLES
+II. DOCUMENT LOAD AND EVENT HANDLERS
+III. RIGHT SIDE MENU FUNCTIONS
+IV. NOTE DOCK FUNCTIONS
+V. MAIN FIRENOTE FUNCTIONS
+VI. NOTE HEADER BAR FUNCTIONS
+VII. MEMO FUNCTIONS
+VIII. TODO LIST FUNCTIONS
+IX. HELPER FUNCTIONS
+*/ 
 
 // *****************************************************************************************************************
 // *****************************************************************************************************************
 // I. GLOBAL VARIABLES
 // *****************************************************************************************************************
 // *****************************************************************************************************************
+
 // note colors used
-var color_dict = {"Orange":"#ffdfba",
-"Pink":"#ffedf8",
-"Blue":"#d0ebfc",
-"Green":"#ceffeb",
-"Yellow":"#fcfacf"};
+var color_dict = {"Orange":"#ffdfba", "Pink":"#ffedf8", "Blue":"#d0ebfc", "Green":"#ceffeb", "Yellow":"#fcfacf"};
 
 // max allowed notes on screen
 const max_notes = 12;
@@ -180,7 +189,7 @@ $(document).ready(function() {
   });
 
   // ***********************************************************************************************
-  // CONTEXT MENUS
+  // CONTEXT MENUS ON LOAD
   // ***********************************************************************************************
   // context menu for todo list items
   const move_down = document.querySelector(".movedown");
@@ -216,26 +225,6 @@ $(document).ready(function() {
     });
   }
 });
-
-// creates a context menu
-function createContextMenu(menu) {
-  let menuVisible = false;
-  const toggleMenu = command => {
-    menu.style.display = command === "show" ? "block" : "none";
-    menuVisible = !menuVisible;
-  };
-  // sets the position of the menu at mouse click
-  const setPosition = ({ top, left }) => {
-    menu.style.left = `${left}px`;
-    menu.style.top = `${top}px`;
-    toggleMenu("show");
-  };
-  // hides the context menu if you click outside it
-  window.addEventListener("click", e => {
-    if (menuVisible) toggleMenu("hide");
-  });
-  return setPosition;
-}
 
 
 // ***********************************************************************************************
@@ -520,6 +509,74 @@ function hideMenu() {
 
 
 // ***********************************************************************************************
+// enable dark mode CSS changes
+// ***********************************************************************************************
+function toggleDarkMode() {
+
+  var sheet = (function() {
+    // Create the <style> tag
+    var style = document.createElement("style");
+    // WebKit hack
+    style.appendChild(document.createTextNode(""));
+    // Add the <style> element to the page
+    document.head.appendChild(style);
+    return style.sheet;
+  })();
+
+  document.body.classList.toggle("dark-mode");
+
+  chrome.storage.sync.get(['firenote_dark'], function(result) {
+
+    // check if dark mode was enabled by user
+    if (result['firenote_dark'] == true) {
+      console.log("dark to light");
+
+      // change the collapsible menu colors
+      sheet.insertRule("\
+      .collapsible, .clear {\
+       background-color: white;\
+       color: gray;\
+      }",0);
+      // change the menu bar colors
+      sheet.insertRule("\
+      .bar {\
+       background-color: gray;\
+      }",0);
+      // change the folder header item colors
+      sheet.insertRule("\
+      .folder {\
+       color: gray;\
+      }",0);
+
+      chrome.storage.sync.set({'firenote_dark' : false}, function() {
+        console.log('Value is set to false');
+      });
+    }
+    else {
+      console.log("light to dark");
+    
+      sheet.insertRule("\
+      .collapsible, .clear {\
+       background-color: #363640;\
+       color: #fcd488;\
+      }",0);
+      sheet.insertRule("\
+      .bar {\
+       background-color: #f0efed;\
+      }",0);
+      sheet.insertRule("\
+      .folder {\
+       color: #f0efed;\
+      }",0);
+      chrome.storage.sync.set({'firenote_dark' : true}, function() {
+        console.log('Value is set to true');
+      });
+    }
+  });
+}
+
+
+// ***********************************************************************************************
 // remove all notes
 // ***********************************************************************************************
 function clearAll() {
@@ -604,80 +661,13 @@ function dockAll() {
 }
 
 
-// ***********************************************************************************************
-// enable dark mode CSS changes
-// ***********************************************************************************************
-function toggleDarkMode() {
-
-  var sheet = (function() {
-    // Create the <style> tag
-    var style = document.createElement("style");
-    // WebKit hack
-    style.appendChild(document.createTextNode(""));
-    // Add the <style> element to the page
-    document.head.appendChild(style);
-    return style.sheet;
-  })();
-
-  document.body.classList.toggle("dark-mode");
-
-  chrome.storage.sync.get(['firenote_dark'], function(result) {
-
-    // check if dark mode was enabled by user
-    if (result['firenote_dark'] == true) {
-      console.log("dark to light");
-
-      // change the collapsible menu colors
-      sheet.insertRule("\
-      .collapsible, .clear {\
-       background-color: white;\
-       color: gray;\
-      }",0);
-      // change the menu bar colors
-      sheet.insertRule("\
-      .bar {\
-       background-color: gray;\
-      }",0);
-      // change the folder header item colors
-      sheet.insertRule("\
-      .folder {\
-       color: gray;\
-      }",0);
-
-      chrome.storage.sync.set({'firenote_dark' : false}, function() {
-        console.log('Value is set to false');
-      });
-    }
-    else {
-      console.log("light to dark");
-    
-      sheet.insertRule("\
-      .collapsible, .clear {\
-       background-color: #363640;\
-       color: #fcd488;\
-      }",0);
-      sheet.insertRule("\
-      .bar {\
-       background-color: #f0efed;\
-      }",0);
-      sheet.insertRule("\
-      .folder {\
-       color: #f0efed;\
-      }",0);
-      chrome.storage.sync.set({'firenote_dark' : true}, function() {
-        console.log('Value is set to true');
-      });
-    }
-  });
-}
-
 
 
 
 
 // *****************************************************************************************************************
 // *****************************************************************************************************************
-// PART IV. NOTES DOCK FUNCTIONS
+// PART IV. NOTE DOCK FUNCTIONS
 // *****************************************************************************************************************
 // *****************************************************************************************************************
 
@@ -725,6 +715,27 @@ function createFolder() {
   var showFolder = document.getElementById("folder" + color);
   showFolder.style.display = "block";
   console.log(showFolder);
+}
+
+
+// ***********************************************************************************************
+// hide all notes in a folder
+// ***********************************************************************************************
+function hideFolder() {
+}
+
+
+// ***********************************************************************************************
+// rename a folder
+// ***********************************************************************************************
+function renameFolder() {
+}
+
+
+// ***********************************************************************************************
+// delete a folder
+// ***********************************************************************************************
+function deleteFolder() {
 }
 
 
@@ -795,7 +806,6 @@ function hideNote(idx) {
 // PART V. MAIN FIRENOTE FUNCTIONS
 // *****************************************************************************************************************
 // *****************************************************************************************************************
-
 
 // creates notes when the page is loaded (note exists), or when the Add Note button is clicked (note does not exist yet)
 function createNote(exists,idx,memo) {
@@ -1067,6 +1077,7 @@ function addNote(memo) {
 
 
 
+
 // *****************************************************************************************************************
 // *****************************************************************************************************************
 // PART VI. NOTE HEADER BAR FUNCTIONS
@@ -1178,6 +1189,7 @@ function deleteNote() {
 
 
 
+
 // *****************************************************************************************************************
 // *****************************************************************************************************************
 // PART VII. MEMO FUNCTIONS
@@ -1224,6 +1236,7 @@ function showMemo(idx) {
     console.log(dict['memo']);
   });
 }
+
 
 
 
@@ -1934,4 +1947,24 @@ function getIdx(elm) {
   }
   console.log(idx);
   return idx;
+}
+
+// creates a context menu
+function createContextMenu(menu) {
+  let menuVisible = false;
+  const toggleMenu = command => {
+    menu.style.display = command === "show" ? "block" : "none";
+    menuVisible = !menuVisible;
+  };
+  // sets the position of the menu at mouse click
+  const setPosition = ({ top, left }) => {
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
+    toggleMenu("show");
+  };
+  // hides the context menu if you click outside it
+  window.addEventListener("click", e => {
+    if (menuVisible) toggleMenu("hide");
+  });
+  return setPosition;
 }
