@@ -6,12 +6,52 @@
 // 'headerItemN': the text element of the header of note N in the Notes Dock
 // chrome.storage.sync.remove('1');
 // add event listeners to onclick elements
+
+
+// *****************************************************************************************************************
+// *****************************************************************************************************************
+// I. GLOBAL VARIABLES
+// *****************************************************************************************************************
+// *****************************************************************************************************************
+// note colors used
 var color_dict = {"Orange":"#ffdfba",
 "Pink":"#ffedf8",
 "Blue":"#d0ebfc",
 "Green":"#ceffeb",
-"Yellow":"#fcfacf"}
+"Yellow":"#fcfacf"};
 
+// max allowed notes on screen
+const max_notes = 12;
+
+// autosizes height of textarea
+var autoExpand = function (field) {
+
+	// Reset field height
+	field.style.height = 'inherit';
+
+	// Get the computed styles for the element
+	var computed = window.getComputedStyle(field);
+
+	// Calculate the height
+	var height = parseInt(computed.getPropertyValue('border-top-width'), 10)
+	             + parseInt(computed.getPropertyValue('padding-top'), 10)
+	             + field.scrollHeight
+	             + parseInt(computed.getPropertyValue('padding-bottom'), 10)
+	             + parseInt(computed.getPropertyValue('border-bottom-width'), 10);
+
+	field.style.height = height + 'px';
+  return height
+};
+
+
+
+
+
+// *****************************************************************************************************************
+// *****************************************************************************************************************
+// PART II. DOCUMENT LOAD AND EVENT HANDLERS
+// *****************************************************************************************************************
+// *****************************************************************************************************************
 $(document).ready(function() {
 
   // adding event listeners to right-side menu
@@ -197,6 +237,7 @@ function createContextMenu(menu) {
   return setPosition;
 }
 
+
 // ***********************************************************************************************
 // NOTE EVENT HANDLERS
 // ***********************************************************************************************
@@ -228,7 +269,7 @@ function addNoteEventHandlers(note) {
     });
     
     memoText.addEventListener('click', function() {
-      if (memoText.value.length < 500) {
+      if (memoText.value.length < 600) {
         document.getElementById('pending').textContent = "edit pending save.";
         document.getElementById('pending').style.opacity = "1";
       }
@@ -389,218 +430,6 @@ function addTodoEventHandlers() {
   }
 }
 
-// hides the menu when the 3 bar icon is clicked
-function hideMenu() {
-  if (document.querySelector('#menu').style.display == "none") {
-    document.querySelector('#menu').style.display = "block";
-  }
-  else {
-    document.querySelector('#menu').style.display = "none";
-  }
-}
-// stores item into Google Chrome sync
-function storeSync(idx,dict) {
-  var key = idx.toString(),
-      value = JSON.stringify(
-          dict
-      );
-  var jsonfile = {};
-  jsonfile[key] = value;
-  chrome.storage.sync.set(jsonfile, function () {
-      console.log('Saved', key, value);
-  });
-}
-
-// dynamically change number of characters remaining in memo
-function countCharacters(e) {    
-  var elm = getElm();
-  var textEntered, countRemaining, counter;          
-  textEntered = elm.parentNode.childNodes[4].value;
-  countRemaining = elm.parentNode.childNodes[5]; 
-  counter = (500 - (textEntered.length));
-  countRemaining.textContent = counter + " characters left";       
-}
-
-// returns the index of the note
-function getIdx(elm) {
-  console.log(elm);
-  // if there are more than 10 notes, get last 2 chars
-  idx = elm.id.slice(-2);
-  if (isNaN(idx) == true) {
-    idx = elm.id.slice(-1);
-  }
-  console.log(idx);
-  return idx;
-}
-
-
-// ***********************************************************************************************
-// MOVE NOTE TO FOLDER
-// ***********************************************************************************************
-function moveToFolder(color, move_select) {
-  
-  var target = document.getElementById("content" + color);
-  document.getElementById(move_select.id).remove();
-
-  // if the folder hasn't been created yet, reveal the folder
-  if (color !== "Yellow") {
-    if (target.innerHTML == "") {
-      document.getElementById("folder" + color).style.display = "block";
-    }
-  }
-
-  // adds the new note header to Notes Dock
-  if (color == "Yellow") {
-    // move the note out of the folder
-    document.querySelector('#myNotes').appendChild(move_select);
-  }
-  else {
-    target.appendChild(move_select);
-  }
-  var idx = getIdx(move_select);
-  var targetNote = document.getElementById("mydiv" + idx);
-  
-  try {
-    targetNote.style.backgroundColor = color_dict[color];
-    document.getElementById("mydiv" + idx + "header").style.backgroundColor = color_dict[color];
-    document.getElementById("memo" + idx).style.backgroundColor = color_dict[color];
-  }
-  catch(err) {
-    console.log(err);
-  }
-}
-
-// ***********************************************************************************************
-// create a folder when a colored circle is clicked in the Notes Dock
-// ***********************************************************************************************
-function createFolder() {
-
-  // show the selected folder if it isn't already shown
-  var color = getElm().id;
-  var showFolder = document.getElementById("folder" + color);
-  showFolder.style.display = "block";
-  console.log(showFolder);
-
-
-
-}
-
-// ***********************************************************************************************
-// creates notes when the page is loaded (note exists), or when the Add Note button is clicked (note does not exist yet)
-// ***********************************************************************************************
-function createNote(exists,idx,memo) {
-
-  idx = idx.toString();
-  var note = document.createElement('div');
-  note.id = "mydiv" + idx;
-  document.body.appendChild(note);
-  note.classList.add('drag');
-  note.innerHTML += '<input class="dragHeader" maxlength="30" readOnly="true" id="mydiv' + idx + 'header" value="Note ' + idx +'">';
-  note.innerHTML += '<img src="images/edit.png" class="editHeader" id="edit">';
-  note.innerHTML += '<img src="images/minimize.png" class="minimize" id="minimize">';
-  note.innerHTML += '<img src="images/exit.png" class="deleteNote" id="exit"></img>';
-  
-  if (memo == true) {
-    note.innerHTML += '<textarea placeholder="Type a memo here..." maxlength="500" class="memo" rows="8" spellcheck="false" id="memo' + idx +'" style="display:inline-block;"></textarea>';
-    note.innerHTML += '<p class="memoCounter" id="memoCounter' + idx + '">Max 500 characters</p>';
-    note.innerHTML += '<button class="saveMemo">Save Memo</button>';
-  }
-  else {
-    note.innerHTML += '<input maxlength="250" class="task" placeholder="Add an item" id="task' + idx + '" style="display:inline-block;"><img src="images/add.png" id="add" class="add">';
-    note.innerHTML += '<img class="undo" id="undo' + idx + '" src="images/undo.png">';
-    note.innerHTML += '<div class="todoLists" id="todos' + idx + '"></div>';
-  }
-
-  var note_header = 'Note ' + idx;
- 
-  chrome.storage.sync.get([idx], function(result) {
-
-    // IF LOADING EXISTING NOTES
-    if (exists == true) {
-     
-      dict = JSON.parse(result[idx]);
-      console.log(dict);
-
-      note.style.top = dict['posTop'];
-      note.style.left = dict['posLeft'];
-
-      //console.log(dict);
-      //note.offsetHeight = dict['height'];
-      //note.offsetWidth = dict['width'];
-      note_header = dict['headerText'];
-      console.log(note_header);
-      note.childNodes[0].value = note_header;
-      console.log(note.childNodes)
-
-      // check if the note is minimized
-      if (dict['minimized'] == true) {
-        note.childNodes[4].style.display = 'none';
-        note.childNodes[5].style.display = 'none';
-        note.childNodes[6].style.display = 'none';
-        note.childNodes[7].style.display = 'none';
-      }
-      // adds the new note header to Notes Dock
-      note_list = document.querySelector('#myNotes');
-      var note_log = document.createElement('div');
-      console.log(note_log);
-      document.querySelector('#myNotes').appendChild(note_log);
-      note_log.innerHTML += '<p class="headerList" id="headerItem' + idx + '">' + note_header + '</p>';
-
-      // check if the note is hidden
-      if (dict['hidden'] == true) {
-        note.style.display = 'none';
-        document.querySelector('#headerItem' + idx).style.color = 'silver';
-      }
-
-      // if note is a memo, query saved text
-      if (memo == true) {
-        note.childNodes[4].value = dict['memo'];
-        textEntered = note.childNodes[4].value;
-        note.childNodes[5].textContent = (500 - textEntered.length) + " characters left";
-        // set the textarea to the saved height
-        note.childNodes[4].style.height = dict['boxHeight'] + "px"; 
-      }
-
-    addNoteEventHandlersOnLoad();
-    }
-    // IF ADDING A NEW NOTE
-    else {
-      console.log(idx);
-      // spawn note in center of screen
-      note.style.top = ($(window).scrollTop() + $(window).height() / 2) + "px";
-      note.style.left = ($(window).scrollTop() + $(window).width() / 2) - (note.offsetWidth / 2) + "px";
-
-      // create new note in local storage as empty list
-      var dict = {
-        'todo': null, // list of todo items
-        'headerText': note_header, 
-        'minimized': false, 
-        'posTop': note.style.top, 
-        'posLeft': note.style.left,
-        'hidden': false,
-        'isMemo': memo,
-        'memo': null,
-      };
-      console.log("Creating item: " + idx);
-
-      storeSync(idx,dict);
-
-      // adds the new note header to Notes Dock
-      note_list = document.querySelector('#myNotes');
-      var note_log = document.createElement('div');
-      console.log(note_log);
-      document.querySelector('#myNotes').appendChild(note_log);
-      note_log.innerHTML += '<p class="headerList" id="headerItem' + idx + '">' + note_header + '</p>';
-
-      // check if the note is hidden
-      if (dict['hidden'] == true) {
-        note.style.display = 'none';
-        document.querySelector('#headerItem' + idx).style.color = 'silver';
-      }
-      addNoteEventHandlers(note);
-    } 
-  });
-};
 
 // ***********************************************************************************************
 // LOAD THE PAGE
@@ -641,7 +470,6 @@ function loadPage() {
     console.log(all_idx);
 
     try {
-
       chrome.storage.sync.get(all_idx, function(result) {
 
         for (idx=1; idx <= 20; idx++) { // 20 for now
@@ -651,8 +479,7 @@ function loadPage() {
           try {
             result2 = JSON.parse(result[idx]);
             memo = result2['isMemo'];
-            createNote(exists=true,idx,memo);
-            
+            createNote(exists=true,idx,memo);    
             if (memo == false) {
               show(idx);
             }
@@ -670,6 +497,112 @@ function loadPage() {
   });
 };
 loadPage();
+
+
+
+
+
+// *****************************************************************************************************************
+// *****************************************************************************************************************
+// PART III. RIGHT SIDE MENU FUNCTIONS
+// *****************************************************************************************************************
+// *****************************************************************************************************************
+
+// hides the menu when the 3 bar icon is clicked
+function hideMenu() {
+  if (document.querySelector('#menu').style.display == "none") {
+    document.querySelector('#menu').style.display = "block";
+  }
+  else {
+    document.querySelector('#menu').style.display = "none";
+  }
+}
+
+
+// ***********************************************************************************************
+// remove all notes
+// ***********************************************************************************************
+function clearAll() {
+  r = confirm("This will remove all of your notes and delete them from your cache. Are you sure you want to proceed?");
+  if (r == true) {
+    var header_list = document.querySelectorAll(".drag");
+
+    for (j = 1; j <= max_notes; j++) {
+      try {
+        console.log("runs");
+        console.log(document.querySelector('#mydiv' + j));
+        document.querySelector('#mydiv' + j).remove();
+        document.querySelector("#headerItem" + j.toString()).remove();
+      }
+      catch(err) {
+        console.log(err);
+      }
+    }
+    chrome.storage.sync.clear(function() {
+      var error = chrome.runtime.lastError;
+      if (error) {
+        console.error(error);
+      }
+    });
+  }
+}
+
+
+// ***********************************************************************************************
+// docks all notes
+// ***********************************************************************************************
+function dockAll() {
+  //var header_list = document.querySelectorAll(".dragHeader");
+
+  // recreate saved notes on page load
+  var all_idx = [];
+  for (var i = 1; i <= max_notes; i++) {
+    all_idx.push(i.toString());
+  }
+
+  chrome.storage.sync.get(all_idx, function(result) {
+    console.log(result);
+    // check if all elements are hidden
+    var all_hidden = true;
+    for (var i = 1; i <= max_notes; i++) {
+      
+      if (result[i] == undefined) { continue; }
+
+      dict = JSON.parse(result[i]);
+      if (dict['hidden'] == false) {
+        all_hidden = false;
+        break;
+      }
+    }
+
+    for (var i = 1; i <= max_notes; i++) {
+ 
+      if (result[i] == undefined) { continue; }
+      dict = JSON.parse(result[i]);
+      div_to_hide = document.querySelector('#mydiv' + i.toString());
+
+      // reveal all notes if they are all hidden
+      if (all_hidden == true) {
+        
+        dict['hidden'] = false;
+        div_to_hide.style.display = "block";
+        document.querySelector('#headerItem' + i).style.color = "rgb(95, 95, 95)";
+        // change notes dock colors
+        if (document.getElementById('toggleDarkMode').style.color == '#fcd488') {
+          document.querySelector('#headerItem' + i).style.color = "white";
+        }
+      }
+      // else hide the notes that are showing
+      else {
+        dict['hidden'] = true;
+        div_to_hide.style.display = "none";
+        document.querySelector('#headerItem' + i).style.color = "silver";
+      }
+      storeSync(i,dict);
+    }
+  });
+}
+
 
 // ***********************************************************************************************
 // enable dark mode CSS changes
@@ -738,15 +671,247 @@ function toggleDarkMode() {
   });
 }
 
+
+
+
+
+// *****************************************************************************************************************
+// *****************************************************************************************************************
+// PART IV. NOTES DOCK FUNCTIONS
+// *****************************************************************************************************************
+// *****************************************************************************************************************
+
+// move note to folder
+function moveToFolder(color, move_select) {
+  
+  var target = document.getElementById("content" + color);
+  document.getElementById(move_select.id).remove();
+
+  // if the folder hasn't been created yet, reveal the folder
+  if (color !== "Yellow") {
+    if (target.innerHTML == "") {
+      document.getElementById("folder" + color).style.display = "block";
+    }
+  }
+  // adds the new note header to Notes Dock
+  if (color == "Yellow") {
+    // move the note out of the folder
+    document.querySelector('#myNotes').appendChild(move_select);
+  }
+  else {
+    target.appendChild(move_select);
+  }
+  var idx = getIdx(move_select);
+  var targetNote = document.getElementById("mydiv" + idx);
+  
+  try {
+    targetNote.style.backgroundColor = color_dict[color];
+    document.getElementById("mydiv" + idx + "header").style.backgroundColor = color_dict[color];
+    document.getElementById("memo" + idx).style.backgroundColor = color_dict[color];
+  }
+  catch(err) {
+    console.log(err);
+  }
+}
+
+
 // ***********************************************************************************************
-// gets an element
+// create a folder when a colored circle is clicked in the Notes Dock
 // ***********************************************************************************************
-function getElm(e) {
-   e = e || window.event;
-   e = e.target || e.srcElement;
-   console.log("Element is: " + e);
-   return e;
+function createFolder() {
+
+  // show the selected folder if it isn't already shown
+  var color = getElm().id;
+  var showFolder = document.getElementById("folder" + color);
+  showFolder.style.display = "block";
+  console.log(showFolder);
+}
+
+
+// ***********************************************************************************************
+// hides a note from view by clicking on it in the Notes Dock
+// ***********************************************************************************************
+function hideNote(idx) {
+  
+  // save hidden feature to local storage
+  elm = getElm();
+
+  idx = getIdx(elm);
+  console.log(idx);
+
+  chrome.storage.sync.get([idx.toString()], function(result) {
+
+    dict = JSON.parse(result[idx]);
+    console.log(dict['todo']);
+
+    div_to_hide = document.querySelector('#mydiv' + idx);
+    all_divs = document.querySelectorAll(".drag");
+    console.log(all_divs);
+    console.log(div_to_hide);
+    console.log(div_to_hide.style.display);
+
+    if (div_to_hide.style.display == "none") {
+
+      div_to_hide.style.display = "block";
+      
+      // bring all the other notes behind the selected note
+      for (j=0; j<all_divs.length; j++) {
+        all_divs[j].style.zIndex = "1";
+      }
+      div_to_hide.style.zIndex = "2";
+
+      elm.style.color = "black";
+
+      chrome.storage.sync.get(['firenote_dark'], function(result) {
+        // check if dark mode was enabled by user
+        if (result['firenote_dark'] == true) {
+          elm.style.color = "white";
+        }
+        dict['hidden'] = false;
+        storeSync(idx,dict);
+      });
+    }
+    else {
+      console.log("hiding...");
+      // reset notes zIndexes
+      for (j=0; j<all_divs.length; j++) {
+        all_divs[j].style.zIndex = "1";
+      }
+      div_to_hide.style.display = "none";
+      console.log(div_to_hide.style.display);
+      elm.style.color = "silver";
+      dict['hidden'] = true;
+    }
+    storeSync(idx,dict);
+  });
+}
+
+
+
+
+
+// *****************************************************************************************************************
+// *****************************************************************************************************************
+// PART V. MAIN FIRENOTE FUNCTIONS
+// *****************************************************************************************************************
+// *****************************************************************************************************************
+
+
+// creates notes when the page is loaded (note exists), or when the Add Note button is clicked (note does not exist yet)
+function createNote(exists,idx,memo) {
+
+  idx = idx.toString();
+  var note = document.createElement('div');
+  note.id = "mydiv" + idx;
+  document.body.appendChild(note);
+  note.classList.add('drag');
+  note.innerHTML += '<input class="dragHeader" maxlength="30" readOnly="true" id="mydiv' + idx + 'header" value="Note ' + idx +'">';
+  note.innerHTML += '<img src="images/edit.png" class="editHeader" id="edit">';
+  note.innerHTML += '<img src="images/minimize.png" class="minimize" id="minimize">';
+  note.innerHTML += '<img src="images/exit.png" class="deleteNote" id="exit"></img>';
+  
+  if (memo == true) {
+    note.innerHTML += '<textarea placeholder="Type a memo here..." maxlength="600" class="memo" rows="8" spellcheck="false" id="memo' + idx +'" style="display:inline-block;"></textarea>';
+    note.innerHTML += '<p class="memoCounter" id="memoCounter' + idx + '">Max 600 characters</p>';
+    note.innerHTML += '<button class="saveMemo">Save Memo</button>';
+  }
+  else {
+    note.innerHTML += '<input maxlength="250" class="task" placeholder="Add an item" id="task' + idx + '" style="display:inline-block;"><img src="images/add.png" id="add" class="add">';
+    note.innerHTML += '<img class="undo" id="undo' + idx + '" src="images/undo.png">';
+    note.innerHTML += '<div class="todoLists" id="todos' + idx + '"></div>';
+  }
+
+  var note_header = 'Note ' + idx;
+ 
+  chrome.storage.sync.get([idx], function(result) {
+
+    // IF LOADING EXISTING NOTES
+    if (exists == true) {
+     
+      dict = JSON.parse(result[idx]);
+      console.log(dict);
+
+      note.style.top = dict['posTop'];
+      note.style.left = dict['posLeft'];
+
+      //console.log(dict);
+      //note.offsetHeight = dict['height'];
+      //note.offsetWidth = dict['width'];
+      note_header = dict['headerText'];
+      console.log(note_header);
+      note.childNodes[0].value = note_header;
+      console.log(note.childNodes)
+
+      // check if the note is minimized
+      if (dict['minimized'] == true) {
+        note.childNodes[4].style.display = 'none';
+        note.childNodes[5].style.display = 'none';
+        note.childNodes[6].style.display = 'none';
+        note.childNodes[7].style.display = 'none';
+      }
+      // adds the new note header to Notes Dock
+      note_list = document.querySelector('#myNotes');
+      var note_log = document.createElement('div');
+      console.log(note_log);
+      document.querySelector('#myNotes').appendChild(note_log);
+      note_log.innerHTML += '<p class="headerList" id="headerItem' + idx + '">' + note_header + '</p>';
+
+      // check if the note is hidden
+      if (dict['hidden'] == true) {
+        note.style.display = 'none';
+        document.querySelector('#headerItem' + idx).style.color = 'silver';
+      }
+
+      // if note is a memo, query saved text
+      if (memo == true) {
+        note.childNodes[4].value = dict['memo'];
+        textEntered = note.childNodes[4].value;
+        note.childNodes[5].textContent = (600 - textEntered.length) + " characters left";
+        // set the textarea to the saved height
+        note.childNodes[4].style.height = dict['boxHeight'] + "px"; 
+      }
+
+    addNoteEventHandlersOnLoad();
+    }
+    // IF ADDING A NEW NOTE
+    else {
+      console.log(idx);
+      // spawn note in center of screen
+      note.style.top = ($(window).scrollTop() + $(window).height() / 2) + "px";
+      note.style.left = ($(window).scrollTop() + $(window).width() / 2) - (note.offsetWidth / 2) + "px";
+
+      // create new note in local storage as empty list
+      var dict = {
+        'todo': null, // list of todo items
+        'headerText': note_header, 
+        'minimized': false, 
+        'posTop': note.style.top, 
+        'posLeft': note.style.left,
+        'hidden': false,
+        'isMemo': memo,
+        'memo': null,
+      };
+      console.log("Creating item: " + idx);
+
+      storeSync(idx,dict);
+
+      // adds the new note header to Notes Dock
+      note_list = document.querySelector('#myNotes');
+      var note_log = document.createElement('div');
+      console.log(note_log);
+      document.querySelector('#myNotes').appendChild(note_log);
+      note_log.innerHTML += '<p class="headerList" id="headerItem' + idx + '">' + note_header + '</p>';
+
+      // check if the note is hidden
+      if (dict['hidden'] == true) {
+        note.style.display = 'none';
+        document.querySelector('#headerItem' + idx).style.color = 'silver';
+      }
+      addNoteEventHandlers(note);
+    } 
+  });
 };
+
 
 // ***********************************************************************************************
 // allows an element to be dragged
@@ -809,10 +974,10 @@ function dragElement(elm) {
   }
 }
 
+
 // ***********************************************************************************************
 // adds a note to the screen when "Add Note" is clicked
 // ***********************************************************************************************
-const max_notes = 12;
 function addNote(memo) {
 
   var existing_notes = [];
@@ -899,6 +1064,96 @@ function addNote(memo) {
   }
 }
 
+
+
+
+// *****************************************************************************************************************
+// *****************************************************************************************************************
+// PART VI. NOTE HEADER BAR FUNCTIONS
+// *****************************************************************************************************************
+// *****************************************************************************************************************
+
+// allows edit of the header of a note
+function editHeader() {
+  elm = getElm();
+  var header = elm.parentNode.childNodes[0];
+  var idx = getIdx(elm.parentNode);
+  pending = document.querySelector('#pending');
+
+  if (header.readOnly == true) {
+    header.readOnly = false;
+    // setting focus on input
+    header.focus();
+    var val = header.value; // store the value of the element
+    header.value = ''; // clear the value of the element
+    header.value = val; // set that value back
+    elm.parentNode.childNodes[1].src = "images/edit_active.png";
+    pending.textContent = "edit pending save.";
+    pending.style.opacity = "1";
+  }
+  else {
+    elm.parentNode.childNodes[1].src = "images/edit.png";
+    header.readOnly = true;
+    header.blur();
+    console.log(header);
+    fade(pending);
+    chrome.storage.sync.get([idx.toString()], function(result) {
+  
+      dict = JSON.parse(result[idx]);
+      dict['headerText'] = header.value;
+      document.querySelector('#headerItem' + idx).textContent = header.value; // update note dock
+      storeSync(idx,dict);
+    });
+  }
+}
+
+
+// ***********************************************************************************************
+// minimize a note leaving only the header
+// ***********************************************************************************************
+function minimize() {
+  elm = getElm();
+
+  idx = getIdx(elm.parentNode);
+
+  console.log(idx);
+  var hide_input = elm.parentNode.childNodes[4];
+  var hide_add = elm.parentNode.childNodes[5];
+  var hide_undo = elm.parentNode.childNodes[6];
+  var hide_todo = elm.parentNode.childNodes[7];
+ 
+  // if visible
+  chrome.storage.sync.get([idx.toString()], function(result) {
+    console.log(result);
+    console.log(result[idx]);
+    dict = JSON.parse(result[idx]);
+    console.log(dict);
+
+    console.log(hide_add.style.display);
+    if (hide_input.style.display == 'inline-block') {
+      console.log("hiding");
+      hide_input.style.display = 'none';
+      hide_add.style.display = 'none';
+      hide_undo.style.display = 'none';
+      hide_todo.style.display= 'none';
+      dict['minimized'] = true;
+      
+    }
+    else {
+      console.log("showing");
+      hide_input.style.display = 'inline-block';
+      hide_add.style.display = 'inline-block';
+      hide_undo.style.display = 'inline-block';
+      hide_todo.style.display = 'inline-block';
+      dict['minimized'] = false;    
+    }
+    console.log(idx);
+    console.log(dict);
+    storeSync(idx,dict);
+  });
+}
+
+
 // ***********************************************************************************************
 // deletes a note from existence
 // ***********************************************************************************************
@@ -907,9 +1162,7 @@ function deleteNote() {
   var elm = getElm();
   // get the parent div element (the note)
   elm = elm.parentNode;
-
   idx = getIdx(elm);
-
   var header = elm.childNodes[0].value;
   var r = confirm("Are you sure you want to delete " + header + "?");
   if (r== false) {
@@ -922,157 +1175,16 @@ function deleteNote() {
   chrome.storage.sync.remove(idx.toString());
 }
 
-// ***********************************************************************************************
-// remove all notes
-// ***********************************************************************************************
-function clearAll() {
 
-  r = confirm("This will remove all of your notes and delete them from your cache. Are you sure you want to proceed?");
-  if (r == true) {
-    var header_list = document.querySelectorAll(".drag");
 
-    for (j = 1; j <= max_notes; j++) {
-      try {
-        console.log("runs");
-        console.log(document.querySelector('#mydiv' + j));
-        document.querySelector('#mydiv' + j).remove();
-        document.querySelector("#headerItem" + j.toString()).remove();
-      }
-      catch(err) {
-        console.log(err);
-      }
-    }
-    chrome.storage.sync.clear(function() {
-      var error = chrome.runtime.lastError;
-      if (error) {
-        console.error(error);
-      }
-    });
-  }
-}
 
-// ***********************************************************************************************
-// add a new todo list item to an existing list
-// ***********************************************************************************************
-function add() {
-    // get the parent div element
-    var elm = getElm();
-    elm = elm.parentNode;
-    console.log(elm);
+// *****************************************************************************************************************
+// *****************************************************************************************************************
+// PART VII. MEMO FUNCTIONS
+// *****************************************************************************************************************
+// *****************************************************************************************************************
 
-    // get the index of div element
-    idx = getIdx(elm);
-
-    // add a task for that note
-    var todos = new Array;
-    console.log(elm.parentNode);
-    if (elm.childNodes[4].value == "") {
-      return;
-    }
-    var task = elm.childNodes[4].value;
-    console.log(task);
-
-    // get the current list of todos for that note
-    chrome.storage.sync.get([idx], function(result) {
-      dict = JSON.parse(result[idx]);
-      console.log(dict);
-
-      var todos_str = dict['todo'];
-      console.log(todos_str);
-
-      // if there is an actual list
-      if (todos_str !== null) {
-
-        // add the new task to the list of todos for that note
-        var todos = todos_str;
-        console.log(todos);
-        if (todos[todos.length - 1] != task) {
-            todos.push(task);
-        }
-      }
-      else {
-        todos = [task];
-        console.log(todos);
-      }
-      dict['todo'] = (todos);
-      console.log(dict['todo']);
-
-      storeSync(idx,dict);
-      
-      console.log(dict);
-      show(idx);
-
-      elm.childNodes[4].value = "";
-    });
-}
-
-// ***********************************************************************************************
-// removes an item from a todo list
-// ***********************************************************************************************
-function remove() {
-
-    var elm = getElm();
-
-    // get the parent div element
-    var parent = elm.parentNode.parentNode.parentNode;
-    // get the index of div element
-    idx = getIdx(parent);
-
-    var id = elm.getAttribute('id');
-
-    chrome.storage.sync.get([idx.toString()], function(result) {
-
-      dict = JSON.parse(result[idx]);
-      var todos = dict['todo'];
-      var crossed = dict['strikethrough'];
-      var priority_list = dict['priority'];
-      var list_item = elm.parentNode.childNodes[3];
-
-      // determine if the todo item is crossed out, priority, or regular
-      if (list_item.style.textDecoration == 'line-through') {
-        var removed = crossed.splice(id, 1);
-        dict['strikethrough'] = crossed;
-      }
-      else if (list_item.style.fontWeight == 'bold') {
-        var removed = priority_list.splice(id, 1);
-        dict['priority'] = priority_list;
-      }
-      else {
-        var removed = todos.splice(id, 1);
-        dict['todo'] = todos;
-      }
-      dict['removed'] = removed;
-      storeSync(idx,dict);
-      show(idx);
-    });
-}
-
-// ***********************************************************************************************
-// recovers a deleted list item
-// ***********************************************************************************************
-function undo() {
-  elm = getElm();
-
-  // get the index of div element
-  idx = getIdx(elm.parentNode);
-
-  chrome.storage.sync.get([idx.toString()], function(result) {
-    dict = JSON.parse(result[idx]);
-    console.log(dict['removed'])
-    if (dict['removed'] == undefined) {
-      dict['removed'] = "";
-      var pending = document.getElementById('pending');
-      pending.textContent = "no item found to undo.";
-      pending.style.opacity = "1";
-    }
-    elm.parentNode.childNodes[4].value = dict['removed'];
-    elm.parentNode.childNodes[5].click();
-  });
-}
-
-// ***********************************************************************************************
 // save memo
-// ***********************************************************************************************
 function saveMemo(idx, box_height) {
   elm = getElm();
 
@@ -1100,6 +1212,7 @@ function saveMemo(idx, box_height) {
   });
 }
 
+
 // ***********************************************************************************************
 // show memo
 // ***********************************************************************************************
@@ -1111,6 +1224,91 @@ function showMemo(idx) {
     console.log(dict['memo']);
   });
 }
+
+
+
+
+// *****************************************************************************************************************
+// *****************************************************************************************************************
+// PART VIII. TODO LIST FUNCTIONS
+// *****************************************************************************************************************
+// *****************************************************************************************************************
+
+// add a new todo list item to an existing list
+function add() {
+  // get the parent div element
+  var elm = getElm();
+  elm = elm.parentNode;
+  console.log(elm);
+
+  // get the index of div element
+  idx = getIdx(elm);
+
+  // add a task for that note
+  var todos = new Array;
+  console.log(elm.parentNode);
+  if (elm.childNodes[4].value == "") {
+    return;
+  }
+  var task = elm.childNodes[4].value;
+  console.log(task);
+
+  // get the current list of todos for that note
+  chrome.storage.sync.get([idx], function(result) {
+    dict = JSON.parse(result[idx]);
+    console.log(dict);
+
+    var todos_str = dict['todo'];
+    console.log(todos_str);
+
+    // if there is an actual list
+    if (todos_str !== null) {
+
+      // add the new task to the list of todos for that note
+      var todos = todos_str;
+      console.log(todos);
+      if (todos[todos.length - 1] != task) {
+          todos.push(task);
+      }
+    }
+    else {
+      todos = [task];
+      console.log(todos);
+    }
+    dict['todo'] = (todos);
+    console.log(dict['todo']);
+    storeSync(idx,dict);
+    console.log(dict);
+    show(idx);
+
+    elm.childNodes[4].value = "";
+  });
+}
+
+
+// ***********************************************************************************************
+// recovers a deleted list item
+// ***********************************************************************************************
+function undo() {
+elm = getElm();
+
+// get the index of div element
+idx = getIdx(elm.parentNode);
+
+chrome.storage.sync.get([idx.toString()], function(result) {
+  dict = JSON.parse(result[idx]);
+  console.log(dict['removed'])
+  if (dict['removed'] == undefined) {
+    dict['removed'] = "";
+    var pending = document.getElementById('pending');
+    pending.textContent = "no item found to undo.";
+    pending.style.opacity = "1";
+  }
+  elm.parentNode.childNodes[4].value = dict['removed'];
+  elm.parentNode.childNodes[5].click();
+});
+}
+
 
 // ***********************************************************************************************
 // idx is the targeted note index
@@ -1180,6 +1378,7 @@ function show(idx) {
     addTodoEventHandlers();
   });
 }
+
 
 // ***********************************************************************************************
 // strikes through a todo list item
@@ -1270,6 +1469,7 @@ function strikeThrough() {
     });
   }
 }
+
 
 // ***********************************************************************************************
 // prioritizes a todo list item
@@ -1415,199 +1615,48 @@ function prioritize(move_select) {
   }
 }
 
-// ***********************************************************************************************
-// docks all notes
-// ***********************************************************************************************
-function dockAll() {
-  //var header_list = document.querySelectorAll(".dragHeader");
-
-  // recreate saved notes on page load
-  var all_idx = [];
-  for (var i = 1; i <= max_notes; i++) {
-    all_idx.push(i.toString());
-  }
-
-  chrome.storage.sync.get(all_idx, function(result) {
-    console.log(result);
-    // check if all elements are hidden
-    var all_hidden = true;
-    for (var i = 1; i <= max_notes; i++) {
-      
-      if (result[i] == undefined) { continue; }
-
-      dict = JSON.parse(result[i]);
-      if (dict['hidden'] == false) {
-        all_hidden = false;
-        break;
-      }
-    }
-
-    for (var i = 1; i <= max_notes; i++) {
- 
-      if (result[i] == undefined) { continue; }
-      dict = JSON.parse(result[i]);
-      div_to_hide = document.querySelector('#mydiv' + i.toString());
-
-      // reveal all notes if they are all hidden
-      if (all_hidden == true) {
-        
-        dict['hidden'] = false;
-        div_to_hide.style.display = "block";
-        document.querySelector('#headerItem' + i).style.color = "rgb(95, 95, 95)";
-        // change notes dock colors
-        if (document.getElementById('toggleDarkMode').style.color == '#fcd488') {
-          document.querySelector('#headerItem' + i).style.color = "white";
-        }
-      }
-      // else hide the notes that are showing
-      else {
-        dict['hidden'] = true;
-        div_to_hide.style.display = "none";
-        document.querySelector('#headerItem' + i).style.color = "silver";
-      }
-      storeSync(i,dict);
-    }
-  });
-}
 
 // ***********************************************************************************************
-// hides a note from view by clicking on it in the Notes Dock
+// removes an item from a todo list
 // ***********************************************************************************************
-function hideNote(idx) {
-  
-  // save hidden feature to local storage
-  elm = getElm();
+function remove() {
 
-  idx = getIdx(elm);
-  console.log(idx);
+  var elm = getElm();
+
+  // get the parent div element
+  var parent = elm.parentNode.parentNode.parentNode;
+  // get the index of div element
+  idx = getIdx(parent);
+
+  var id = elm.getAttribute('id');
 
   chrome.storage.sync.get([idx.toString()], function(result) {
 
     dict = JSON.parse(result[idx]);
-    console.log(dict['todo']);
+    var todos = dict['todo'];
+    var crossed = dict['strikethrough'];
+    var priority_list = dict['priority'];
+    var list_item = elm.parentNode.childNodes[3];
 
-    div_to_hide = document.querySelector('#mydiv' + idx);
-    all_divs = document.querySelectorAll(".drag");
-    console.log(all_divs);
-    console.log(div_to_hide);
-    console.log(div_to_hide.style.display);
-
-    if (div_to_hide.style.display == "none") {
-
-      div_to_hide.style.display = "block";
-      
-      // bring all the other notes behind the selected note
-      for (j=0; j<all_divs.length; j++) {
-        all_divs[j].style.zIndex = "1";
-      }
-      div_to_hide.style.zIndex = "2";
-
-      elm.style.color = "black";
-
-      chrome.storage.sync.get(['firenote_dark'], function(result) {
-        // check if dark mode was enabled by user
-        if (result['firenote_dark'] == true) {
-          elm.style.color = "white";
-        }
-        dict['hidden'] = false;
-        storeSync(idx,dict);
-      });
+    // determine if the todo item is crossed out, priority, or regular
+    if (list_item.style.textDecoration == 'line-through') {
+      var removed = crossed.splice(id, 1);
+      dict['strikethrough'] = crossed;
+    }
+    else if (list_item.style.fontWeight == 'bold') {
+      var removed = priority_list.splice(id, 1);
+      dict['priority'] = priority_list;
     }
     else {
-      console.log("hiding...");
-      // reset notes zIndexes
-      for (j=0; j<all_divs.length; j++) {
-        all_divs[j].style.zIndex = "1";
-      }
-      div_to_hide.style.display = "none";
-      console.log(div_to_hide.style.display);
-      elm.style.color = "silver";
-      dict['hidden'] = true;
+      var removed = todos.splice(id, 1);
+      dict['todo'] = todos;
     }
+    dict['removed'] = removed;
     storeSync(idx,dict);
+    show(idx);
   });
 }
 
-// ***********************************************************************************************
-// minimize a note leaving only the header
-// ***********************************************************************************************
-function minimize() {
-  elm = getElm();
-
-  idx = getIdx(elm.parentNode);
-
-  console.log(idx);
-  var hide_input = elm.parentNode.childNodes[4];
-  var hide_add = elm.parentNode.childNodes[5];
-  var hide_undo = elm.parentNode.childNodes[6];
-  var hide_todo = elm.parentNode.childNodes[7];
- 
-  // if visible
-  chrome.storage.sync.get([idx.toString()], function(result) {
-    console.log(result);
-    console.log(result[idx]);
-    dict = JSON.parse(result[idx]);
-    console.log(dict);
-
-    console.log(hide_add.style.display);
-    if (hide_input.style.display == 'inline-block') {
-      console.log("hiding");
-      hide_input.style.display = 'none';
-      hide_add.style.display = 'none';
-      hide_undo.style.display = 'none';
-      hide_todo.style.display= 'none';
-      dict['minimized'] = true;
-      
-    }
-    else {
-      console.log("showing");
-      hide_input.style.display = 'inline-block';
-      hide_add.style.display = 'inline-block';
-      hide_undo.style.display = 'inline-block';
-      hide_todo.style.display = 'inline-block';
-      dict['minimized'] = false;    
-    }
-    console.log(idx);
-    console.log(dict);
-    storeSync(idx,dict);
-  });
-}
-
-// ***********************************************************************************************
-// allows edit of the header of a note
-// ***********************************************************************************************
-function editHeader() {
-  elm = getElm();
-  var header = elm.parentNode.childNodes[0];
-  var idx = getIdx(elm.parentNode);
-  pending = document.querySelector('#pending');
-
-  if (header.readOnly == true) {
-    header.readOnly = false;
-    // setting focus on input
-    header.focus();
-    var val = header.value; // store the value of the element
-    header.value = ''; // clear the value of the element
-    header.value = val; // set that value back
-    elm.parentNode.childNodes[1].src = "images/edit_active.png";
-    pending.textContent = "edit pending save.";
-    pending.style.opacity = "1";
-  }
-  else {
-    elm.parentNode.childNodes[1].src = "images/edit.png";
-    header.readOnly = true;
-    header.blur();
-    console.log(header);
-    fade(pending);
-    chrome.storage.sync.get([idx.toString()], function(result) {
-  
-      dict = JSON.parse(result[idx]);
-      dict['headerText'] = header.value;
-      document.querySelector('#headerItem' + idx).textContent = header.value; // update note dock
-      storeSync(idx,dict);
-    });
-  }
-}
 
 // ***********************************************************************************************
 // moves an item up the list
@@ -1679,6 +1728,7 @@ function moveItem(move_select, direction) {
   });
 }
 
+
 // ***********************************************************************************************
 // allows a list item to be edited
 // ***********************************************************************************************
@@ -1730,6 +1780,7 @@ function editNote() {
     pending.style.opacity = "1";
   };
 }
+
 
 // ***********************************************************************************************
 // saves an edit on a todo list item
@@ -1817,9 +1868,17 @@ function saveEdit() {
     });
 }
 
-// ***********************************************************************************************
+
+
+
+
+// *****************************************************************************************************************
+// *****************************************************************************************************************
+// PART IX. HELPER FUNCTIONS
+// *****************************************************************************************************************
+// *****************************************************************************************************************
+
 // fade an element out
-// ***********************************************************************************************
 function fade(element) {
   var op = 1;  // initial opacity
   var timer = setInterval(function () {
@@ -1830,29 +1889,49 @@ function fade(element) {
       }
       element.style.opacity = op;
       element.style.filter = 'alpha(opacity=' + op * 100 + ")";
-      op -= op * 0.08;
-    
+      op -= op * 0.08;   
   }, 50);
 }
 
-// ***********************************************************************************************
-// autosizes height of textarea
-// ***********************************************************************************************
-var autoExpand = function (field) {
-
-	// Reset field height
-	field.style.height = 'inherit';
-
-	// Get the computed styles for the element
-	var computed = window.getComputedStyle(field);
-
-	// Calculate the height
-	var height = parseInt(computed.getPropertyValue('border-top-width'), 10)
-	             + parseInt(computed.getPropertyValue('padding-top'), 10)
-	             + field.scrollHeight
-	             + parseInt(computed.getPropertyValue('padding-bottom'), 10)
-	             + parseInt(computed.getPropertyValue('border-bottom-width'), 10);
-
-	field.style.height = height + 'px';
-  return height
+// gets an element
+function getElm(e) {
+  e = e || window.event;
+  e = e.target || e.srcElement;
+  console.log("Element is: " + e);
+  return e;
 };
+
+// stores item into Google Chrome sync
+function storeSync(idx,dict) {
+  var key = idx.toString(),
+      value = JSON.stringify(
+          dict
+      );
+  var jsonfile = {};
+  jsonfile[key] = value;
+  chrome.storage.sync.set(jsonfile, function () {
+      console.log('Saved', key, value);
+  });
+}
+
+// dynamically change number of characters remaining in memo
+function countCharacters(e) {    
+  var elm = getElm();
+  var textEntered, countRemaining, counter;          
+  textEntered = elm.parentNode.childNodes[4].value;
+  countRemaining = elm.parentNode.childNodes[5]; 
+  counter = (600 - (textEntered.length));
+  countRemaining.textContent = counter + " characters left";       
+}
+
+// returns the index of the note
+function getIdx(elm) {
+  console.log(elm);
+  // if there are more than 10 notes, get last 2 chars
+  idx = elm.id.slice(-2);
+  if (isNaN(idx) == true) {
+    idx = elm.id.slice(-1);
+  }
+  console.log(idx);
+  return idx;
+}
