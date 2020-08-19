@@ -228,10 +228,7 @@ $(document).ready(function() {
   var color;
   // add event listeners for folder action context menus
   document.querySelector(".hideFolder").addEventListener("click", e => {
-
-    color = move_select.id.replace('folder','');
-
-    hideFolder(color,move_select);
+    hideFolder(move_select);
   });
   document.querySelector(".renameFolder").addEventListener("click", e => {
     renameFolder(color,move_select);
@@ -329,8 +326,6 @@ function addNoteEventHandlers(note) {
     }
   });
   headerItem.addEventListener('click', function() {
-    console.log("clicked");
-    console.log(move_select);
     hideNote();
   });
 
@@ -739,14 +734,16 @@ function createFolder() {
 // ***********************************************************************************************
 // hide all notes in a folder
 // ***********************************************************************************************
-function hideFolder(color) {
+function hideFolder(move_select) {
+  var color = move_select.id.replace('folder','');
   var target = document.getElementById("content" + color);
+ 
   console.log(target.childNodes);
   var note_indexes = [];
   for (i=0; i< target.childNodes.length; i++) {
-    var idx = getIdx(target.childNodes[i]);
-    note_indexes.push(idx);
-    hideNote(idx);
+    var idx_alt = getIdx(target.childNodes[i]);
+    note_indexes.push(idx_alt);
+    hideNote(idx_alt);
   }
   console.log(note_indexes);
 }
@@ -769,13 +766,21 @@ function deleteFolder() {
 // ***********************************************************************************************
 // hides a note from view by clicking on it in the Notes Dock
 // ***********************************************************************************************
-function hideNote(idx) {
-  
-  // save hidden feature to local storage
-  elm = getElm();
+function hideNote(idx_alt) {
+  // idx_alt is an optional argument passed when the user is trying to hide all notes
+  // in a folder through the Notes Dock
 
-  idx = getIdx(elm);
-  console.log(idx);
+  // save hidden feature to local storage
+  var hidingFolder = false;
+  var elm = getElm();
+  console.log(elm); 
+  if (idx_alt == null) {
+    var idx = getIdx(elm);
+  }
+  else {
+    hidingFolder = true;
+    var idx = idx_alt;
+  }
 
   chrome.storage.sync.get([idx.toString()], function(result) {
  
@@ -788,6 +793,12 @@ function hideNote(idx) {
     console.log(div_to_hide);
     console.log(div_to_hide.style.display);
 
+    if (hidingFolder == true) {
+      var dock_idx = getIdx(div_to_hide);
+      var header_item = "headerItem" + dock_idx;
+      elm = document.getElementById(header_item);
+    }
+
     if (div_to_hide.style.display == "none") {
 
       div_to_hide.style.display = "block";
@@ -797,14 +808,14 @@ function hideNote(idx) {
         all_divs[j].style.zIndex = "1";
       }
       div_to_hide.style.zIndex = "2";
-
       elm.style.color = "black";
 
       chrome.storage.sync.get(['firenote_dark'], function(result) {
+
         // check if dark mode was enabled by user
         if (result['firenote_dark'] == true) {
           elm.style.color = "white";
-        }
+        } 
         dict['hidden'] = false;
         storeSync(idx,dict);
       });
