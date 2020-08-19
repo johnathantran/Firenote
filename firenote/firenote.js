@@ -225,7 +225,6 @@ $(document).ready(function() {
       return false;
     });
   }
-  var color;
   // add event listeners for folder action context menus
   document.querySelector(".hideFolder").addEventListener("click", e => {
     hideFolder(move_select);
@@ -233,8 +232,8 @@ $(document).ready(function() {
   document.querySelector(".renameFolder").addEventListener("click", e => {
     renameFolder(color,move_select);
   });
-  document.querySelector(".delFolder").addEventListener("click", e => {
-    delFolder(color,move_select);
+  document.querySelector(".deleteFolder").addEventListener("click", e => {
+    deleteFolder(move_select);
   });
 });
 
@@ -745,7 +744,6 @@ function hideFolder(move_select) {
     note_indexes.push(idx_alt);
     hideNote(idx_alt);
   }
-  console.log(note_indexes);
 }
 
 
@@ -759,7 +757,28 @@ function renameFolder() {
 // ***********************************************************************************************
 // delete a folder
 // ***********************************************************************************************
-function deleteFolder() {
+function deleteFolder(move_select) {
+
+  console.log(move_select);
+  var r = confirm("Are you sure you want to delete the folder " + move_select.innerHTML + "?");
+  if (r== false) {
+    return;
+  }
+  var color = move_select.id.replace('folder','');
+  var target = document.getElementById("content" + color);
+  console.log(target.childNodes);
+
+  for (i=0; i <= target.childNodes.length; i++) {
+    var idx = getIdx(target.childNodes[i]);
+    console.log(idx);
+    
+    // remove all notes within the folder
+    console.log(document.getElementById('mydiv' + idx));
+    document.getElementById('mydiv' + idx).remove();
+    document.querySelector("#headerItem" + idx.toString()).remove();
+    chrome.storage.sync.remove(idx.toString());
+  }
+  document.getElementById('folder' + color).style.display = "none";
 }
 
 
