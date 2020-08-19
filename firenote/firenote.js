@@ -28,10 +28,8 @@ IX. HELPER FUNCTIONS
 
 // note colors used
 var color_dict = {"Orange":"#ffdfba", "Pink":"#ffedf8", "Blue":"#d0ebfc", "Green":"#ceffeb", "Yellow":"#fcfacf"};
-
 // max allowed notes on screen
 const max_notes = 12;
-
 // autosizes height of textarea
 var autoExpand = function (field) {
 
@@ -230,10 +228,16 @@ $(document).ready(function() {
     hideFolder(move_select);
   });
   document.querySelector(".renameFolder").addEventListener("click", e => {
-    renameFolder(color,move_select);
+    renameFolder(move_select);
   });
   document.querySelector(".deleteFolder").addEventListener("click", e => {
     deleteFolder(move_select);
+  });
+  document.querySelector(".folderHeader").addEventListener('keyup', function (e) {
+    if (e.keyCode == 13) {
+      event.preventDefault();
+      saveRename(getElm().value);
+    }
   });
 });
 
@@ -692,6 +696,23 @@ function moveToFolder(color, move_select) {
     if (target.innerHTML == "") {
       document.getElementById("folder" + color).style.display = "block";
     }
+
+    chrome.storage.sync.get([color], function(result) {
+      // if folder has already been created
+      try {
+        var folder_items = JSON.parse(result[color]);
+        console.log(typeof folder_items);
+        console.log(folder_items);
+      }
+      // if folder has not been created yet
+      catch(err) {
+        var folder_items = [];
+      }
+      folder_items.push(move_select.id);
+      console.log(folder_items);
+      storeSync(color,folder_items);
+    });
+
   }
   // adds the new note header to Notes Dock
   if (color == "Yellow") {
@@ -726,7 +747,6 @@ function createFolder() {
   showFolder.style.display = "block";
   console.log(showFolder);
 
-
 }
 
 
@@ -750,33 +770,66 @@ function hideFolder(move_select) {
 // ***********************************************************************************************
 // rename a folder
 // ***********************************************************************************************
-function renameFolder() {
+function renameFolder(move_select) {
+  console.log(move_select);
+
+  if (move_select.readOnly == true) {
+    move_select.readOnly = false;
+    move_select.focus();
+    var val = move_select.value; // store the value of the element
+    move_select.value = ''; // clear the value of the element
+    move_select.value = val; // set that value back
+
+    var pending = document.querySelector("#pending");
+    pending.textContent = "type in the new name of your folder. press Enter to save the new name.";
+    pending.style.opacity = "1";
+  }
 }
 
+
+function saveRename(rename) {
+  console.log(rename);
+  // dict = JSON.parse(result[idx]);
+  elm = getElm();
+  var color = elm.id.replace('folder','');
+
+  chrome.storage.sync.get([color], function(result) {
+
+    console.log(result);
+    
+    color_dict = result[color]; // the value to the 'Color' key
+    color_dict['name'] = rename;
+    console.log(color_dict);
+    console.log(result);
+    // Orange Folder:
+    // Orange: { 'name':rename, 'notes': [] }
+  });
+}
 
 // ***********************************************************************************************
 // delete a folder
 // ***********************************************************************************************
 function deleteFolder(move_select) {
 
-  console.log(move_select);
   var r = confirm("Are you sure you want to delete the folder " + move_select.innerHTML + "?");
-  if (r== false) {
-    return;
-  }
+  if (r== false) { return; }
+
   var color = move_select.id.replace('folder','');
   var target = document.getElementById("content" + color);
-  console.log(target.childNodes);
+  var notes_to_delete = [];
 
-  for (i=0; i <= target.childNodes.length; i++) {
+  for (i=0; i < target.childNodes.length; i++) {
     var idx = getIdx(target.childNodes[i]);
-    console.log(idx);
-    
-    // remove all notes within the folder
-    console.log(document.getElementById('mydiv' + idx));
+    notes_to_delete.push(idx);
+  }
+
+  // remove all notes within the folder
+  for (i=0; i < notes_to_delete.length; i++) {
+    idx = notes_to_delete[i];
     document.getElementById('mydiv' + idx).remove();
     document.querySelector("#headerItem" + idx.toString()).remove();
     chrome.storage.sync.remove(idx.toString());
+    chrome.storage.sync.remove(color);
   }
   document.getElementById('folder' + color).style.display = "none";
 }
