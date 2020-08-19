@@ -195,6 +195,7 @@ $(document).ready(function() {
   const move_down = document.querySelector(".movedown");
   const move_up = document.querySelector(".moveup");
   const priority_btn = document.querySelector(".priority");
+
   // runs this function when a menu item is clicked
   move_up.addEventListener("click", e => {
     moveItem(move_select, "up");
@@ -224,6 +225,20 @@ $(document).ready(function() {
       return false;
     });
   }
+  var color;
+  // add event listeners for folder action context menus
+  document.querySelector(".hideFolder").addEventListener("click", e => {
+
+    color = move_select.id.replace('folder','');
+
+    hideFolder(color,move_select);
+  });
+  document.querySelector(".renameFolder").addEventListener("click", e => {
+    renameFolder(color,move_select);
+  });
+  document.querySelector(".delFolder").addEventListener("click", e => {
+    delFolder(color,move_select);
+  });
 });
 
 
@@ -315,6 +330,7 @@ function addNoteEventHandlers(note) {
   });
   headerItem.addEventListener('click', function() {
     console.log("clicked");
+    console.log(move_select);
     hideNote();
   });
 
@@ -715,13 +731,24 @@ function createFolder() {
   var showFolder = document.getElementById("folder" + color);
   showFolder.style.display = "block";
   console.log(showFolder);
+
+
 }
 
 
 // ***********************************************************************************************
 // hide all notes in a folder
 // ***********************************************************************************************
-function hideFolder() {
+function hideFolder(color) {
+  var target = document.getElementById("content" + color);
+  console.log(target.childNodes);
+  var note_indexes = [];
+  for (i=0; i< target.childNodes.length; i++) {
+    var idx = getIdx(target.childNodes[i]);
+    note_indexes.push(idx);
+    hideNote(idx);
+  }
+  console.log(note_indexes);
 }
 
 
@@ -751,7 +778,7 @@ function hideNote(idx) {
   console.log(idx);
 
   chrome.storage.sync.get([idx.toString()], function(result) {
-
+ 
     dict = JSON.parse(result[idx]);
     console.log(dict['todo']);
 
