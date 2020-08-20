@@ -462,31 +462,8 @@ function loadPage() {
   chrome.storage.sync.get(['firenote_dark'], function(result) {
     console.log(result['firenote_dark']);
     if (result['firenote_dark'] == true) {
-      
-      var sheet = (function() {
-        // Create the <style> tag
-        var style = document.createElement("style");
-        // WebKit hack
-        style.appendChild(document.createTextNode(""));
-        // Add the <style> element to the page
-        document.head.appendChild(style);
-        return style.sheet;
-      })();
       document.body.classList.toggle("dark-mode");
-      sheet.insertRule("\
-      .collapsible, .clear {\
-      background-color: #363640;\
-      color: #fcd488;\
-      }",0);
-      sheet.insertRule("\
-      .bar {\
-      background-color: white;\
-      }",0);
-      // change the folder header item colors
-      sheet.insertRule("\
-      .folderHeader {\
-      color: #f0efed;\
-      }",0);
+      assignColorMode("dark");
     }
     // recreate saved notes on page load
     var all_idx = [];
@@ -525,50 +502,7 @@ function loadPage() {
 };
 loadPage();
 
-function assignColorMode(mode) {
 
-  var sheet = (function() {
-    // Create the <style> tag
-    var style = document.createElement("style");
-    // WebKit hack
-    style.appendChild(document.createTextNode(""));
-    // Add the <style> element to the page
-    document.head.appendChild(style);
-    return style.sheet;
-  })();
-
-  if (mode == "dark") {
-      sheet.insertRule("\
-      .collapsible, .clear {\
-      background-color: #363640;\
-      color: #fcd488;\
-      }",0);
-      sheet.insertRule("\
-      .bar {\
-      background-color: white;\
-      }",0);
-      // change the folder header item colors
-      sheet.insertRule("\
-      .folderHeader {\
-      color: #f0efed;\
-      }",0);
-  }
-  else {
-    sheet.insertRule("\
-    .collapsible, .clear {\
-     background-color: #363640;\
-     color: #fcd488;\
-    }",0);
-    sheet.insertRule("\
-    .bar {\
-     background-color: #f0efed;\
-    }",0);
-    sheet.insertRule("\
-    .folderHeader {\
-     color: #f0efed;\
-    }",0);
-  }
-}
 
 
 
@@ -610,45 +544,14 @@ function toggleDarkMode() {
 
     // check if dark mode was enabled by user
     if (result['firenote_dark'] == true) {
-      console.log("dark to light");
 
-      // change the collapsible menu colors
-      sheet.insertRule("\
-      .collapsible, .clear {\
-       background-color: white;\
-       color: gray;\
-      }",0);
-      // change the menu bar colors
-      sheet.insertRule("\
-      .bar {\
-       background-color: gray;\
-      }",0);
-      // change the folder header item colors
-      sheet.insertRule("\
-      .folderHeader {\
-       color: gray;\
-      }",0);
-
+      assignColorMode("light");
       chrome.storage.sync.set({'firenote_dark' : false}, function() {
         console.log('Value is set to false');
       });
     }
     else {
-      console.log("light to dark");
-    
-      sheet.insertRule("\
-      .collapsible, .clear {\
-       background-color: #363640;\
-       color: #fcd488;\
-      }",0);
-      sheet.insertRule("\
-      .bar {\
-       background-color: #f0efed;\
-      }",0);
-      sheet.insertRule("\
-      .folderHeader {\
-       color: #f0efed;\
-      }",0);
+      assignColorMode("dark");
       chrome.storage.sync.set({'firenote_dark' : true}, function() {
         console.log('Value is set to true');
       });
@@ -2175,4 +2078,52 @@ function createContextMenu(menu) {
     if (menuVisible) toggleMenu("hide");
   });
   return setPosition;
+}
+
+// assigns either dark or light color modes
+function assignColorMode(mode) {
+
+  var sheet = (function() {
+    // Create the <style> tag
+    var style = document.createElement("style");
+    // WebKit hack
+    style.appendChild(document.createTextNode(""));
+    // Add the <style> element to the page
+    document.head.appendChild(style);
+    return style.sheet;
+  })();
+
+  if (mode == "dark") {
+      sheet.insertRule("\
+      .collapsible, .clear {\
+      background-color: #363640;\
+      color: #fcd488;\
+      }",0);
+      sheet.insertRule("\
+      .bar {\
+      background-color: white;\
+      }",0);
+      // change the folder header item colors
+      sheet.insertRule("\
+      .folderHeader {\
+      color: #f0efed;\
+      }",0);
+  }
+  else {
+    sheet.insertRule("\
+    .collapsible, .clear {\
+     background-color: white;\
+     color: gray;\
+    }",0);
+    // change the menu bar colors
+    sheet.insertRule("\
+    .bar {\
+     background-color: gray;\
+    }",0);
+    // change the folder header item colors
+    sheet.insertRule("\
+    .folderHeader {\
+     color: gray;\
+    }",0);
+  }
 }
