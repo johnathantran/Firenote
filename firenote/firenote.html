@@ -101,11 +101,14 @@
     <div class="modal-content">
       <span class="close">&times;</span>
       <h1>a quick guide</h1>
+      <div><button class="blueBtn" id="guideBtn1"> next: folder guide </button></div>  
       <hr>
+      
       <h3> You can add "List" and "Memo" notes to your workspace. Both will sync to your Google account so you can access your notes anywhere.</h3>
       <p> "List" notes allow you to add, remove, and cross out items in a todo-list format. "Memo" notes allow you to write and save short paragraph-style notes.
         You can drag notes across the screen by double-clicking the note headers.
       </p>
+      
       <img id="guide" src="images/help.png">
 
       <table class="center">
@@ -156,11 +159,43 @@
           <td>Save a memo-style note. Remember to do this every time you make an edit.</td>
         </tr>
       </table>
-
-
     </div>
   </div>
- 
+
+
+  <div id="myModal2" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h1>folder guide</h1>
+      <div><button class="blueBtn" id="guideBtn2"> prev: quick guide </button></div>   
+      <hr>
+      <h3> Folders are a way to easily categorize your notes. You can add notes to different colored folders using 2 methods: </h3>
+      <p>1. Right-clicking the header of the note itself.</p>
+      <p>2. Right-clicking the note title from the Notes Dock.</p>
+      <p> Notes without folders are yellow by default.</p>
+  
+      <img class="folderExamples" src="images/folder_ex.png"><br>
+      <h3>Right-clicking the folder itself in the Notes Dock will bring up the following menu.</h3>
+      <img class="folderExamples" src="images/folder_menu_ex.png">
+      <table class="center">
+        <tr>
+          <td><strong>1. Hide Folder </strong></td>
+          <td>Hide all notes in the folder. Click again to reveal.</td>
+        </tr>
+        <tr>
+          <td style="width:18%"><strong>2. Rename Folder </strong></td>
+          <td style="width:82%">Rename the folder from its default color. Press Enter to save the new name.</td>
+        </tr>
+        <tr>
+          <td><strong>3. Delete Folder </strong></td>
+          <td>Deletes all notes in the folder. Careful - this cannot be undone.</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+
   <div id="messages">
     <div id="msgBtn"><img id="messageImg" src="images/message.png"></div>
     <p id="releaseNotes"> 2.1.0 release notes </p>
@@ -168,7 +203,9 @@
       <strong>Version 2.1.0 is released! The changes: </strong>
       <ol>
         <li><strong>A colored folder system has been implemented.</strong></li>
-        <li>Right clikc a note in the Notes Dock to classify it to one of 4 available folders.</li>
+        <li>Right click a note in the Notes Dock to classify it to one of 4 available folders.
+          Please refer to the quick guide for details on the new feature.
+        </li>
       </ol>
       <p> As always, please let me know of any issues and I will resolve them as quickly as possible (firenoteapp@gmail.com).
         Your existing notes may not reflect all of these new features. If this is the case, contact me and try recreating the note by adding a new note and copying the items over.

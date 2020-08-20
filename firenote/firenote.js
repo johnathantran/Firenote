@@ -171,6 +171,31 @@ $(document).ready(function() {
       modal.style.display = "none";
     }
   }
+  // quick guide modal - folders
+  var modal2 = document.getElementById("myModal2");
+  var prevBtn = document.getElementById("guideBtn2");
+  var nextBtn = document.getElementById("guideBtn1");
+  span = document.getElementsByClassName("close")[1];
+
+  nextBtn.onclick = function() {
+    modal.style.display = "none";
+    modal2.style.display = "block";
+  }
+  // When the user clicks on <span> (x), close the modal
+  span.onclick = function() {
+    modal2.style.display = "none";
+  }
+  // Go to previous modal when this button is clicked
+  prevBtn.onclick = function() {
+    modal.style.display = "block";
+    modal2.style.display = "none";
+  }
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function(event) {
+    if (event.target == modal2) {
+      modal2.style.display = "none";
+    }
+  }
 
   // dev messages button
   var el = document.getElementById('msgBtn');
@@ -463,7 +488,7 @@ function loadPage() {
     console.log(result['firenote_dark']);
     if (result['firenote_dark'] == true) {
       document.body.classList.toggle("dark-mode");
-      assignColorMode("dark");
+      var dark = assignColorMode("dark");
     }
     // recreate saved notes on page load
     var all_idx = [];
@@ -528,34 +553,19 @@ function hideMenu() {
 // ***********************************************************************************************
 function toggleDarkMode() {
 
-  var sheet = (function() {
-    // Create the <style> tag
-    var style = document.createElement("style");
-    // WebKit hack
-    style.appendChild(document.createTextNode(""));
-    // Add the <style> element to the page
-    document.head.appendChild(style);
-    return style.sheet;
-  })();
-
   document.body.classList.toggle("dark-mode");
 
   chrome.storage.sync.get(['firenote_dark'], function(result) {
-
     // check if dark mode was enabled by user
     if (result['firenote_dark'] == true) {
-
-      assignColorMode("light");
-      chrome.storage.sync.set({'firenote_dark' : false}, function() {
-        console.log('Value is set to false');
-      });
+      var dark = assignColorMode("light");
     }
     else {
-      assignColorMode("dark");
-      chrome.storage.sync.set({'firenote_dark' : true}, function() {
-        console.log('Value is set to true');
-      });
+      var dark = assignColorMode("dark");
     }
+    chrome.storage.sync.set({'firenote_dark' : dark}, function() {
+      console.log('Color mode set');
+    });
   });
 }
 
@@ -790,7 +800,7 @@ function saveRename(rename) {
 // ***********************************************************************************************
 function deleteFolder(move_select) {
 
-  var r = confirm("Are you sure you want to delete the folder " + move_select.innerHTML + "?");
+  var r = confirm("Are you sure you want to delete the folder " + move_select.value + "?");
   if (r== false) { return; }
 
   var color = move_select.id.replace('input','');
@@ -2094,6 +2104,7 @@ function assignColorMode(mode) {
   })();
 
   if (mode == "dark") {
+      var dark = true;
       sheet.insertRule("\
       .collapsible, .clear {\
       background-color: #363640;\
@@ -2110,6 +2121,7 @@ function assignColorMode(mode) {
       }",0);
   }
   else {
+    var dark = false;
     sheet.insertRule("\
     .collapsible, .clear {\
      background-color: white;\
@@ -2126,4 +2138,5 @@ function assignColorMode(mode) {
      color: gray;\
     }",0);
   }
+  return dark;
 }
