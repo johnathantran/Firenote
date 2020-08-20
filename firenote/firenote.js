@@ -698,22 +698,24 @@ function moveToFolder(color, move_select) {
   document.getElementById(move_select.id).remove();
 
   // if the folder hasn't been created yet, reveal the folder
-  if (color !== "Yellow") {
+  try {
     if (target.innerHTML == "") {
       document.getElementById("folder" + color).style.display = "block";
     }
-
-    var idx = getIdx(move_select);
-
-    chrome.storage.sync.get([idx.toString()], function(result) {
-      dict = JSON.parse(result[idx]);
-
-      // assign the note's folder to the selected color
-      dict['folderColor'] = color;
-      console.log(dict['folderColor']);
-      storeSync(idx,dict);
-    });
   }
+  catch(err) {}
+
+  var idx = getIdx(move_select);
+
+  chrome.storage.sync.get([idx.toString()], function(result) {
+    dict = JSON.parse(result[idx]);
+
+    // assign the note's folder to the selected color
+    dict['folderColor'] = color;
+    console.log(dict['folderColor']);
+    storeSync(idx,dict);
+  });
+  
   // adds the new note header to Notes Dock
   if (color == "Yellow") {
     // move the note out of the folder
@@ -754,10 +756,10 @@ function createFolder() {
 // hide all notes in a folder
 // ***********************************************************************************************
 function hideFolder(move_select) {
-  var color = move_select.id.replace('folder','');
+  var color = move_select.id.replace('input','');
   var target = document.getElementById("content" + color);
- 
   console.log(target.childNodes);
+  
   var note_indexes = [];
   for (i=0; i< target.childNodes.length; i++) {
     var idx_alt = getIdx(target.childNodes[i]);
@@ -787,6 +789,9 @@ function renameFolder(move_select) {
 }
 
 
+// ***********************************************************************************************
+// saves a folder rename to Chrome storage
+// ***********************************************************************************************
 function saveRename(rename) {
   elm = getElm();
   var color = elm.id.replace('input','');
@@ -820,9 +825,7 @@ function deleteFolder(move_select) {
   if (r== false) { return; }
 
   var color = move_select.id.replace('input','');
-  console.log(color);
   var target = document.getElementById("content" + color);
-  console.log(target);
   var notes_to_delete = [];
 
   for (i=0; i < target.childNodes.length; i++) {
@@ -837,7 +840,8 @@ function deleteFolder(move_select) {
     document.querySelector("#headerItem" + idx.toString()).remove();
     chrome.storage.sync.remove(idx.toString());
     chrome.storage.sync.remove(color);
-    chrome.storage.sync.remove("folderNames");
+    // for debugging purposes (removes all folder names):
+    //chrome.storage.sync.remove("folderNames");
   }
   document.getElementById('folder' + color).style.display = "none";
 }
