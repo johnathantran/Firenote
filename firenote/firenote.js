@@ -233,12 +233,18 @@ $(document).ready(function() {
   document.querySelector(".deleteFolder").addEventListener("click", e => {
     deleteFolder(move_select);
   });
-  document.querySelector(".folderHeader").addEventListener('keyup', function (e) {
-    if (e.keyCode == 13) {
-      event.preventDefault();
-      saveRename(getElm().value);
-    }
-  });
+
+  let folder_headers = document.getElementsByClassName("folderHeader");
+  for(i=0; i < folder_headers.length; i++) {
+
+    folder_headers[i].addEventListener('keyup', function (e) {
+
+      if (e.keyCode == 13) {
+        event.preventDefault();
+        saveRename(getElm().value);
+      }
+    });
+  }
 });
 
 
@@ -697,22 +703,16 @@ function moveToFolder(color, move_select) {
       document.getElementById("folder" + color).style.display = "block";
     }
 
-    chrome.storage.sync.get([color], function(result) {
-      // if folder has already been created
-      try {
-        var folder_items = JSON.parse(result[color]);
-        console.log(typeof folder_items);
-        console.log(folder_items);
-      }
-      // if folder has not been created yet
-      catch(err) {
-        var folder_items = [];
-      }
-      folder_items.push(move_select.id);
-      console.log(folder_items);
-      storeSync(color,folder_items);
-    });
+    var idx = getIdx(move_select);
 
+    chrome.storage.sync.get([idx.toString()], function(result) {
+      dict = JSON.parse(result[idx]);
+
+      // assign the note's folder to the selected color
+      dict['folderColor'] = color;
+      console.log(dict['folderColor']);
+      storeSync(idx,dict);
+    });
   }
   // adds the new note header to Notes Dock
   if (color == "Yellow") {
@@ -788,21 +788,26 @@ function renameFolder(move_select) {
 
 
 function saveRename(rename) {
-  console.log(rename);
-  // dict = JSON.parse(result[idx]);
   elm = getElm();
-  var color = elm.id.replace('folder','');
+  var color = elm.id.replace('input','');
+  color = color.replace(/\\/g, '');
+  
+  chrome.storage.sync.get(["folderNames"], function(result) {
 
-  chrome.storage.sync.get([color], function(result) {
-
-    console.log(result);
-    
-    color_dict = result[color]; // the value to the 'Color' key
-    color_dict['name'] = rename;
-    console.log(color_dict);
-    console.log(result);
-    // Orange Folder:
-    // Orange: { 'name':rename, 'notes': [] }
+    var folderNames = result['folderNames'];
+    try {
+      folderNames[color] = rename;
+    }
+    catch(err) {
+      result['folderNames'] = {};
+      var folderNames = result['folderNames'];
+      folderNames[color] = rename;
+    }
+    chrome.storage.sync.set({'folderNames' : folderNames}, function() {
+      move_select.blur();
+      document.querySelector("#pending").textContent = "folder renamed.";
+      fade(document.querySelector("#pending"));
+    });
   });
 }
 
@@ -814,8 +819,10 @@ function deleteFolder(move_select) {
   var r = confirm("Are you sure you want to delete the folder " + move_select.innerHTML + "?");
   if (r== false) { return; }
 
-  var color = move_select.id.replace('folder','');
+  var color = move_select.id.replace('input','');
+  console.log(color);
   var target = document.getElementById("content" + color);
+  console.log(target);
   var notes_to_delete = [];
 
   for (i=0; i < target.childNodes.length; i++) {
@@ -830,6 +837,7 @@ function deleteFolder(move_select) {
     document.querySelector("#headerItem" + idx.toString()).remove();
     chrome.storage.sync.remove(idx.toString());
     chrome.storage.sync.remove(color);
+    chrome.storage.sync.remove("folderNames");
   }
   document.getElementById('folder' + color).style.display = "none";
 }
@@ -970,11 +978,29 @@ function createNote(exists,idx,memo) {
         note.childNodes[7].style.display = 'none';
       }
       // adds the new note header to Notes Dock
-      note_list = document.querySelector('#myNotes');
+      var color = dict['folderColor'];
       var note_log = document.createElement('div');
-      console.log(note_log);
       document.querySelector('#myNotes').appendChild(note_log);
       note_log.innerHTML += '<p class="headerList" id="headerItem' + idx + '">' + note_header + '</p>';
+
+      // add the new note to the appropriate folder
+      if ((color !== "Yellow") && (color !== undefined)) {
+        moveToFolder(color,note_log.childNodes[0]);
+
+        chrome.storage.sync.get(['folderNames'], function(result) {
+          try {
+            var folderNames = result['folderNames'];
+            var rename = color;
+            if (folderNames[color] !== undefined) {
+              var rename = folderNames[color];
+            }
+            document.getElementById("input" + color).value = rename;
+          }
+          catch(err) {
+            console.log(err);
+          }
+        });
+      }
 
       // check if the note is hidden
       if (dict['hidden'] == true) {
@@ -993,7 +1019,9 @@ function createNote(exists,idx,memo) {
 
     addNoteEventHandlersOnLoad();
     }
+    // ****************************************************************
     // IF ADDING A NEW NOTE
+    // ****************************************************************
     else {
       console.log(idx);
       // spawn note in center of screen
@@ -1016,7 +1044,6 @@ function createNote(exists,idx,memo) {
       storeSync(idx,dict);
 
       // adds the new note header to Notes Dock
-      note_list = document.querySelector('#myNotes');
       var note_log = document.createElement('div');
       console.log(note_log);
       document.querySelector('#myNotes').appendChild(note_log);
