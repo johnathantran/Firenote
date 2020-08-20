@@ -525,7 +525,50 @@ function loadPage() {
 };
 loadPage();
 
+function assignColorMode(mode) {
 
+  var sheet = (function() {
+    // Create the <style> tag
+    var style = document.createElement("style");
+    // WebKit hack
+    style.appendChild(document.createTextNode(""));
+    // Add the <style> element to the page
+    document.head.appendChild(style);
+    return style.sheet;
+  })();
+
+  if (mode == "dark") {
+      sheet.insertRule("\
+      .collapsible, .clear {\
+      background-color: #363640;\
+      color: #fcd488;\
+      }",0);
+      sheet.insertRule("\
+      .bar {\
+      background-color: white;\
+      }",0);
+      // change the folder header item colors
+      sheet.insertRule("\
+      .folderHeader {\
+      color: #f0efed;\
+      }",0);
+  }
+  else {
+    sheet.insertRule("\
+    .collapsible, .clear {\
+     background-color: #363640;\
+     color: #fcd488;\
+    }",0);
+    sheet.insertRule("\
+    .bar {\
+     background-color: #f0efed;\
+    }",0);
+    sheet.insertRule("\
+    .folderHeader {\
+     color: #f0efed;\
+    }",0);
+  }
+}
 
 
 
