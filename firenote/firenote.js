@@ -95,23 +95,23 @@ $(document).ready(function() {
     });
   }
   // adding event listeners to note dock context menu items
-  var el = document.getElementById("orangeMove");
+  var el = document.getElementById("moveOrange");
   el.addEventListener('click',function() {
     moveToFolder('Orange', move_select);
   });
-  var el = document.getElementById("pinkMove");
+  var el = document.getElementById("movePink");
   el.addEventListener('click',function() {
     moveToFolder('Pink', move_select);
   });
-  var el = document.getElementById("blueMove");
+  var el = document.getElementById("moveBlue");
   el.addEventListener('click',function() {
     moveToFolder('Blue', move_select);
   });
-  var el = document.getElementById("greenMove");
+  var el = document.getElementById("moveGreen");
   el.addEventListener('click',function() {
     moveToFolder('Green', move_select);
   });
-  var el = document.getElementById("yellowMove");
+  var el = document.getElementById("moveYellow");
   el.addEventListener('click',function() {
     moveToFolder('Yellow', move_select);
   });
@@ -261,6 +261,19 @@ function addNoteEventHandlers(note) {
   var minBtn = note.childNodes[2];
   var delBtn = note.childNodes[3];
   
+  // add context menu when you right click on the note header to move to folder
+  var setPosition2 = createContextMenu(document.querySelector(".folderAddMenu"));
+  header.addEventListener("contextmenu", e => {
+    move_select = getElm().parentNode;
+    e.preventDefault();
+    const origin = {
+      left: e.pageX,
+      top: e.pageY
+    };
+    setPosition2(origin);
+    return false;
+  });
+
   // if it's a memo style note
   if (note.childNodes[4].nodeName == 'TEXTAREA') {
     var memoText = note.childNodes[4];
@@ -469,6 +482,11 @@ function loadPage() {
       .bar {\
       background-color: white;\
       }",0);
+      // change the folder header item colors
+      sheet.insertRule("\
+      .folderHeader {\
+      color: #f0efed;\
+      }",0);
     }
     // recreate saved notes on page load
     var all_idx = [];
@@ -564,7 +582,7 @@ function toggleDarkMode() {
       }",0);
       // change the folder header item colors
       sheet.insertRule("\
-      .folder {\
+      .folderHeader {\
        color: gray;\
       }",0);
 
@@ -585,7 +603,7 @@ function toggleDarkMode() {
        background-color: #f0efed;\
       }",0);
       sheet.insertRule("\
-      .folder {\
+      .folderHeader {\
        color: #f0efed;\
       }",0);
       chrome.storage.sync.set({'firenote_dark' : true}, function() {
@@ -704,7 +722,7 @@ function moveToFolder(color, move_select) {
     }
   }
   catch(err) {}
-
+  console.log(move_select);
   var idx = getIdx(move_select);
 
   chrome.storage.sync.get([idx.toString()], function(result) {
@@ -759,7 +777,7 @@ function hideFolder(move_select) {
   var color = move_select.id.replace('input','');
   var target = document.getElementById("content" + color);
   console.log(target.childNodes);
-  
+
   var note_indexes = [];
   for (i=0; i< target.childNodes.length; i++) {
     var idx_alt = getIdx(target.childNodes[i]);
@@ -808,8 +826,13 @@ function saveRename(rename) {
       var folderNames = result['folderNames'];
       folderNames[color] = rename;
     }
+
+    var contextMenuSelect = document.getElementById("option" + color);
+    contextMenuSelect.innerHTML = rename;
+
     chrome.storage.sync.set({'folderNames' : folderNames}, function() {
       move_select.blur();
+      move_select.readOnly = true;
       document.querySelector("#pending").textContent = "folder renamed.";
       fade(document.querySelector("#pending"));
     });
@@ -999,6 +1022,7 @@ function createNote(exists,idx,memo) {
               var rename = folderNames[color];
             }
             document.getElementById("input" + color).value = rename;
+            document.getElementById("option" + color).innerHTML = rename;
           }
           catch(err) {
             console.log(err);
