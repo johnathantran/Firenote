@@ -280,7 +280,6 @@ $(document).ready(function() {
 function addNoteEventHandlers(note) {
 
   idx = getIdx(note);
-
   var header = note.childNodes[0];
   var editHeaderBtn = note.childNodes[1];
   var minBtn = note.childNodes[2];
@@ -289,7 +288,9 @@ function addNoteEventHandlers(note) {
   // add context menu when you right click on the note header to move to folder
   var setPosition2 = createContextMenu(document.querySelector(".folderAddMenu"));
   header.addEventListener("contextmenu", e => {
-    move_select = getElm().parentNode;
+    //move_select = getElm().parentNode;
+    move_select = document.getElementById("headerItem" + idx);
+    console.log(move_select);
     e.preventDefault();
     const origin = {
       left: e.pageX,
@@ -380,6 +381,7 @@ function addNoteEventHandlers(note) {
   var setPosition = createContextMenu(document.querySelector(".folderAddMenu"));
   headerItem.addEventListener("contextmenu", e => {
     move_select = getElm();
+    console.log(move_select);
     e.preventDefault();
     const origin = {
       left: e.pageX,
