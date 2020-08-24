@@ -26,10 +26,17 @@ IX. HELPER FUNCTIONS
 // *****************************************************************************************************************
 // *****************************************************************************************************************
 
+// check user storage:
+chrome.storage.sync.getBytesInUse(function(result){
+  console.log("Bytes in use: " + result + " out of 102,400 quota bytes")
+});
+
 // note colors used
 var color_dict = {"Orange":"#ffdfba", "Pink":"#ffedf8", "Blue":"#d0ebfc", "Green":"#ceffeb", "Yellow":"#fcfacf"};
 // max allowed notes on screen
 const max_notes = 15;
+// indicates if dark mode is enabled
+var dark_enabled = document.getElementById("darkEnabled");
 // autosizes height of textarea
 var autoExpand = function (field) {
 
@@ -79,12 +86,10 @@ $(document).ready(function() {
   }
   // adding event listeners to note dock items
   coll = document.getElementsByClassName("folderCollapsible");
-  console.log(coll);
   for (i = 0; i < coll.length; i++) {
     coll[i].addEventListener("click", function() {
       this.classList.toggle("active");
       var content = this.nextElementSibling;
-      console.log(content);
       if (content !== null) {
         if (content.style.maxHeight){
           content.style.maxHeight = null;
@@ -289,6 +294,7 @@ function addNoteEventHandlers(note) {
   var setPosition2 = createContextMenu(document.querySelector(".folderAddMenu"));
   header.addEventListener("contextmenu", e => {
     //move_select = getElm().parentNode;
+    console.log(idx);
     move_select = document.getElementById("headerItem" + idx);
     console.log(move_select);
     e.preventDefault();
@@ -401,11 +407,8 @@ attachedListeners = false;
 function addNoteEventHandlersOnLoad() {
   
   chrome.storage.sync.get(['haveListeners'], function(result) {
-    console.log(result);
     
-    if (attachedListeners == true) {
-      return;
-    }
+    if (attachedListeners == true) { return; }
 
     all_notes = (document.querySelectorAll('.drag'));
     for (i=0; i < all_notes.length; i++) {
@@ -487,10 +490,11 @@ function loadPage() {
 
   // check if user has enabled dark mode
   chrome.storage.sync.get(['firenote_dark'], function(result) {
-    console.log(result['firenote_dark']);
+
     if (result['firenote_dark'] == true) {
       document.body.classList.toggle("dark-mode");
       var dark = assignColorMode("dark");
+      dark_enabled.innerHTML = "enabled";
     }
     // recreate saved notes on page load
     var all_idx = [];
@@ -523,7 +527,7 @@ function loadPage() {
       });
     }
     catch(err) {
-      console.log(error);
+      console.log(err);
     }
   });
 };
@@ -561,9 +565,11 @@ function toggleDarkMode() {
     // check if dark mode was enabled by user
     if (result['firenote_dark'] == true) {
       var dark = assignColorMode("light");
+      document.getElementById("darkEnabled").innerHTML = "disabled";
     }
     else {
       var dark = assignColorMode("dark");
+      document.getElementById("darkEnabled").innerHTML = "enabled";
     }
     chrome.storage.sync.set({'firenote_dark' : dark}, function() {
       console.log('Color mode set');
@@ -680,7 +686,7 @@ function moveToFolder(color, move_select) {
     }
   }
   catch(err) {}
-  console.log(move_select);
+
   var idx = getIdx(move_select);
 
   chrome.storage.sync.get([idx.toString()], function(result) {
@@ -688,7 +694,6 @@ function moveToFolder(color, move_select) {
 
     // assign the note's folder to the selected color
     dict['folderColor'] = color;
-    console.log(dict['folderColor']);
     storeSync(idx,dict);
   });
   
@@ -708,23 +713,7 @@ function moveToFolder(color, move_select) {
     document.getElementById("mydiv" + idx + "header").style.backgroundColor = color_dict[color];
     document.getElementById("memo" + idx).style.backgroundColor = color_dict[color];
   }
-  catch(err) {
-    console.log(err);
-  }
-}
-
-
-// ***********************************************************************************************
-// create a folder when a colored circle is clicked in the Notes Dock
-// ***********************************************************************************************
-function createFolder() {
-
-  // show the selected folder if it isn't already shown
-  var color = getElm().id;
-  var showFolder = document.getElementById("folder" + color);
-  showFolder.style.display = "block";
-  console.log(showFolder);
-
+  catch(err) {}
 }
 
 
@@ -732,20 +721,62 @@ function createFolder() {
 // hide all notes in a folder
 // ***********************************************************************************************
 function hideFolder(move_select) {
-  var color = move_select.id.replace('input','');
-  var target = document.getElementById("content" + color);
-  console.log(target);
-  console.log(target.childNodes);
 
-  var note_indexes = [];
-  for (i=0; i< target.childNodes.length; i++) {
-    var idx_alt = getIdx(target.childNodes[i]);
-    note_indexes.push(idx_alt);
-    hideNote(idx_alt);
+  var color = move_select.id.replace('input','');
+  color = color.replace('folder','');
+  var target = document.getElementById("content" + color);
+  var all_divs = document.querySelectorAll(".drag");
+  var all_idx = [];
+  var dark = false;
+
+  for (j = 0; j < target.childNodes.length; j++) {
+    var idx = getIdx(target.childNodes[j]);
+    all_idx.push(idx);
   }
-  chrome.storage.sync.get([idx_alt], function(result) {
-    dict = JSON.parse(result[idx_alt]);
-      console.log(dict);
+  console.log(all_idx);
+  chrome.storage.sync.get(all_idx, function(result) {
+
+    console.log(target.childNodes)
+    for (i=0; i < target.childNodes.length; i++) {
+      
+      console.log(target.childNodes[i]);
+      var idx = getIdx(target.childNodes[i]).toString();
+      var dict = JSON.parse(result[idx]);
+      var div_to_hide = document.querySelector('#mydiv' + idx);
+      var header_item = document.getElementById("headerItem" + idx);
+      
+
+      // check if the note is currently hidden or not
+      if (dict['hidden'] == true) {
+        console.log("showing...");
+        
+        div_to_hide.style.display = "block";
+        
+        // bring all the other notes behind the selected note
+        for (j=0; j < all_divs.length; j++) {
+          all_divs[j].style.zIndex = "1";
+        }
+        div_to_hide.style.zIndex = "2";
+        
+        // if dark
+        header_item.style.color = "black";
+        if (document.getElementById("darkEnabled").innerHTML == "enabled") {
+          header_item.style.color = "white";
+        }
+        dict['hidden'] = false;
+      }
+      else {
+        console.log("hiding...");
+        // reset notes zIndexes
+        for (j=0; j < all_divs.length; j++) {
+          all_divs[j].style.zIndex = "1";
+        }
+        div_to_hide.style.display = "none";
+        header_item.style.color = "silver";
+        dict['hidden'] = true;
+      }
+      storeSync(idx,dict); 
+    }
   });
 }
 
@@ -802,6 +833,7 @@ function saveRename(rename) {
   });
 }
 
+
 // ***********************************************************************************************
 // delete a folder
 // ***********************************************************************************************
@@ -836,46 +868,19 @@ function deleteFolder(move_select) {
 // ***********************************************************************************************
 // hides a note from view by clicking on it in the Notes Dock
 // ***********************************************************************************************
-function hideNote(idx_alt) {
-  // idx_alt is an optional argument passed when the user is trying to hide all notes
-  // in a folder through the Notes Dock
+function hideNote() {
 
-  // save hidden feature to local storage
-  var hidingFolder = false;
   var elm = getElm();
-  console.log(elm);
-  console.log(idx_alt);
-  if (idx_alt == null) {
-    var idx = getIdx(elm);
-    console.log(idx);
-  }
-  else {
-    hidingFolder = true;
-    var idx = idx_alt;
-    console.log(idx);
-  }
+  var idx = getIdx(elm);
 
   chrome.storage.sync.get([idx.toString()], function(result) {
  
     dict = JSON.parse(result[idx]);
-    console.log(dict['todo']);
-
-    div_to_hide = document.querySelector('#mydiv' + idx);
-    all_divs = document.querySelectorAll(".drag");
-    console.log(all_divs);
-    console.log(div_to_hide);
-    console.log(div_to_hide.style.display);
-
-    if (hidingFolder == true) {
-      var dock_idx = getIdx(div_to_hide);
-      console.log(dock_idx);
-      var header_item = "headerItem" + dock_idx;
-      elm = document.getElementById(header_item);
-      console.log(elm);
-    }
+    var div_to_hide = document.querySelector('#mydiv' + idx);
+    var all_divs = document.querySelectorAll(".drag");
 
     if (div_to_hide.style.display == "none") {
-
+      console.log("Showing Note" + idx);
       div_to_hide.style.display = "block";
       
       // bring all the other notes behind the selected note
@@ -885,30 +890,23 @@ function hideNote(idx_alt) {
       div_to_hide.style.zIndex = "2";
       elm.style.color = "black";
 
-      chrome.storage.sync.get(['firenote_dark'], function(result) {
-
-        // check if dark mode was enabled by user
-        if (result['firenote_dark'] == true) {
-          elm.style.color = "white";
-        } 
-        dict['hidden'] = false;
-        storeSync(idx,dict);
-      });
+      // check if dark mode was enabled by user
+      if (dark_enabled == "enabled") {
+        elm.style.color = "white";
+      } 
+      dict['hidden'] = false;
     }
     else {
-      console.log("hiding...");
+      console.log("Hiding Note " + idx);
       // reset notes zIndexes
       for (j=0; j<all_divs.length; j++) {
         all_divs[j].style.zIndex = "1";
       }
       div_to_hide.style.display = "none";
-      console.log(div_to_hide.style.display);
       elm.style.color = "silver";
       dict['hidden'] = true;
     }
     console.log(dict);
-    console.log(document.getElementById('headerItem' + idx));
-    dict['headerText'] = document.getElementById('headerItem' + idx).innerHTML;
     storeSync(idx,dict);
   });
 }
@@ -927,69 +925,62 @@ function hideNote(idx_alt) {
 function createNote(exists,idx,memo) {
 
   idx = idx.toString();
-  chrome.storage.sync.get([idx], function(result) {
-    dict = JSON.parse(result[idx]);
-      console.log(dict);
-  });
-  var note = document.createElement('div');
-  note.id = "mydiv" + idx;
-  document.body.appendChild(note);
-  note.classList.add('drag');
-  console.log(idx);
-  note.innerHTML += '<input class="dragHeader" maxlength="30" readOnly="true" id="mydiv' + idx + 'header" value="Note ' + idx +'">';
-  note.innerHTML += '<img src="images/edit.png" class="editHeader" id="edit">';
-  note.innerHTML += '<img src="images/minimize.png" class="minimize" id="minimize">';
-  note.innerHTML += '<img src="images/exit.png" class="deleteNote" id="exit"></img>';
-  console.log(idx);
-  if (memo == true) {
-    note.innerHTML += '<textarea placeholder="Type a memo here..." maxlength="600" class="memo" rows="8" spellcheck="false" id="memo' + idx +'" style="display:inline-block;"></textarea>';
-    note.innerHTML += '<p class="memoCounter" id="memoCounter' + idx + '">Max 600 characters</p>';
-    note.innerHTML += '<button class="saveMemo">Save Memo</button>';
-  }
-  else {
-    note.innerHTML += '<input maxlength="250" class="task" placeholder="Add an item" id="task' + idx + '" style="display:inline-block;"><img src="images/add.png" id="add" class="add">';
-    note.innerHTML += '<img class="undo" id="undo' + idx + '" src="images/undo.png">';
-    note.innerHTML += '<div class="todoLists" id="todos' + idx + '"></div>';
-  }
 
   //var note_header = 'Note ' + idx;
-  console.log("test 1");
   chrome.storage.sync.get([idx], function(result) {
-    console.log("test 2");
+
+    var note = document.createElement('div');
+    note.id = "mydiv" + idx;
+    document.body.appendChild(note);
+    note.classList.add('drag');
+
+    note.innerHTML += '<input class="dragHeader" maxlength="30" readOnly="true" id="mydiv' + idx + 'header" value="Note ' + idx +'">';
+    note.innerHTML += '<img src="images/edit.png" class="editHeader" id="edit">';
+    note.innerHTML += '<img src="images/minimize.png" class="minimize" id="minimize">';
+    note.innerHTML += '<img src="images/exit.png" class="deleteNote" id="exit"></img>';
+
+    if (memo == true) {
+      note.innerHTML += '<textarea placeholder="Type a memo here..." maxlength="600" class="memo" rows="8" spellcheck="false" id="memo' + idx +'" style="display:inline-block;"></textarea>';
+      note.innerHTML += '<p class="memoCounter" id="memoCounter' + idx + '">Max 600 characters</p>';
+      note.innerHTML += '<button class="saveMemo">Save Memo</button>';
+    }
+    else {
+      note.innerHTML += '<input maxlength="250" class="task" placeholder="Add an item" id="task' + idx + '" style="display:inline-block;"><img src="images/add.png" id="add" class="add">';
+      note.innerHTML += '<img class="undo" id="undo' + idx + '" src="images/undo.png">';
+      note.innerHTML += '<div class="todoLists" id="todos' + idx + '"></div>';
+    }
+
     // IF LOADING EXISTING NOTES
     if (exists == true) {
      
       dict = JSON.parse(result[idx]);
-      console.log(dict);
-
       note.style.top = dict['posTop'];
       note.style.left = dict['posLeft'];
 
-      //console.log(dict);
       //note.offsetHeight = dict['height'];
       //note.offsetWidth = dict['width'];
       var note_header = dict['headerText'];
-      console.log(note_header);
       note.childNodes[0].value = note_header;
-      console.log(note.childNodes)
 
       // check if the note is minimized
       if (dict['minimized'] == true) {
         note.childNodes[4].style.display = 'none';
         note.childNodes[5].style.display = 'none';
         note.childNodes[6].style.display = 'none';
-        note.childNodes[7].style.display = 'none';
+        try {
+          note.childNodes[7].style.display = 'none';
+        }
+        catch(err){};
       }
       // adds the new note header to Notes Dock
       var color = dict['folderColor'];
       var note_log = document.createElement('div');
       document.querySelector('#myNotes').appendChild(note_log);
-      console.log(idx);
       note_log.innerHTML += '<p class="headerList" id="headerItem' + idx + '">' + note_header + '</p>';
-      console.log(note_log.childNodes);
+
       // add the new note to the appropriate folder
       if ((color !== "Yellow") && (color !== undefined)) {
-        console.log(note_log);
+  
         moveToFolder(color,note_log.childNodes[0]);
 
         chrome.storage.sync.get(['folderNames'], function(result) {
@@ -1002,9 +993,7 @@ function createNote(exists,idx,memo) {
             document.getElementById("input" + color).value = rename;
             document.getElementById("option" + color).innerHTML = rename;
           }
-          catch(err) {
-            console.log(err);
-          }
+          catch(err) {}
         });
       }
 
@@ -1478,17 +1467,14 @@ function show(idx) {
 
   chrome.storage.sync.get([idx.toString()], function(result) {
 
-    dict = JSON.parse(result[idx]);
-    console.log(dict);
-
+    var dict = JSON.parse(result[idx]);
     var todos_list = dict['todo'];
     var crossed_list = dict['strikethrough'];
     var priority_list = dict['priority'];
 
-    console.log(idx);
-    console.log("Currently in the priority list: " + priority_list);
-    console.log("Currently in this todo list:" + todos_list + "!");
-    console.log("Currently in the crossed list: " + crossed_list);
+    //console.log("Currently in the priority list: " + priority_list);
+    //console.log("Currently in this todo list:" + todos_list + "!");
+    //console.log("Currently in the crossed list: " + crossed_list);
 
     var html = '<ul>';
     // if list of priorities is found, show on screen
@@ -1504,7 +1490,6 @@ function show(idx) {
     // if the list of todos is found, shown on screen
     if ((todos_list !== null) && (todos_list !== undefined) && (todos_list.toString() !== "")) {
       
-      console.log("todo runs");
       // build list of uncrossed todo list items
       for(var i=0; i<todos_list.length; i++) {
           html += '<li class="lists">';
@@ -1512,11 +1497,9 @@ function show(idx) {
           html += '<img class="crossoff" src="images/crossoff.png" id="' + i  + '">';
           html += '<img src="images/save.png" style="display:none;" class="save"></img>';
           html += '<span type="text" class="span">' + todos_list[i] + '</span>';     
-          //html += '<hr>';
       };
     }
     if (crossed_list !== undefined) {
-      console.log(crossed_list);
       // build list of crossed todo list items
       for(var i=0; i<crossed_list.length; i++) {
         html += '<li class="lists">';
@@ -2087,13 +2070,11 @@ function countCharacters(e) {
 
 // returns the index of the note
 function getIdx(elm) {
-  console.log(elm);
   // if there are more than 10 notes, get last 2 chars
   idx = elm.id.slice(-2);
   if (isNaN(idx) == true) {
     idx = elm.id.slice(-1);
   }
-  console.log(idx);
   return idx;
 }
 
